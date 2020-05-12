@@ -1,5 +1,6 @@
 from dlx import DLX, DLXStatistics
 import sqlalchemy as db
+import pandas as pd
 #import os
 import xlsxwriter
 import time
@@ -175,28 +176,30 @@ def contradiction_check(ingredients):
                 if contradiction in temp:
                     return False
     return True
-# Get the ingredient and patient data from the database
-IngredientData, PatientData = initialise_data(db_file)
 
-# Getting the relevant patient information
-print("Input patient id: ", end = "")
-id = input()
-start = time.time()
-patient = get_patient(id)
+if __name__ == '__main__':
+    # Get the ingredient and patient data from the database
+    IngredientData, PatientData = initialise_data(db_file)
 
-# filter the ingredients for things such as stock and allergies
-filter_ingredients()
+    # Getting the relevant patient information
+    print("Input patient id: ", end = "")
+    id = input()
+    start = time.time()
+    patient = get_patient(id)
 
-# Create and then run the dlx solver
-grid = create_dlx()
-validSolutions = solve_dlx(grid)
+    # filter the ingredients for things such as stock and allergies
+    filter_ingredients()
 
-# printing all the solutions with the minimum number of ingredients
-for solution in get_min_ingredients(validSolutions):
-    print([ingred[IngredientNameIndex] for ingred in solution])
+    # Create and then run the dlx solver
+    grid = create_dlx()
+    validSolutions = solve_dlx(grid)
 
-# Testing script performance
-end = time.time()
-print('Time Elapsed: ', end='')
-print(end - start, end='')
-print('seconds')
+    # printing all the solutions with the minimum number of ingredients
+    for solution in get_min_ingredients(validSolutions):
+        print([ingred[IngredientNameIndex] for ingred in solution])
+
+    # Testing script performance
+    end = time.time()
+    print('Time Elapsed: ', end='')
+    print(end - start, end='')
+    print('seconds')
