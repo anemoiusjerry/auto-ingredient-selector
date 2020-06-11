@@ -7,9 +7,7 @@ class RunButton(QWidget):
     def __init__(self, parent=None):
         super(RunButton,self).__init__(parent)
 
-        self.button = QPushButton("&Run")
-        self.button.clicked.connect(self.runDLX)
-        self.button.setFixedWidth(70)
+
 
         layout = QHBoxLayout()
         layout.addWidget(self.button)

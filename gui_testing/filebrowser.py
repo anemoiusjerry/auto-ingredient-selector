@@ -1,4 +1,4 @@
-from PySide2.QtCore import QDir, QFile
+from PySide2.QtCore import QDir, QFile, Signal
 from PySide2.QtWidgets import QWidget, QFileDialog, QGridLayout, QLineEdit, QPushButton, QDialog, QLabel, QFrame, QMessageBox
 
 
