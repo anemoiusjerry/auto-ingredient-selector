@@ -1,4 +1,4 @@
-
+import functools
 """
 Python implementation of Donald Knuths DLX3 algorithm
 By Hayden Goodwin 2020
@@ -189,13 +189,13 @@ class DLX:
                     self.nodes[cc].itm += 1
                 nn += 1
 
-            if react:
-                l = self.itms[c].prev
-                r = self.itms[c].next
-                self.itms[l].next = c
-                self.itms[r].prev = c
-
             rr = self.nodes[rr].down
+
+        if react:
+            l = self.itms[c].prev
+            r = self.itms[c].next
+            self.itms[l].next = c
+            self.itms[r].prev = c
 
     def purify(self, p):
         cc = self.nodes[p].itm
@@ -331,11 +331,14 @@ class DLX:
                     self.best_l = self.nodes[k].itm
             k = self.itms[k].next
 
-        if self.score <= 0:
-            self.backdown()
-            return
+        if self.score < DLX.INFTY:
+            a =1
 
+
+        if self.score <= 0:
+            return self.backdown
         if self.score == DLX.INFTY:
+            #print("level: ", self.level)
             self.count += 1
             self.partialsolution = []
             for i in range(self.level):
@@ -348,11 +351,14 @@ class DLX:
                     self.partialsolution.append(self.rownames[self.rowid[pp]])
 
             self.solutions.append(self.partialsolution)
-            if self.count > DLX.MAX_COUNT:
-                return
 
-            self.backdown()
-            return
+            #if len(self.solutions) % 100000 == 0:
+                #print("\nSolution found: ", len(self.solutions), " level: ", self.level)
+                #print("Latest solution", self.solutions[-1])
+
+            if self.count > DLX.MAX_COUNT:
+                return None
+            return self.backdown
 
         try:
             self.scor[self.level] = self.score
@@ -379,17 +385,16 @@ class DLX:
             if self.itms[self.best_itm].bound == 0:
                 self.cover(self.best_itm,1)
 
-        self.advance()
-        return
+        return self.advance
 
     def advance(self):
         if (self.itms[self.best_itm].bound == 0) and (self.itms[self.best_itm].slack==0):
             if self.cur_node == self.best_itm:
-                self.backup()
-                return
+                return self.backup
+
         elif self.nodes[self.best_itm].itm <= (self.itms[self.best_itm].bound - self.itms[self.best_itm].slack):
-            self.backup()
-            return
+            return self.backup
+
         elif self.cur_node != self.best_itm:
             self.tweak(self.cur_node, self.itms[self.best_itm].bound)
         elif self.itms[self.best_itm].bound != 0:
@@ -420,10 +425,9 @@ class DLX:
         self.level += 1
         if self.level > self.maxl:
             if self.level >= DLX.MAX_LEVEL:
-                return #there are too many levels, quit the function and return solutions
+                return None #there are too many levels, quit the function and return solutions
             self.maxl = self.level
-        self.forward()
-        return
+        return self.forward
 
     def backup(self):
         if(self.itms[self.best_itm].bound == 0) and (self.itms[self.best_itm].slack == 0):
@@ -431,12 +435,12 @@ class DLX:
         else:
             self.untweak(self.best_itm, self.first_tweak[self.level], self.itms[self.best_itm].bound)
         self.itms[self.best_itm].bound += 1
-        self.backdown()
-        return
+        return self.backdown
 
     def backdown(self):
+
         if self.level == 0:
-            return
+            return None
         self.level -= 1
         self.cur_node = self.choice[self.level]
         self.best_itm = self.nodes[self.cur_node].itm
@@ -448,8 +452,7 @@ class DLX:
             q = self.itms[self.best_itm].next
             self.itms[p].next= self.best_itm
             self.itms[q].prev= self.best_itm
-            self.backup()
-            return
+            return self.backup
 
         pp = self.cur_node - 1
         while pp != self.cur_node:
@@ -470,13 +473,21 @@ class DLX:
         self.choice[self.level] = self.nodes[self.cur_node].down;
         self.cur_node = self.nodes[self.cur_node].down
 
-        self.advance()
-        return
+        return self.advance
 
     def dance(self):
         """
         Starts the dancing links program and returns a list of solutions found.
         """
+        def tramampoline(func):
+            @functools.wraps(func)
+            def g(*args):
+                h = func
+                while h is not None:
+                    h = h(*args)
+                return args
+            return g()
 
-        self.forward()
+        tramampoline(self.forward)
+
         return self.solutions
