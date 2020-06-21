@@ -1,0 +1,50 @@
+{
+    "Paths": {
+        "Customer Questionnaire": "",
+        "Product Catalog": "",
+        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Restored To Eden/RTE Ingredients Database.csv",
+        "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
+        "Formulation Sheets Directory": "",
+        "Export Directory": ""
+    },
+    "ConstraintSettings": {
+        "DayCream": {
+            "Viscosity": "Light",
+            "Absorbency": "Fast"
+        },
+        "ManCream": {
+            "Viscosity": "Medium",
+            "Absorbency": "Medium"
+        },
+        "NightCream": {
+            "Viscosity": "Heavy",
+            "Absorbency": "Slow"
+        },
+        "OilCleanser": {
+            "Viscosity": "Medium",
+            "Absorbency": "Medium"
+        }
+    },
+    "Viscosity": [
+        "light",
+        "medium",
+        "heavy"
+    ],
+    "Absorbency": [
+        "slow",
+        "medium",
+        "fast"
+    ],
+    "ComedogenicRating": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Restored To Eden/Ingredients.csv",
+    "Formulation Sheets Directory:": "C:/Users/jerry/Desktop/Restored To Eden/Formulation Templates",
+    "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
+    "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
+}
