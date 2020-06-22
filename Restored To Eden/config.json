@@ -1,50 +1,124 @@
 {
-    "Paths": {
-        "Customer Questionnaire": "",
-        "Product Catalog": "",
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Restored To Eden/RTE Ingredients Database.csv",
-        "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
-        "Formulation Sheets Directory": "",
-        "Export Directory": ""
-    },
-    "ConstraintSettings": {
-        "DayCream": {
-            "Viscosity": "Light",
-            "Absorbency": "Fast"
+    "Product": {
+        "day cream": {
+            "viscosity": "light",
+            "absorbency": "fast",
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
-        "ManCream": {
-            "Viscosity": "Medium",
-            "Absorbency": "Medium"
+        "man cream": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
-        "NightCream": {
-            "Viscosity": "Heavy",
-            "Absorbency": "Slow"
+        "night cream": {
+            "viscosity": "heavy",
+            "absorbency": "slow",
+            "types": [
+                "aqueous base",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
-        "OilCleanser": {
-            "Viscosity": "Medium",
-            "Absorbency": "Medium"
+        "oil cleanser": {
+            "Viscosity": "medium",
+            "Absorbency": "medium",
+            "types": [
+                "anhydrous base",
+                "essential oil"
+            ]
         }
     },
-    "Viscosity": [
-        "light",
-        "medium",
-        "heavy"
-    ],
-    "Absorbency": [
-        "slow",
-        "medium",
-        "fast"
-    ],
-    "ComedogenicRating": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5
-    ],
-    "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Restored To Eden/Ingredients.csv",
-    "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Restored To Eden/Formulation Templates",
-    "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
-    "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
+    "Constants": {
+        "Viscosity": [
+            "light",
+            "medium",
+            "heavy"
+        ],
+        "Absorbency": [
+            "slow",
+            "medium",
+            "fast"
+        ],
+        "ComedogenicRating": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ]
+    },
+    "Column names": {
+        "Ingredients Spreadsheet": {
+            "name": "INGREDIENT COMMON NAME",
+            "stock": "In Stock",
+            "type": "TYPE OF INGREDIENT",
+            "EO note": "ESSENTIAL OIL NOTE",
+            "skin problem": "SKIN PROBLEM",
+            "contraindications": "CONTRAINDICATIONS",
+            "viscosity": "VISCOSITY",
+            "absorption": "ABSORPTION RATE",
+            "comedogenic": "COMEDOGENIC RATING"
+        },
+        "Customer Questionnaire": {
+            "name": "Full Name",
+            "email": "Email",
+            "allergies": "Multi Selection Field",
+            "medical": "Multi Selection Field 2",
+            "skin type": "Multi Selection Field 3",
+            "skin problem": [
+                "Multi Selection Field 4",
+                "Multi Selection Field 5"
+            ],
+            "Additional notes": "Paragraph Field"
+        },
+        "Orders Spreadsheet": {
+            "order number": "Order #",
+            "date": "Date",
+            "time": "Time",
+            "customer": "Billing Customer",
+            "email": "Buyer's Email",
+            "item": "Item's Name"
+        },
+        "Product Catalog": {
+            "item": "name",
+            "products": "additionalInfoDescription6"
+        }
+    },
+    "Directories": {
+        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
+        "Orders Spreadsheet": "",
+        "Customer Questionnaire": "",
+        "Product Catalog": "",
+        "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
+    },
+    "Values": {
+        "lowBound": 1,
+        "upBound": 1,
+        "maxupBound": 3,
+        "tpyeoverlap_low": 1,
+        "typeoverlap_up": 3,
+        "maxsols": 5,
+        "fitweight": 0.8,
+        "numingredweight": 0.1,
+        "addedbenefitweight": 0.1
+    },
+    "Customer Questionnaire": "/Users/HG/Desktop/questionairre.csv",
+    "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
+    "Ingredients Spreadsheet": "/Users/HG/Desktop/Ingredients.csv",
+    "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
+    "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+    "Export Directory": "/Users/HG/Desktop"
 }

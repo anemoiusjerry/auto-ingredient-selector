@@ -48,7 +48,7 @@ class FileBrowser(QDialog):
         directory = QFileDialog.getOpenFileName(self, "Select .csv file", "", "Excel Files (*.csv *.xlsx);; All Files (*)")
         if directory:
             self.display.setText(directory[0])
-        
+
         config[self.label.text()] = directory[0]
 
     def checkPath(self):
@@ -76,3 +76,6 @@ class FileBrowser(QDialog):
         warning = QMessageBox(QMessageBox.Warning, "Invalid Filepath", text, QMessageBox.NoButton)
         warning.addButton("Ok", QMessageBox.AcceptRole)
         warning.exec_()
+
+    def getLabel():
+        return self.label.text()
