@@ -27,19 +27,17 @@ class TabDialog(QTabWidget):
         """ Save browsed paths to config
         """
         json_obj = json.dumps(self.config, indent=4)
-        with open("config.json", "w") as outfile:
+        with open("config/config.json", "w") as outfile:
             outfile.write(json_obj)
 
 def main():
     """ Central control point for all modules.
     """
     # Load config
-    with open("config.json") as json_file:
+    with open("config/config.json") as json_file:
         config = json.load(json_file)
     # Load UI
     app = QApplication(sys.argv)
     window = TabDialog(config, app)
     window.show()
-    sys.exit(app.exec_())    
-
-  
+    sys.exit(app.exec_())
