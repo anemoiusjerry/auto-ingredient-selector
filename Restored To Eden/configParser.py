@@ -9,7 +9,7 @@ class FigMe:
 
     def __init__(self, path=os.path.abspath("config.json")):
         # Get the filepath of the config file
-        self.path = os.path.abspath("config.json")
+        self.path = path
         self.gdriveAPI = Gdriver()
         # open the config file in read only mode and retrieve dictionary
         with open(self.path, "r") as config:
@@ -69,4 +69,3 @@ class FigMe:
 
     def getDir(directory):
         return self.masterDict["Directories"][directory]
-        

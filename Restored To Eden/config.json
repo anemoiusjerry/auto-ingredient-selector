@@ -3,28 +3,60 @@
         "day cream": {
             "viscosity": "light",
             "absorbency": "fast",
-            "types": ["aqueous base","aqueous high performance","anhydrous base","essential oil"]
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
         "man cream": {
             "viscosity": "medium",
             "absorbency": "medium",
-            "types": ["aqueous base","aqueous high performance","anhydrous base","essential oil"]
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
         "night cream": {
             "viscosity": "heavy",
             "absorbency": "slow",
-            "types": ["aqueous base","anhydrous base","essential oil"]
+            "types": [
+                "aqueous base",
+                "anhydrous base",
+                "essential oil"
+            ]
         },
         "oil cleanser": {
             "Viscosity": "medium",
             "Absorbency": "medium",
-            "types": ["anhydrous base","essential oil"]
+            "types": [
+                "anhydrous base",
+                "essential oil"
+            ]
         }
     },
     "Constants": {
-        "Viscosity": ["light", "medium", "heavy"],
-        "Absorbency": ["slow", "medium", "fast"],
-        "ComedogenicRating": [0, 1, 2, 3, 4, 5]
+        "Viscosity": [
+            "light",
+            "medium",
+            "heavy"
+        ],
+        "Absorbency": [
+            "slow",
+            "medium",
+            "fast"
+        ],
+        "ComedogenicRating": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ]
     },
     "Column names": {
         "Ingredients Spreadsheet": {
@@ -44,7 +76,10 @@
             "allergies": "Multi Selection Field",
             "medical": "Multi Selection Field 2",
             "skin type": "Multi Selection Field 3",
-            "skin problem": ["Multi Selection Field 4", "Multi Selection Field 5"],
+            "skin problem": [
+                "Multi Selection Field 4",
+                "Multi Selection Field 5"
+            ],
             "Additional notes": "Paragraph Field"
         },
         "Orders Spreadsheet": {
@@ -61,12 +96,12 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Restored To Eden/Ingredients.csv",
+        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
         "Orders Spreadsheet": "",
         "Customer Questionnaire": "",
         "Product Catalog": "",
-        "Formulation Sheets Directory:": "C:/Users/jerry/Desktop/Restored To Eden/Formulation Templates",
-        "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
+        "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
         "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
     },
     "Values": {
@@ -79,5 +114,11 @@
         "fitweight": 0.8,
         "numingredweight": 0.1,
         "addedbenefitweight": 0.1
-    }
+    },
+    "Customer Questionnaire": "/Users/HG/Desktop/questionairre.csv",
+    "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
+    "Ingredients Spreadsheet": "/Users/HG/Desktop/Ingredients.csv",
+    "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
+    "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+    "Export Directory": "/Users/HG/Desktop"
 }

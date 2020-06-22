@@ -256,6 +256,8 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     # orders columns
     customerCol = config.getColname("Orders Spreadsheet", "customer")
     orderCol = config.getColnames("Orders Spreadsheet", "order number")
+    emailCol = config.getColnames("Orders Spreadsheet", "email")
+    oitemCol = config.getColnames("Orders Spreadsheet", "item")
 
     # ingredients columns
     inameCol = config.getColnames("Ingredients Spreadsheet", "name")
@@ -266,6 +268,7 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     # questionnaire columns
     qnameCol = config.getColnames("Customer Questionnaire", "name")
     skinProbCols = config.getColnames("Customer Questionnaire", "skin problem")
+    qemailCol = config.getColnames("Customer Questionnaire", "email")
 
     # catalog columns
     itemCol = config.getColnames("Product Catalog", "item")
@@ -309,21 +312,21 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
 
         # Find the customer questionnaire using the name or email address
         # !!!! NOTE: A dialog should be added to check that the email corresponds to the correct person
-        name = order["Billing Customer"]
-        email = order["Buyer's Email"]
+        name = order[customerCol]
+        email = order[emailCol]
 
-        if name in qnair["Full Name"].values.tolist():
+        if name in qnair[qnameCol].values.tolist():
             qdata = qnair.loc[name,:]
-        elif email in qnair["Email"].values.tolist():
+        elif email in qnair[qemailCol].values.tolist():
             # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
-            qdata = qnair.loc[qnair["Email"].values.tolist().index(email)]
+            qdata = qnair.loc[qnair[qemailCol].values.tolist().index(email)]
         else:
             # Add a warning dialog that says the name does not match any on the questionnaire
             continue
 
         # Finding the products required to fulfil the order. if they cannot be found, skip to next order
-        item = order["Item's Name"]
-        itemConstituents = catalog.loc[catalog["name"].values.tolist().index(item),"additionalInfoDescription6"]
+        item = order[oitemCol]
+        itemConstituents = catalog.loc[item,productCol]
         if itemConstituents:
             products = itemConstituents
         else: # add a check to make sure that all the products are within the known products
@@ -331,7 +334,7 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
             continue
 
         # Create a folder for the order
-        ordername = str(order["Billing Customer"]) + " " + str(date.today().strftime("%b-%d-%Y"))
+        ordername = str(order[customerCol]) + " " + str(date.today().strftime("%b-%d-%Y"))
         orderFolderName = parentFolderPath + "/" + ordername
         if not os.path.exists(orderFolderName):
             os.makedirs(orderFolderName)

@@ -75,6 +75,6 @@ class LandingTab(QWidget):
 
                 # Replace all nan with empty string
                 df.fillna("", inplace=True)
-                dataframes[key.getLabel()] = df
+                dataframes[self.widgets[key].label.getLabel()] = df
 
         return dataframes
