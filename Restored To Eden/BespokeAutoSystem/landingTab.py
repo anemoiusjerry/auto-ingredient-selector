@@ -18,7 +18,8 @@ class LandingTab(QWidget):
         self.widgets["patient_sheet"] = FileBrowser("csv", "Customer Questionnaire", config)
         self.widgets["catalog_sheet"] = FileBrowser("csv", "Product Catalog", config)
         self.widgets["ingredient_sheet"] = FileBrowser("csv", "Ingredients Spreadsheet", config)
-        
+        self.widgets["orders_sheet"] = FileBrowser("csv", "Orders Spreadsheet", config)
+
         self.widgets["formulation_dir"] = FileBrowser("dir", "Formulation Sheets Directory:", config)
         self.widgets["save_dir"] = FileBrowser("dir", "Export Directory", config)
 
@@ -37,13 +38,15 @@ class LandingTab(QWidget):
     def runDLX(self):
         # Load spreadsheets into pandas DataFrames
         self.dataframes = self.createDataFrames()
-        
+
         # Start ingredient selection process
-        selector = IngredientSelector.IngredientSelector()
-        results = selector.select_ingredients()
+        results = IngredientSelector.IngredientSelector(self.dataframes["Orders Spreadsheet"],
+                                                        self.dataframes["Ingredients Spreadsheet"],
+                                                        self.dataframes["Customer Questionnaire"],
+                                                        self.dataframes["Product Catalog"])
 
         # Start formulation calculations for all orders
-        filler = FormulationFiller.FormulationFiller(self.dataframes["ingredient_sheet"], self.gdriveAPI)
+        filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
         filler.process_all(results)
 
 
@@ -72,6 +75,6 @@ class LandingTab(QWidget):
 
                 # Replace all nan with empty string
                 df.fillna("", inplace=True)
-                dataframes[key] = df
+                dataframes[key.getLabel()] = df
 
         return dataframes
