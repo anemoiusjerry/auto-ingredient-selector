@@ -3,7 +3,6 @@ import sys
 import logging
 import pandas as pd
 import jinja2
-import logging
 import pdfkit
 import json
 import copy
@@ -87,8 +86,9 @@ class InfoSheetGenerator:
         while sheet[f"C{i}"].value != None:
             inci = sheet[f"A{i}"].value
             if inci != None:
-                inci_str += inci
+                inci_str += inci + ", "
             i+=1
+        inci_str = inci_str[:-2] + "."
 
         # insert position at second to last column
         pos = df.shape[1] - 1
@@ -114,7 +114,7 @@ class InfoSheetGenerator:
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
 
-            pdfkit.from_string(html_str, output_path + "\\report.pdf", configuration=self.config, options=self.options)
+            pdfkit.from_string(html_str, output_path + f"\\{name}-{prod_type}-report.pdf", configuration=self.config, options=self.options)
 
     def split_sections(self, df):
         headings = list(df)

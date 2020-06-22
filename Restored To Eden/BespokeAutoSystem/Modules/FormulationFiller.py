@@ -6,10 +6,13 @@ from datetime import *
 from collections import defaultdict as dd
 import re
 
+from .Configer import Configer
+
 class FormulationFiller:
     SOF = 7
 
     def __init__(self, ingredients_df, gdriveObject):
+        self.configer = Configer()
         # Drop duplicates
         self.ingredients_df = ingredients_df.loc[~ingredients_df.index.duplicated(keep="first")]
         self.gdriveObject = gdriveObject
@@ -28,8 +31,10 @@ class FormulationFiller:
         """
         #???????????????????? CHNAGED to google drive ?????????????????
         # Get template folder path
-        path = os.getcwd() + "\\Formulation Templates\\"
-        template_path = path + prod_type + " Worksheet.xlsx"
+
+        config = self.configer.read_config()
+        path = config["Formulation Sheets Directory"]
+        template_path = path + "\\" + prod_type + " Worksheet.xlsx"
 
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)

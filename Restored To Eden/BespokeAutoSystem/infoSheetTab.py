@@ -1,5 +1,7 @@
-from PySide2.QtWidgets import *
+import os
 import pandas as pd
+from PySide2.QtWidgets import *
+from PySide2.QtGui import QPixmap, QIcon
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
@@ -66,10 +68,12 @@ class InfoTab(QWidget):
         self.del_buttons = []
         self.txt_boxes = []
         for i in range(df.shape[1]):
+            banner_layout = QGridLayout()
+
             # Create label
-            #l = QLabel(list(df)[i])
-            l = QLineEdit(list(df)[i])
-            self.layout.addWidget(l, 2*i+2, 0)
+            l = QLabel(list(df)[i])
+            #l = QLineEdit(list(df)[i])
+            banner_layout.addWidget(l, 0, 0)
 
             # Create text boxes
             t = QTextEdit(df.iloc[0,i])
@@ -78,9 +82,15 @@ class InfoTab(QWidget):
             self.txt_boxes.append((l, t))
 
             # Delete button
-            button = QPushButton("Del")
+            button = QPushButton()
+            # Set trash icon
+            icon = QPixmap(os.path.dirname(os.path.realpath(__file__)) + "\\Assets\\trash.svg")
+            button.setIcon(QIcon(icon))
+            button.setMaximumWidth(30)
             self.del_buttons.append(ButtonWrapper(button, l, t))
-            self.layout.addWidget(button, 2*i+3, 1)
+            banner_layout.addWidget(button, 0, 1)
+
+            self.layout.addLayout(banner_layout, 2*i+2, 0)
 
     def save(self):
         # Update self dataframe
