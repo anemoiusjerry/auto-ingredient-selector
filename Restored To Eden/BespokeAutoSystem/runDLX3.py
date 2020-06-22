@@ -1,4 +1,4 @@
-from dlx3 import DLX
+from .dlx3 import DLX
 import pandas as pd
 import re
 import math
@@ -6,8 +6,8 @@ import os
 import xlsxwriter
 from datetime import date
 from collections import defaultdict as dd
-from Modules.formulationfiller import calc_ingredient_weight as weighter
-from ..configParser import FigMe
+from .Modules.FormulationFiller import FormulationFiller
+from config.configParser import FigMe
 
 def matrixGen(product, ingredients, ailments, userCons, config):
     # fname = filepath of the ingredients csv
@@ -155,7 +155,7 @@ def orderParser(product, qdata, ingredients, config):
             vals[ingredient].append(absorbConst.index(key))
 
         # Returns the percentage composition of each ingredient in the product
-        composition = weighter(solution, product, ingredients)
+        composition = FormulationFiller.calc_ingredient_weight(solution, product, ingredients)
         # Returns the point that this current solution occupies
         point = pointGen(composition, vals)
         # Returns the maximum distance from the target point and the distance to the point
@@ -255,24 +255,24 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     config = FigMe()
     # orders columns
     customerCol = config.getColname("Orders Spreadsheet", "customer")
-    orderCol = config.getColnames("Orders Spreadsheet", "order number")
-    emailCol = config.getColnames("Orders Spreadsheet", "email")
-    oitemCol = config.getColnames("Orders Spreadsheet", "item")
+    orderCol = config.getColname("Orders Spreadsheet", "order number")
+    emailCol = config.getColname("Orders Spreadsheet", "email")
+    oitemCol = config.getColname("Orders Spreadsheet", "item")
 
     # ingredients columns
-    inameCol = config.getColnames("Ingredients Spreadsheet", "name")
-    typeCol = config.getColnames("Ingredients Spreadsheet", "type")
-    skinProbCol = config.getColnames("Ingredients Spreadsheet", "skin problem")
-    contrainsCol = config.getColnames("Ingredients Spreadsheet", "contraindications")
+    inameCol = config.getColname("Ingredients Spreadsheet", "name")
+    typeCol = config.getColname("Ingredients Spreadsheet", "type")
+    skinProbCol = config.getColname("Ingredients Spreadsheet", "skin problem")
+    contrainsCol = config.getColname("Ingredients Spreadsheet", "contraindications")
 
     # questionnaire columns
-    qnameCol = config.getColnames("Customer Questionnaire", "name")
-    skinProbCols = config.getColnames("Customer Questionnaire", "skin problem")
-    qemailCol = config.getColnames("Customer Questionnaire", "email")
+    qnameCol = config.getColname("Customer Questionnaire", "name")
+    skinProbCols = config.getColname("Customer Questionnaire", "skin problem")
+    qemailCol = config.getColname("Customer Questionnaire", "email")
 
     # catalog columns
-    itemCol = config.getColnames("Product Catalog", "item")
-    productCol = config.getColnames("Product Catalog", "products")
+    itemCol = config.getColname("Product Catalog", "item")
+    productCol = config.getColname("Product Catalog", "products")
 
     # Convert all data in dataframes to lowercase
     # Readjust all names of customers to have one space between names
@@ -284,13 +284,15 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     ingredients = ingredients.applymap(lambda x:str(x).lower())
     for colname in [typeCol, skinProbCol, contrainsCol]:
         ingredients[colname] = ingredients[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-    ingredients.set_index(inameCol, inplace=True)
+    #ingredients.set_index(inameCol, inplace=True)
 
     # Readjust all names of customers to have one space between names
     # Convert relevant column data to lists
     qnair = qnair.applymap(lambda x:str(x).lower())
     qnair[qnameCol] = qnair[qnameCol].apply(lambda x:" ".join(x.split()))
+    print(qnair)
     for colname in skinProbCols:
+        print(list(qnair.columns))
         qnair[colname] = qnair[colname].apply(lambda x: re.split("\s*[,]\s*", x))
     qnair.set_index(qnameCol, inplace=True)
 

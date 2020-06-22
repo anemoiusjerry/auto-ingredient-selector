@@ -5,7 +5,7 @@ from PySide2.QtGui import QKeySequence, QPalette, QColor
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
-from .Modules import IngredientSelector
+from .runDLX3 import IngredientSelector
 from .Modules import FormulationFiller
 
 class LandingTab(QWidget):
@@ -79,10 +79,10 @@ class LandingTab(QWidget):
         self.dataframes = self.createDataFrames()
 
         # Start ingredient selection process
-        results = IngredientSelector.IngredientSelector(self.dataframes["Orders Spreadsheet"],
-                                                        self.dataframes["Ingredients Spreadsheet"],
-                                                        self.dataframes["Customer Questionnaire"],
-                                                        self.dataframes["Product Catalog"])
+        results = IngredientSelector(self.dataframes["Orders Spreadsheet"],
+                                    self.dataframes["Ingredients Spreadsheet"],
+                                    self.dataframes["Customer Questionnaire"],
+                                    self.dataframes["Product Catalog"])
 
         # Start formulation calculations for all orders
         filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
@@ -114,6 +114,7 @@ class LandingTab(QWidget):
 
                 # Replace all nan with empty string
                 df.fillna("", inplace=True)
-                dataframes[self.widgets[key].label.getLabel()] = df
+                print("Key: ", key)
+                dataframes[self.widgets[key].label.text()] = df
 
         return dataframes
