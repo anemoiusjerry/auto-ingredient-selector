@@ -1,20 +1,24 @@
 {
-    "Product target": {
-        "DayCream": {
-            "Viscosity": "light",
-            "Absorbency": "fast"
+    "Product": {
+        "day cream": {
+            "viscosity": "light",
+            "absorbency": "fast",
+            "types": ["aqueous base","aqueous high performance","anhydrous base","essential oil"]
         },
-        "ManCream": {
+        "man cream": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "types": ["aqueous base","aqueous high performance","anhydrous base","essential oil"]
+        },
+        "night cream": {
+            "viscosity": "heavy",
+            "absorbency": "slow",
+            "types": ["aqueous base","anhydrous base","essential oil"]
+        },
+        "oil cleanser": {
             "Viscosity": "medium",
-            "Absorbency": "medium"
-        },
-        "NightCream": {
-            "Viscosity": "heavy",
-            "Absorbency": "slow"
-        },
-        "OilCleanser": {
-            "Viscosity": "medium",
-            "Absorbency": "medium"
+            "Absorbency": "medium",
+            "types": ["anhydrous base","essential oil"]
         }
     },
     "Constants": {
@@ -66,9 +70,9 @@
         "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
     },
     "Values": {
-        "lowbound": 1,
-        "upbound": 1,
-        "maxupbound": 3,
+        "lowBound": 1,
+        "upBound": 1,
+        "maxupBound": 3,
         "tpyeoverlap_low": 1,
         "typeoverlap_up": 3,
         "maxsols": 5,

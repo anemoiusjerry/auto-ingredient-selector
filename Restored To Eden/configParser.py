@@ -64,5 +64,9 @@ class FigMe:
         # Constants are stored as a list of values, key refers to the constant name
         return self.masterDict["Constants"][key]
 
-    def getProdTarget(product, var):
-        return self.masterDict["Product target"][product][var]
+    def getProduct(product, var):
+        return self.masterDict["Product"][product][var]
+
+    def getDir(directory):
+        return self.masterDict["Directories"][directory]
+        
