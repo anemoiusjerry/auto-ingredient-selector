@@ -35,7 +35,7 @@ class TabDialog(QTabWidget):
         dark_palette.setColor(QPalette.ToolTipText, Qt.white)
         dark_palette.setColor(QPalette.Text, Qt.white)
         dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
-        dark_palette.setColor(QPalette.ButtonText, Qt.white) 
+        dark_palette.setColor(QPalette.ButtonText, Qt.white)
         dark_palette.setColor(QPalette.BrightText, Qt.red)
         dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
         dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
@@ -46,20 +46,18 @@ class TabDialog(QTabWidget):
         """ Save browsed paths to config
         """
         json_obj = json.dumps(self.config, indent=4)
-        with open("config.json", "w") as outfile:
+        with open("config/config.json", "w") as outfile:
             outfile.write(json_obj)
 
 def main():
     """ Central control point for all modules.
     """
     # Load config
-    with open("config.json") as json_file:
+    with open("config/config.json") as json_file:
         config = json.load(json_file)
     # Load UI
     app = QApplication(sys.argv)
     window = TabDialog(config)
     window.toggleDarkMode(app)
     window.show()
-    sys.exit(app.exec_())    
-
-  
+    sys.exit(app.exec_())

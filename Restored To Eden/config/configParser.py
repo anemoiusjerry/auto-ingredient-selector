@@ -7,7 +7,7 @@ from BespokeAutoSystem.Gdriver import Gdriver
 
 class FigMe:
 
-    def __init__(self, path=os.path.abspath("config.json")):
+    def __init__(self, path=os.path.abspath("config/config.json")):
         # Get the filepath of the config file
         self.path = path
         self.gdriveAPI = Gdriver()
@@ -54,18 +54,18 @@ class FigMe:
 
         return df
 
-    def getVal(variable):
+    def getVal(self,variable):
         return self.masterDict["Values"][variable]
 
-    def getColname(dataframe, col):
+    def getColname(self,dataframe, col):
         return self.masterDict["Column names"][dataframe][col]
 
-    def getConst(key):
+    def getConst(self,key):
         # Constants are stored as a list of values, key refers to the constant name
         return self.masterDict["Constants"][key]
 
-    def getProduct(product, var):
+    def getProduct(self,product, var):
         return self.masterDict["Product"][product][var]
 
-    def getDir(directory):
+    def getDir(self,directory):
         return self.masterDict["Directories"][directory]
