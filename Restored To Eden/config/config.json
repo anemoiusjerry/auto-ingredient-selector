@@ -118,7 +118,8 @@
     "Customer Questionnaire": "/Users/HG/Desktop/questionairre.csv",
     "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
     "Ingredients Spreadsheet": "/Users/HG/Desktop/Ingredients.csv",
-    "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
+    "Orders Spreadsheet": "C:/Users/jerry/source/repos/RTE Side Project/Restored To Eden/orders.csv",
     "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
-    "Export Directory": "/Users/HG/Desktop"
+    "Export Directory": "/Users/HG/Desktop",
+    "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx"
 }

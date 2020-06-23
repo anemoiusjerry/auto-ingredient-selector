@@ -55,10 +55,11 @@ class Gdriver:
         if 'application/vnd.google-apps' in file_type:
             request = self.service.files().export_media(fileId=file_id, 
                 mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            fh = io.BytesIO()
         else:            
             request = self.service.files().get_media(fileId=file_id)
-
-        fh = io.BytesIO()
+            fh = io.FileIO("file.csv", "wb")
+        
         downloader = MediaIoBaseDownload(fh, request)
 
         done = False
