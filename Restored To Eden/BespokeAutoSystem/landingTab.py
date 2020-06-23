@@ -1,3 +1,4 @@
+import io
 import pandas as pd
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import *
@@ -99,16 +100,23 @@ class LandingTab(QWidget):
             if "sheet" in key:
                 try:
                     # Retrieve from gdrive
-                    fh, file_id = self.gdriveAPI.fetch_file(self.widgets[key].label.teext())
-                    df = pd.read_excel(fh)
+                    fetch_name = self.widgets[key].label.text()
+                    print(fetch_name)
+                    fh, file_id = self.gdriveAPI.fetch_file(fetch_name)
+                    # Handles corrupt csv file when reading directly from bytesIO
+                    if (type(fh) is io.BytesIO):
+                        df = pd.read_excel(fh)
+                    else:
+                        df = pd.read_csv("file.csv")
                 # Try to get df locally if google drive fails
                 except:
                     try:
                         df_path = self.widgets[key].display.text()
                         df = pd.read_csv(df_path)
+                        print(f"Fetched {key} locally...")
                     except:
                         # Pop up dialog that errors when not all df are browsed
-                        print("Not browsed")
+                        print(f"Failed to browse {key} locally...")
 
                 if "ingredient" in key:
                     df.set_index("INGREDIENT COMMON NAME", drop=False, inplace=True)

@@ -26,13 +26,12 @@ class InfoTab(QWidget):
         reporter.process_all()
 
     def loadSheetLocal(self):
-        # If failed then use local vers
-        self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
-        self.loadUi(self.infoSheet_df)
-        # try:
-            
-        # except:
-        #     print("Local load failed")
+        try:
+            # If failed then use local vers
+            self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
+            self.loadUi(self.infoSheet_df)
+        except:
+            print("Local load failed")
     def loadSheetCloud(self):
         try:
             # Query Gdrive for info sheet
@@ -41,7 +40,7 @@ class InfoTab(QWidget):
             self.infoSheet_df = pd.read_excel(fh)
             self.loadUi(self.infoSheet_df)
         except:
-            print("Could Load from GDrive, trying load locally...")
+            print("Could not Load from GDrive, trying load locally...")
             self.loadSheetLocal()
 
 
