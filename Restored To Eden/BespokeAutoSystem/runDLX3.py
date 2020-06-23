@@ -194,6 +194,7 @@ def orderParser(product, qdata, ingredients, config, filler):
 def pointGen(composition, vals):
     print("composition", composition)
     print("vals", vals)
+    
     point = []
     for i in range(3):
         val = 0
