@@ -119,10 +119,10 @@
         "numingredweight": 0.1,
         "addedbenefitweight": 0.1
     },
-    "Customer Questionnaire": "/Users/HG/Desktop/questionairre.csv",
+    "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/questionaire.csv",
     "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
     "Ingredients Spreadsheet": "/Users/HG/Desktop/Ingredients.csv",
-    "Orders Spreadsheet": "C:/Users/jerry/source/repos/RTE Side Project/Restored To Eden/orders.csv",
+    "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
     "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
     "Export Directory": "/Users/HG/Desktop",
     "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx"
