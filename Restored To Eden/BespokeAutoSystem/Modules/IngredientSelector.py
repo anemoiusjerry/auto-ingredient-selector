@@ -1,4 +1,5 @@
 from config.configParser import FigMe
+from BespokeAutoSystem.dlx3 import DLX
 import re
 import os
 
@@ -120,7 +121,7 @@ class IngredientSelector:
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
 
-                solutions, cols, unresolved = orderParser(product, qdata, self.ingredients, self.config, self.filler)
+                solutions, cols, unresolved = self.orderParser(product, qdata, self.ingredients, self.config, self.filler)
 
                 # create a new worksheet for each solution
                 self.writeToWorkbook(workbook, solutions, cols, unresolved)
@@ -155,117 +156,118 @@ class IngredientSelector:
 
             i = i+1
 
-    def orderParser(self):
+    def orderParser(self, product, qdata):
 
-        def orderParser(product, qdata, ingredients, config, filler):
+        types = self.config.getProduct(product, "types")
+        target = self.config.getTarget(product)
+        # Filetring and retrieving the skin problems from customer info
+        ailments = [a for col in ailmentCols for a in qdata[col] if a]
 
-            # addedBenefitWeight = config.getVal("addedbenefitweight") # need to finish this part
+        # Finding the customers contraindications
+        usercons = conFinder(qdata[self.allergyCol], qdata[self.medicalCol])
 
-            types = config.getProduct(product, "types")
-            target = config.getTarget(product)
-            # Filetring and retrieving the skin problems from customer info
-            ailments = [a for col in ailmentCols for a in qdata[col] if a and a!="I DON'T KNOW...THAT'S WHAT I NEED YOU FOR :)"]
+        # retrieve the rows and columns that will make up the dlx matrix
+        rows, cols = matrixGen(product, ailments, usercons)
 
-            # Finding the customers contraindications
-            usercons = conFinder(qdata[allergyCol], qdata[medicalCol])
-            print("usercons",usercons)
-            # retrieve the rows and columns that will make up the dlx matrix
-            rows, cols = matrixGen(product, ingredients, ailments, usercons, config)
+        # Convert cols into dlx useable format
+        cols = [(cols[i],0,self.lowBound,self.upBound) for i in range(len(cols))]
 
-            # Convert cols into dlx useable format
-            cols = [(cols[i],0,lowBound,upBound) for i in range(len(cols))]
+        # If Essential oils are part of the product recipe, make sure they are included at least once
+        for type in types:
+            cols.append((type,0,self.tpyeoverlap_low,self.typeoverlap_up))
+            colind = len(cols) - 1
+            for row in rows:
+                # ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(row[1])
+                # ^^ this was removed due to the set_index function. If something is wrong check here
+                ingredtype = self.ingredients.loc[row[1],self.typeCol]
+                if type in ingredtype:
+                    row[0].append((colind, None))
 
-            # If Essential oils are part of the product recipe, make sure they are included at least once
-            for type in types:
-                cols.append((type,0,tpyeoverlap_low,typeoverlap_up))
-                colind = len(cols) - 1
-                for row in rows:
-                    # ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(row[1])
-                    # ^^ this was removed due to the set_index function. If something is wrong check here
-                    ingredtype = ingredients.loc[row[1],ingredTypeCol]
-                    if type in ingredtype:
-                        row[0].append((colind, None))
-
-            # Check that all cols can be stisfied at least once, remove cols that cant be
-            colsCovered = set([node[0] for row in rows for node in row[0]])
-            unresolved = []
-            for col in range(len(cols)-1, 0, -1):
-                if col not in colsCovered:
-                    unresolved.append(cols.pop(col)[0])
-                    for i in range(len(rows)):
-                        rows[i][0] = [node for node in rows[i][0] if node[0] != col]
+        # Check that all cols can be stisfied at least once, remove cols that cant be
+        colsCovered = set([node[0] for row in rows for node in row[0]])
+        unresolved = []
+        for col in range(len(cols)-1, 0, -1):
+            if col not in colsCovered:
+                unresolved.append(cols.pop(col)[0])
+                for i in range(len(rows)):
+                    rows[i][0] = [node for node in rows[i][0] if node[0] != col]
 
 
-            # Run the DLX to find all the solutions
+        # Run the DLX to find all the solutions
+        matrix = DLX(cols, rows)
+        solutions = matrix.dance()
+
+        print("cols: ", cols)
+        # Run the DLX with an increased upper bound until max is reached or enough solutions are found
+        while len(solutions) < 100 and upBound < maxupBound:
+            upBound = upBound + 1
+            for i in range(len(cols)):
+                cols[i] = list(cols[i])
+                if cols[i][0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]: # Hardcoded
+                    cols[i][3] = upBound
+                cols[i] = tuple(cols[i])
+
             matrix = DLX(cols, rows)
             solutions = matrix.dance()
 
-            # Run the DLX with an increased upper bound until max is reached or enough solutions are found
-            while len(solutions) < 100 and upBound < maxupBound:
-                upBound = upBound + 1
-                for i in range(len(cols)):
-                    cols[i] = list(cols[i])
-                    if cols[i][0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]: # Hardcoded
-                        cols[i][3] = upBound
-                    cols[i] = tuple(cols[i])
+        print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
+        print(len(solutions))
 
-                matrix = DLX(cols, rows)
-                solutions = matrix.dance()
+        # Finding the best solutions
+        chosen = []
+        _lenlst = [len(s) for s in solutions]
+        maxlen, minlen = max(_lenlst), min(_lenlst)
 
-            print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
-            print(len(solutions))
+        if len(solutions) > 10:
+            solutions = solutions[:10]
 
-            # Finding the best solutions
-            chosen = []
-            _lenlst = [len(s) for s in solutions]
-            maxlen, minlen = max(_lenlst), min(_lenlst)
-            for solution in solutions:
-                # calculating fit
-                vals = dd(list)
-                for ingredient in solution:
-                    #ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(ingredient)
+        for solution in solutions[:]:
+            # calculating fit
+            vals = dd(list)
+            for ingredient in solution:
+                #ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(ingredient)
 
-                    # Retrieve comodegenic rating
-                    _como = ingredients.loc[ingredient,comedogenicCol]
-                    vals[ingredient].append(0) if _como == "" else vals[ingredient].append(comeConst.index(int(float(_como))))
-                    # Retrieve Viscocity
-                    key = ingredients.loc[ingredient,viscocityCol]
-                    try:
-                        vals[ingredient].append(viscConst.index(key))
-                    except:
-                        vals[ingredient].append(1)
-                    # Retrieve  absoption rate
-                    key = ingredients.loc[ingredient,absorptionCol]
-                    try:
-                        vals[ingredient].append(absorbConst.index(key))
-                    except:
-                        vals[ingredient].append(1)
-                # Returns the percentage composition of each ingredient in the product
-                composition = filler.calc_ingredient_weight(solution, product, ingredients)
-                # Returns the point that this current solution occupies
-                point = pointGen(composition, vals)
-                # Returns the maximum distance from the target point and the distance to the point
-                # Need to generate the point from the config file. this will change types[product][1]<-----------------------------------------------------------
+                # Retrieve comodegenic rating
+                _como = ingredients.loc[ingredient,comedogenicCol]
+                vals[ingredient].append(0) if _como == "" else vals[ingredient].append(comeConst.index(int(float(_como))))
+                # Retrieve Viscocity
+                key = ingredients.loc[ingredient,viscocityCol]
+                try:
+                    vals[ingredient].append(viscConst.index(key))
+                except:
+                    vals[ingredient].append(1)
+                # Retrieve  absoption rate
+                key = ingredients.loc[ingredient,absorptionCol]
+                try:
+                    vals[ingredient].append(absorbConst.index(key))
+                except:
+                    vals[ingredient].append(1)
+            # Returns the percentage composition of each ingredient in the product
+            composition = filler.calc_ingredient_weight(solution, product, ingredients)
+            # Returns the point that this current solution occupies
+            point = pointGen(composition, vals)
+            # Returns the maximum distance from the target point and the distance to the point
+            # Need to generate the point from the config file. this will change types[product][1]<-----------------------------------------------------------
 
-                maxdist, dist = distFinder(target, point, config)
-                # Calculate fit score (lower is better)
-                fit = fitWeight * dist * 100 / maxdist
-                # Calculate the score of the number of ingredients (lower is better)
-                numIngred = numIngredWeight * (len(solution)-minlen) * 100 / (maxlen-minlen) if maxlen-minlen else 0
-                score = fit + numIngred
-                # Need to find the additional benefits <----------------------------------------------------------------------
+            maxdist, dist = distFinder(target, point, config)
+            # Calculate fit score (lower is better)
+            fit = fitWeight * dist * 100 / maxdist
+            # Calculate the score of the number of ingredients (lower is better)
+            numIngred = numIngredWeight * (len(solution)-minlen) * 100 / (maxlen-minlen) if maxlen-minlen else 0
+            score = fit + numIngred
+            # Need to find the additional benefits <----------------------------------------------------------------------
 
-                if len(chosen) < maxSols:
-                    chosen.append((solution, score))
-                elif score < max([sol[1] for sol in chosen]):
-                    # remove the old maximum and add the solution to the list
-                    for i in range(len(chosen)):
-                        if chosen[i][1] > score:
-                            chosen[i] = (solution, score)
-                            break
+            if len(chosen) < maxSols:
+                chosen.append((solution, score))
+            elif score < max([sol[1] for sol in chosen]):
+                # remove the old maximum and add the solution to the list
+                for i in range(len(chosen)):
+                    if chosen[i][1] > score:
+                        chosen[i] = (solution, score)
+                        break
 
-            print("Best solutions: ")
-            for sol in chosen:
-                print(sol)
-            print("Unresolved: ", unresolved)
-            return chosen, cols, unresolved
+        print("Best solutions: ")
+        for sol in chosen:
+            print(sol)
+        print("Unresolved: ", unresolved)
+        return chosen, cols, unresolved
