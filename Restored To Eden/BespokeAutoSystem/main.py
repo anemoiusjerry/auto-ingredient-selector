@@ -6,15 +6,16 @@ from PySide2.QtGui import QKeySequence, QPalette, QColor
 from PySide2.QtWidgets import *
 
 # Own .py files
+from config.configParser import FigMe
 import faulthandler; faulthandler.enable()
 from .landingTab import LandingTab
 from .infoSheetTab import InfoTab
 
 class TabDialog(QTabWidget):
 
-    def __init__(self, config, app, parent=None):
+    def __init__(self, app, parent=None):
         super(TabDialog, self).__init__(parent)
-        self.config = config
+        self.config = FigMe()
         self.setWindowTitle("RTE Automatron")
 
         self.landingTab = LandingTab(self.config, app)
@@ -33,11 +34,8 @@ class TabDialog(QTabWidget):
 def main():
     """ Central control point for all modules.
     """
-    # Load config
-    with open("config/config.json") as json_file:
-        config = json.load(json_file)
     # Load UI
     app = QApplication(sys.argv)
-    window = TabDialog(config, app)
+    window = TabDialog(app)
     window.show()
     sys.exit(app.exec_())

@@ -23,7 +23,7 @@ class LandingTab(QWidget):
         self.widgets["ingredient_sheet"] = FileBrowser("csv", "Ingredients Spreadsheet", config)
         self.widgets["orders_sheet"] = FileBrowser("csv", "Orders Spreadsheet", config)
 
-        self.widgets["formulation_dir"] = FileBrowser("dir", "Formulation Sheets Directory:", config)
+        self.widgets["formulation_dir"] = FileBrowser("dir", "Formulation Sheets Directory", config)
         self.widgets["save_dir"] = FileBrowser("dir", "Export Directory", config)
 
         # Display widgets in layout

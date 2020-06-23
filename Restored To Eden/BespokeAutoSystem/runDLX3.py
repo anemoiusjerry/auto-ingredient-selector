@@ -23,15 +23,6 @@ def matrixGen(product, ingredients, ailments, userCons, config):
     # In the form [[ingredient types], [viscocity, Absorption rate, Comodegenic rating]]
     types = config.getProduct(product, "types")
 
-    keywords = ["dry","inflamed","cracking","fine lines","wrinkles","damage from sun",
-                "eczema","irritated","acne","age spots","tewl","firmness","sebum",
-                "clogged","enlarged","scarring","regeneration","flaky","t-zone",
-                "fine dehydration lines","rough","itching","redness","dull","flaking",
-                "scaling","peeling","tightness","dehydrat"]
-
-    problems = [k for a in ailments for k in keywords if k in a]
-    problems = list(dict.fromkeys(problems))
-
     for index, ingredient in ingredients.iterrows():
         # Attain current stock, constraindications and ingredient type
         stock = ingredient[stockCol]
@@ -40,20 +31,18 @@ def matrixGen(product, ingredients, ailments, userCons, config):
 
         # Filter the ingredients associated cures to contain keywords
         cures = ingredient[skinProbCol]
-        cures = [k for i in cures for k in keywords if k in i] # cures will need to change since i dont have to worry about non matching strings
-        cures = list(dict.fromkeys(cures))
 
         # check if the ingredient is in stock, not a contraindication and useable
         if checkStock(stock) \
           and contrainCheck(ingredCons, userCons) \
-          and useablecheck(cures, problems) \
+          and useablecheck(cures, ailments) \
           and typeCheck(types, type):
 
             # Create and append nodes for each row of the dlx matrix created
-            nodes = dlxRowFormat(cures, problems)
+            nodes = dlxRowFormat(cures, ailments)
             rows.append((nodes, index))
 
-    return rows, problems
+    return rows, ailments
 
 def orderParser(product, qdata, ingredients, config, filler):
     ailmentCols = config.getColname("Customer Questionnaire", "skin problem")
@@ -84,7 +73,9 @@ def orderParser(product, qdata, ingredients, config, filler):
     types = config.getProduct(product, "types")
     target = config.getTarget(product)
     # Filetring and retrieving the skin problems from customer info
-    ailments = [a for col in ailmentCols for a in qdata[col] if a and a!="I DON'T KNOW...THAT'S WHAT I NEED YOU FOR :)"]
+    ailments = [a for col in ailmentCols for a in qdata[col] if a]
+
+    print("ailments", ailments)
 
     # Finding the customers contraindications
     usercons = conFinder(qdata[allergyCol], qdata[medicalCol])
@@ -120,6 +111,7 @@ def orderParser(product, qdata, ingredients, config, filler):
     matrix = DLX(cols, rows)
     solutions = matrix.dance()
 
+    print("cols: ", cols)
     # Run the DLX with an increased upper bound until max is reached or enough solutions are found
     while len(solutions) < 100 and upBound < maxupBound:
         upBound = upBound + 1
@@ -139,7 +131,11 @@ def orderParser(product, qdata, ingredients, config, filler):
     chosen = []
     _lenlst = [len(s) for s in solutions]
     maxlen, minlen = max(_lenlst), min(_lenlst)
-    for solution in solutions:
+
+    if len(solutions) > 10:
+        solutions = solutions[:10]
+
+    for solution in solutions[:]:
         # calculating fit
         vals = dd(list)
         for ingredient in solution:
@@ -147,7 +143,6 @@ def orderParser(product, qdata, ingredients, config, filler):
 
             # Retrieve comodegenic rating
             _como = ingredients.loc[ingredient,comedogenicCol]
-            print("como rating", _como)
             vals[ingredient].append(0) if _como == "" else vals[ingredient].append(comeConst.index(int(float(_como))))
             # Retrieve Viscocity
             key = ingredients.loc[ingredient,viscocityCol]
@@ -168,7 +163,7 @@ def orderParser(product, qdata, ingredients, config, filler):
         # Returns the maximum distance from the target point and the distance to the point
         # Need to generate the point from the config file. this will change types[product][1]<-----------------------------------------------------------
 
-        maxdist, dist = distFinder(target, point)
+        maxdist, dist = distFinder(target, point, config)
         # Calculate fit score (lower is better)
         fit = fitWeight * dist * 100 / maxdist
         # Calculate the score of the number of ingredients (lower is better)
@@ -192,9 +187,7 @@ def orderParser(product, qdata, ingredients, config, filler):
     return chosen, cols, unresolved
 
 def pointGen(composition, vals):
-    print("composition", composition)
-    print("vals", vals)
-    
+
     point = []
     for i in range(3):
         val = 0
@@ -203,7 +196,7 @@ def pointGen(composition, vals):
         point.append(val)
     return point
 
-def distFinder(t, p):
+def distFinder(t, p, config):
     # t is the target point, p is the point
     # Find the distance of the point to the target point
     dist = math.sqrt((t[0]-p[0])**2 + (t[1]-p[1])**2 + (t[2]-p[2])**2)
@@ -358,6 +351,10 @@ def IngredientSelector(orders, ingredients, qnair, catalog, filler):
             # create a new worksheet for each solution
             i=1
             for solution in solutions:
+                # returning jerry's formatted stuff
+                returns.append({"Ingredients": solution[0],
+                                "CustomerName": name,
+                                "ProductType": product})
                 worksheet = workbook.add_worksheet("Solution " + str(i))
                 # Write the row headers (skin problems)
                 row = 2
@@ -376,6 +373,7 @@ def IngredientSelector(orders, ingredients, qnair, catalog, filler):
 
                 i = i+1
             workbook.close()
+    return returns
 
 if __name__ == '__main__':
     IngredientSelector(orders, ingredients, qnair)

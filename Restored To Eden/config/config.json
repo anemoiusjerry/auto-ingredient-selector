@@ -101,12 +101,12 @@
     },
     "Directories": {
         "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
-        "Orders Spreadsheet": "",
-        "Customer Questionnaire": "",
-        "Product Catalog": "",
-        "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/orders.csv",
+        "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/questionnaire.csv",
+        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
         "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/Restored To Eden/Outputs"
+        "Export Directory": "/Users/HG/Desktop"
     },
     "Values": {
         "lowBound": 1,
@@ -118,12 +118,5 @@
         "fitweight": 0.8,
         "numingredweight": 0.1,
         "addedbenefitweight": 0.1
-    },
-    "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/questionaire.csv",
-    "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
-    "Ingredients Spreadsheet": "/Users/HG/Desktop/Ingredients.csv",
-    "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
-    "Formulation Sheets Directory:": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
-    "Export Directory": "/Users/HG/Desktop",
-    "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx"
+    }
 }

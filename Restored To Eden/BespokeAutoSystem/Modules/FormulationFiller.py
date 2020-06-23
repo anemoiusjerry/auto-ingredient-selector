@@ -6,13 +6,13 @@ from datetime import *
 from collections import defaultdict as dd
 import re
 
-from .Configer import Configer
+from config.configParser import FigMe
 
 class FormulationFiller:
     SOF = 7
 
     def __init__(self, ingredients_df, gdriveObject):
-        self.configer = Configer()
+        self.config = FigMe()
         # Drop duplicates
         self.ingredients_df = ingredients_df.loc[~ingredients_df.index.duplicated(keep="first")]
         self.gdriveObject = gdriveObject
@@ -32,9 +32,8 @@ class FormulationFiller:
         #???????????????????? CHNAGED to google drive ?????????????????
         # Get template folder path
 
-        config = self.configer.read_config()
-        path = config["Formulation Sheets Directory"]
-        template_path = path + "\\" + prod_type + " Worksheet.xlsx"
+        path = self.config.getDir("Formulation Sheets Directory")
+        template_path = path + "/" + prod_type + " Worksheet.xlsx"
 
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
@@ -130,24 +129,22 @@ class FormulationFiller:
         ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
 
         # Fill main table entries
-        for i in range(len(ingredients)):
-            ingredient_name = ingredients[i]
+        for ingredient_name in ingredients:
 
             # Get ingredient types ???????????/// Waiting for answer to simplify column
-            type_str = str(ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]).lower()
-            type_list = re.split("\s*[,]\s*", type_str)
-            ingredient_type = type_list[-1]
+            type_list = ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
 
-            if "essential oil" in ingredient_type:
-                ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+            for ingredient_type in type_list:
+                if "essential oil" in ingredient_type:
+                    ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
 
-            if ingredient_type in ww_dict:
-                # Pop off and use first weight of ingredient type
-                if len(ww_dict[ingredient_type]) > 1:
-                    assigned_vals[ingredient_name] = ww_dict[ingredient_type].pop(0)
-                # If only one is left then keep using that one
-                else:
-                    assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
+                if ingredient_type in ww_dict:
+                    # Pop off and use first weight of ingredient type
+                    if len(ww_dict[ingredient_type]) > 1:
+                        assigned_vals[ingredient_name] = ww_dict[ingredient_type].pop(0)
+                    # If only one is left then keep using that one
+                    else:
+                        assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
 
         # Scale to 100
         tot = sum(assigned_vals.values())

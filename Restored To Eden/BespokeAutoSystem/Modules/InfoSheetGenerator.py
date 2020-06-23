@@ -41,7 +41,7 @@ class InfoSheetGenerator:
         for f in os.listdir(path):
             if os.path.isfile(os.path.join(path, f)):
                 sheet_paths.append(path + "\\" + f)
-        
+
         for f in sheet_paths:
             workbook = load_workbook(filename=f)
             sheet = workbook.active
@@ -56,7 +56,7 @@ class InfoSheetGenerator:
 
             # Pass all info to gen brochure
             self.generateReport(headings, paragraphs, name, prod_type)
-    
+
     def fill_instructions(self, name, prod_type, df):
         # Get product instructions
         f = open(
@@ -74,7 +74,7 @@ class InfoSheetGenerator:
         date_blended = sheet["B3"].value
         df[[list(df)[-1]]] += f"\n\nDate Blended: {date_blended}"
         return df
-    
+
     def extract_incis(self, sheet, df):
         """ Returns df with ingredients INCI section inserted
         """
@@ -98,18 +98,22 @@ class InfoSheetGenerator:
     def generateReport(self, headings, paragraphs, name, prod_type):
             assets_path = str(Path(os.path.dirname(os.path.realpath(__file__)))) + "\\InfoSheetAssets"
 
-            html_str = self.template.render(headings=headings, paragraphs=paragraphs, 
+            html_str = self.template.render(headings=headings, paragraphs=paragraphs,
                                             name=name, prod_type=prod_type, assets_path=assets_path)
 
             sheet = open("Information & Ingredients Sheet.html", "w")
-            sheet.write(html_str)           
+            sheet.write(html_str)
             sheet.close()
 
             # get output path
+            """
             with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "\\config.json") as j:
                 config = json.load(j)
             output_path = config["Export Directory"] + "\\Reports"
-
+            """
+            # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
+            config = FigMe()
+            output_path = config["Directories"]["Export Directory"] + "\\Reports"
             # Create reports folder if it doesnt exist
             if not os.path.exists(output_path):
                 os.makedirs(output_path)

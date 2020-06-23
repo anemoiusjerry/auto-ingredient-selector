@@ -13,7 +13,7 @@ class FileBrowser(QDialog):
         self.label = QLabel(label)
         # try to get saved path
         try:
-            save_path = config[label]
+            save_path = config["Directories"][label]
         except:
             save_path = ""
         self.display = QLineEdit(save_path)
@@ -42,14 +42,14 @@ class FileBrowser(QDialog):
         directory = QFileDialog.getExistingDirectory(self, "Save Location")
         if directory:
             self.display.setText(directory)
-        config[self.label.text()] = directory
+        #config["Directories"][self.label.text()] = directory
 
     def findCSV(self, config):
         directory = QFileDialog.getOpenFileName(self, "Select .csv file", "", "Excel Files (*.csv *.xlsx);; All Files (*)")
         if directory:
             self.display.setText(directory[0])
 
-        config[self.label.text()] = directory[0]
+        #config["Directories"][self.label.text()] = directory[0]
 
     def checkPath(self):
         file = self.display.text()
