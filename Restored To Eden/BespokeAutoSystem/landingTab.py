@@ -100,7 +100,7 @@ class LandingTab(QWidget):
             if "sheet" in key:
                 try:
                     # Retrieve from gdrive
-                    fetch_name = self.widgets[key].label.text()
+                    fetch_name = self.widgets[key].label.teext()
                     print(fetch_name)
                     fh, file_id = self.gdriveAPI.fetch_file(fetch_name)
                     # Handles corrupt csv file when reading directly from bytesIO
