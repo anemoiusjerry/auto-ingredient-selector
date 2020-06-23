@@ -32,15 +32,15 @@ def matrixGen(product, ingredients, ailments, userCons, config):
     problems = [k for a in ailments for k in keywords if k in a]
     problems = list(dict.fromkeys(problems))
 
-    for i in range(ingredients.shape[0]):
+    for index, ingredient in ingredients.iterrows():
         # Attain current stock, constraindications and ingredient type
-        stock = ingredients.loc[i,stockCol]
-        ingredCons = ingredients.loc[i,contrainCol]
-        type = ingredients.loc[i,typeCol]
+        stock = ingredient[stockCol]
+        ingredCons = ingredient[contrainCol]
+        type = ingredient[typeCol]
 
         # Filter the ingredients associated cures to contain keywords
-        cures = ingredients.loc[i,skinProbCol]
-        cures = [k for i in cures for k in keywords if k in i]
+        cures = ingredient[skinProbCol]
+        cures = [k for i in cures for k in keywords if k in i] # cures will need to change since i dont have to worry about non matching strings
         cures = list(dict.fromkeys(cures))
 
         # check if the ingredient is in stock, not a contraindication and useable
@@ -51,11 +51,11 @@ def matrixGen(product, ingredients, ailments, userCons, config):
 
             # Create and append nodes for each row of the dlx matrix created
             nodes = dlxRowFormat(cures, problems)
-            rows.append((nodes, ingredients.loc[i,nameCol]))
+            rows.append((nodes, index))
 
     return rows, problems
 
-def orderParser(product, qdata, ingredients, config):
+def orderParser(product, qdata, ingredients, config, filler):
     ailmentCols = config.getColname("Customer Questionnaire", "skin problem")
     allergyCol = config.getColname("Customer Questionnaire", "allergies")
     medicalCol = config.getColname("Customer Questionnaire", "medical")
@@ -82,12 +82,13 @@ def orderParser(product, qdata, ingredients, config):
     addedBenefitWeight = config.getVal("addedbenefitweight") # need to finish this part
 
     types = config.getProduct(product, "types")
+    target = config.getTarget(product)
     # Filetring and retrieving the skin problems from customer info
     ailments = [a for col in ailmentCols for a in qdata[col] if a and a!="I DON'T KNOW...THAT'S WHAT I NEED YOU FOR :)"]
 
     # Finding the customers contraindications
     usercons = conFinder(qdata[allergyCol], qdata[medicalCol])
-
+    print("usercons",usercons)
     # retrieve the rows and columns that will make up the dlx matrix
     rows, cols = matrixGen(product, ingredients, ailments, usercons, config)
 
@@ -143,24 +144,31 @@ def orderParser(product, qdata, ingredients, config):
         vals = dd(list)
         for ingredient in solution:
             #ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(ingredient)
-            info = ingredients.loc[ingredient,:]
-            # Retrieve comodegenic rating
-            _como = info[comedogenicCol]
-            vals[ingredient].append(0) if _como == "" else vals[ingredient].append(comeConst.index(_como))
-            # Retrieve Viscocity
-            key = info[viscocityCol]
-            vals[ingredient].append(viscConst.index(key))
-            # Retrieve  absoption rate
-            key = info[absorptionCol]
-            vals[ingredient].append(absorbConst.index(key))
 
+            # Retrieve comodegenic rating
+            _como = ingredients.loc[ingredient,comedogenicCol]
+            print("como rating", _como)
+            vals[ingredient].append(0) if _como == "" else vals[ingredient].append(comeConst.index(int(float(_como))))
+            # Retrieve Viscocity
+            key = ingredients.loc[ingredient,viscocityCol]
+            try:
+                vals[ingredient].append(viscConst.index(key))
+            except:
+                vals[ingredient].append(1)
+            # Retrieve  absoption rate
+            key = ingredients.loc[ingredient,absorptionCol]
+            try:
+                vals[ingredient].append(absorbConst.index(key))
+            except:
+                vals[ingredient].append(1)
         # Returns the percentage composition of each ingredient in the product
-        composition = FormulationFiller.calc_ingredient_weight(solution, product, ingredients)
+        composition = filler.calc_ingredient_weight(solution, product, ingredients)
         # Returns the point that this current solution occupies
         point = pointGen(composition, vals)
         # Returns the maximum distance from the target point and the distance to the point
         # Need to generate the point from the config file. this will change types[product][1]<-----------------------------------------------------------
-        maxdist, dist = distFinder(types[product][1], point)
+
+        maxdist, dist = distFinder(target, point)
         # Calculate fit score (lower is better)
         fit = fitWeight * dist * 100 / maxdist
         # Calculate the score of the number of ingredients (lower is better)
@@ -184,6 +192,8 @@ def orderParser(product, qdata, ingredients, config):
     return chosen, cols, unresolved
 
 def pointGen(composition, vals):
+    print("composition", composition)
+    print("vals", vals)
     point = []
     for i in range(3):
         val = 0
@@ -251,7 +261,7 @@ def dlxRowFormat(cures, problems):
             nodes.append((problems.index(cure),None))
     return nodes
 
-def IngredientSelector(orders, ingredients, qnair, catalog):
+def IngredientSelector(orders, ingredients, qnair, catalog, filler):
     config = FigMe()
     # orders columns
     customerCol = config.getColname("Orders Spreadsheet", "customer")
@@ -278,7 +288,6 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     # Readjust all names of customers to have one space between names
     orders = orders.applymap(lambda x:str(x).lower())
     orders[customerCol] = orders[customerCol].apply(lambda x:" ".join(x.split()))
-    orders.set_index(orderCol, inplace=True)
 
     # Convert relevant column data to lists
     ingredients = ingredients.applymap(lambda x:str(x).lower())
@@ -290,14 +299,11 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     # Convert relevant column data to lists
     qnair = qnair.applymap(lambda x:str(x).lower())
     qnair[qnameCol] = qnair[qnameCol].apply(lambda x:" ".join(x.split()))
-    print(qnair)
     for colname in skinProbCols:
-        print(list(qnair.columns))
         qnair[colname] = qnair[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-    qnair.set_index(qnameCol, inplace=True)
 
     catalog = catalog.applymap(lambda x:str(x).lower())
-    catalog[productCol] = catalog[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-4]) if x and "privacy policy" not in x else [])
+    catalog[productCol] = catalog[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
     catalog.set_index(itemCol, inplace=True)
 
     # Creating new file for the orders to be saved into
@@ -309,15 +315,14 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
     # Attaining the questionnaire information for the customer of each order
     # If it cant find the questionairre, the next order is attempted
     returns = []
-    for i in range(orders.shape[0]):
-        order = orders.loc[i,:]
+    for index, order in orders.iterrows():
 
         # Find the customer questionnaire using the name or email address
         # !!!! NOTE: A dialog should be added to check that the email corresponds to the correct person
         name = order[customerCol]
         email = order[emailCol]
 
-        if name in qnair[qnameCol].values.tolist():
+        if name in qnair.index.tolist():
             qdata = qnair.loc[name,:]
         elif email in qnair[qemailCol].values.tolist():
             # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
@@ -328,11 +333,11 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
 
         # Finding the products required to fulfil the order. if they cannot be found, skip to next order
         item = order[oitemCol]
-        itemConstituents = catalog.loc[item,productCol]
-        if itemConstituents:
-            products = itemConstituents
-        else: # add a check to make sure that all the products are within the known products
-            #print("For customer:",name,", product:", item,"couldn't be found")
+
+        try:
+            products = catalog.loc[item,productCol]
+        except:
+            # add a check to make sure that all the products are within the known products
             continue
 
         # Create a folder for the order
@@ -347,7 +352,7 @@ def IngredientSelector(orders, ingredients, qnair, catalog):
             wbookname = orderFolderName + "/" + str(product) + ".xlsx"
             workbook = xlsxwriter.Workbook(wbookname)
 
-            solutions, cols, unresolved = orderParser(product, qdata, ingredients)
+            solutions, cols, unresolved = orderParser(product, qdata, ingredients, config, filler)
 
             # create a new worksheet for each solution
             i=1

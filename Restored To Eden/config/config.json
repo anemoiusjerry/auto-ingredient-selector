@@ -3,6 +3,7 @@
         "day cream": {
             "viscosity": "light",
             "absorbency": "fast",
+            "comedogenic": 0,
             "types": [
                 "aqueous base",
                 "aqueous high performance",
@@ -13,6 +14,7 @@
         "man cream": {
             "viscosity": "medium",
             "absorbency": "medium",
+            "comedogenic": 0,
             "types": [
                 "aqueous base",
                 "aqueous high performance",
@@ -23,6 +25,7 @@
         "night cream": {
             "viscosity": "heavy",
             "absorbency": "slow",
+            "comedogenic": 0,
             "types": [
                 "aqueous base",
                 "anhydrous base",
@@ -32,6 +35,7 @@
         "oil cleanser": {
             "Viscosity": "medium",
             "Absorbency": "medium",
+            "comedogenic": 0,
             "types": [
                 "anhydrous base",
                 "essential oil"

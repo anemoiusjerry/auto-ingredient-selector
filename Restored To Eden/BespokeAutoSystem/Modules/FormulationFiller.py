@@ -66,11 +66,11 @@ class FormulationFiller:
                     if ingredient_name.lower() == sheet[f"B{j}"].value.lower():
                         # Fill w/w%
                         sheet[f"D{j}"] = assigned_vals[ingredient_name]
-                        
+
                         realloc_dict.pop(f"D{j}", None)
                         assigned_vals.pop(ingredient_name)
                         break
-                
+
                 else:
                     # Get ingredient types ???????????/// Waiting for answer to simply column
                     type_list = str(self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]).lower()
@@ -98,11 +98,11 @@ class FormulationFiller:
                         assigned_vals.pop(ingredient_name)
                         break
                 j+=1
-            
+
             # Move onto next if cannot write ingredient
             if ingredient_name in assigned_vals.keys():
                 i+=1
-        
+
         # Reallocate surplus %
         if len(realloc_dict) > 0:
             sheet = self.too_many_slots(realloc_dict, sheet)
@@ -120,6 +120,8 @@ class FormulationFiller:
         # Get template folder path
         path = os.getcwd() + "\\Formulation Templates\\"
         template_path = path + prod_type + " Worksheet.xlsx"
+
+        template_path = os.path.abspath("Formulation Templates/" + prod_type + " Worksheet.xlsx")
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
@@ -138,7 +140,7 @@ class FormulationFiller:
 
             if "essential oil" in ingredient_type:
                 ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
-            
+
             if ingredient_type in ww_dict:
                 # Pop off and use first weight of ingredient type
                 if len(ww_dict[ingredient_type]) > 1:
@@ -169,8 +171,8 @@ class FormulationFiller:
                      EOF - index of last row for ingredients
         """
         ww_dict = dd(list)
-        phase_dict = {} 
-        realloc_dict = {}  
+        phase_dict = {}
+        realloc_dict = {}
         assigned_dict = {}
 
         i = self.SOF

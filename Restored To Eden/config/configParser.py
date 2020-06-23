@@ -69,3 +69,14 @@ class FigMe:
 
     def getDir(self,directory):
         return self.masterDict["Directories"][directory]
+
+    def getTarget(self,product):
+        # Returns the integer values in the format [como, visc, absorb]
+        dic = self.masterDict["Product"][product]
+        constants = self.masterDict["Constants"]
+
+        como = dic["comedogenic"]
+        visc = constants["Viscosity"].index(dic["viscosity"])
+        absorb = constants["Absorbency"].index(dic["absorbency"])
+
+        return [como, visc, absorb]

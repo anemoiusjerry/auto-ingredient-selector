@@ -67,7 +67,7 @@ class LandingTab(QWidget):
             dark_palette.setColor(QPalette.ToolTipText, Qt.white)
             dark_palette.setColor(QPalette.Text, Qt.white)
             dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
-            dark_palette.setColor(QPalette.ButtonText, Qt.white) 
+            dark_palette.setColor(QPalette.ButtonText, Qt.white)
             dark_palette.setColor(QPalette.BrightText, Qt.red)
             dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
             dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
@@ -78,14 +78,15 @@ class LandingTab(QWidget):
         # Load spreadsheets into pandas DataFrames
         self.dataframes = self.createDataFrames()
 
+        filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
         # Start ingredient selection process
         results = IngredientSelector(self.dataframes["Orders Spreadsheet"],
                                     self.dataframes["Ingredients Spreadsheet"],
                                     self.dataframes["Customer Questionnaire"],
-                                    self.dataframes["Product Catalog"])
+                                    self.dataframes["Product Catalog"], filler)
 
         # Start formulation calculations for all orders
-        filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
+
         filler.process_all(results)
 
 
@@ -98,7 +99,7 @@ class LandingTab(QWidget):
             if "sheet" in key:
                 try:
                     # Retrieve from gdrive
-                    fh, file_id = self.gdriveAPI.fetch_file(self.widgets[key].label.text())
+                    fh, file_id = self.gdriveAPI.fetch_file(self.widgets[key].label.teext())
                     df = pd.read_excel(fh)
                 # Try to get df locally if google drive fails
                 except:
@@ -110,11 +111,10 @@ class LandingTab(QWidget):
                         print("Not browsed")
 
                 if "ingredient" in key:
-                    df.set_index("INGREDIENT COMMON NAME", inplace=True)
+                    df.set_index("INGREDIENT COMMON NAME", drop=False, inplace=True)
 
                 # Replace all nan with empty string
                 df.fillna("", inplace=True)
-                print("Key: ", key)
                 dataframes[self.widgets[key].label.text()] = df
 
         return dataframes
