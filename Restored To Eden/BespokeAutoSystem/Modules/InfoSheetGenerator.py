@@ -16,13 +16,13 @@ from config.configParser import FigMe
 
 class InfoSheetGenerator:
 
-    def __init__(self, infoSheet_df, gdriveObject):
-        self.config = FigMe()
+    def __init__(self, infoSheet_df, gdriveObject, config):
+        self.config = config
         self.contents_df = infoSheet_df
         self.gdriveObject = gdriveObject
 
         # Open html template as string
-        tmpPath =  os.path.dirname(os.path.realpath(__file__)) + "\\InfoSheetAssets\\InfoSheetTemplate.html"
+        tmpPath =  os.getcwd() + "\\Assets\\InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
         # Jinja2 Setup
@@ -61,9 +61,9 @@ class InfoSheetGenerator:
 
     def fill_instructions(self, name, prod_type, df):
         # Get product instructions
-        f = open(
-            str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + \
-            f"\\Product Information\\{prod_type} Instructions.docx", "rb")
+        instructions_path = self.config.getDir("Product Instructions Directory") + f"/{prod_type} Instructions.docx"
+        f = open(instructions_path, "rb")
+
         fullText = name + ", "
         doc = docx.Document(f)
         for para in doc.paragraphs:
@@ -98,7 +98,7 @@ class InfoSheetGenerator:
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
-            assets_path = str(Path(os.path.dirname(os.path.realpath(__file__)))) + "\\InfoSheetAssets"
+            assets_path = os.getcwd() + "\\Assets"
 
             html_str = self.template.render(headings=headings, paragraphs=paragraphs,
                                             name=name, prod_type=prod_type, assets_path=assets_path)
