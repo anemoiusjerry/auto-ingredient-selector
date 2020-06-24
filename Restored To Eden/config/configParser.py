@@ -19,7 +19,8 @@ class FigMe:
 
         try:
             # Retrieve from gdrive
-            fh, file_id = self.gdriveAPI.fetch_file(dfname) # <------- ask jerry if this is relevant if we have the absolute filepaths from the config file already
+            list(3)
+            fh, file_id = self.gdriveAPI.fetch_file(dfname)
             df = pd.read_excel(fh)
         # Try to get df locally if google drive fails
         except:
@@ -29,28 +30,39 @@ class FigMe:
             except:
                 # Pop up dialog that errors when not all df are browsed
                 print("Not browsed")
+                return None
 
         df.fillna("", inplace=True)
         df = df.applymap(lambda x:str(x).lower())
 
         if dfname == "Ingredients Spreadsheet":
-            for colname in ["TYPE OF INGREDIENT", "SKIN PROBLEM", "CONTRAINDICATIONS"]:
+            typeCol = self.getColname("Ingredients Spreadsheet", "type")
+            skinProbCol = self.getColname("Ingredients Spreadsheet", "skin problem")
+            contrainsCol = self.getColname("Ingredients Spreadsheet", "contraindications")
+            nameCol = self.getColname("Ingredients Spreadsheet", "name")
+
+            for colname in [typeCol, skinProbCol, contrainsCol]:
                 df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-            df.set_index("INGREDIENT COMMON NAME", inplace=True)
+            df.set_index(nameCol, drop=False, inplace=True)
 
         elif dfname == "Orders Spreadsheet":
-            df["Billing Customer"] = df["Billing Customer"].apply(lambda x:" ".join(x.split()))
-            df.set_index("Order #", inplace=True)
+            customerCol = self.getColname("Orders Spreadsheet", "customer")
+            df[customerCol] = df[customerCol].apply(lambda x:" ".join(x.split()))
 
         elif dfname == "Customer Questionnaire":
-            df["Full Name"] = df["Full Name"].apply(lambda x:" ".join(x.split()))
-            for colname in ["Multi Selection Field", "Multi Selection Field 2", "Multi Selection Field 4", "Multi Selection Field 5"]:
+            nameCol = self.getColname("Customer Questionnaire", "name")
+            skinProbCols = self.getColname("Customer Questionnaire", "skin problem")
+
+            df[nameCol] = df[nameCol].apply(lambda x:" ".join(x.split()))
+            for colname in skinProbCols:
                 df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-            df.set_index("Full Name", inplace=True)
 
         elif dfname == "Product Catalog":
-            df["additionalInfoDescription6"] = df["additionalInfoDescription6"].apply(lambda x: re.split("\s*[,]\s*", x[3:-4]) if x and "privacy policy" not in x else [])
-            df.set_index("name", inplace=True)
+            itemCol = self.getColname("Product Catalog", "item")
+            productCol = self.getColname("Product Catalog", "products")
+
+            df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
+            df.set_index(itemCol, inplace=True)
 
         return df
 

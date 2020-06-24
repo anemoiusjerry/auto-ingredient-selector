@@ -13,7 +13,7 @@ class FileBrowser(QDialog):
         self.label = QLabel(label)
         # try to get saved path
         try:
-            save_path = config["Directories"][label]
+            save_path = config.getDir(label)
         except:
             save_path = ""
         self.display = QLineEdit(save_path)

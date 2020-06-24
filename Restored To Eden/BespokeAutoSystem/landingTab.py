@@ -6,8 +6,9 @@ from PySide2.QtGui import QKeySequence, QPalette, QColor
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
-from .runDLX3 import IngredientSelector
+from .Modules.IngredientSelector import IngredientSelector
 from .Modules import FormulationFiller
+from config.configParser import FigMe
 
 class LandingTab(QWidget):
 
@@ -81,11 +82,11 @@ class LandingTab(QWidget):
 
         filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
         # Start ingredient selection process
-        results = IngredientSelector(self.dataframes["Orders Spreadsheet"],
+        ingredient_selector = IngredientSelector(self.dataframes["Orders Spreadsheet"],
                                     self.dataframes["Ingredients Spreadsheet"],
                                     self.dataframes["Customer Questionnaire"],
                                     self.dataframes["Product Catalog"], filler)
-
+        results = ingredient_selector.selectIngredients()
         # Start formulation calculations for all orders
 
         filler.process_all(results)
@@ -93,36 +94,13 @@ class LandingTab(QWidget):
 
     def createDataFrames(self):
         # Store all dataframes in dictionary
+        config = FigMe()
         dataframes = {}
 
         for key in self.widgets.keys():
             # Only process to df if widget stores a spreadsheet
-            if "sheet" in key:
-                try:
-                    # Retrieve from gdrive
-                    fetch_name = self.widgets[key].label.teext()
-                    print(fetch_name)
-                    fh, file_id = self.gdriveAPI.fetch_file(fetch_name)
-                    # Handles corrupt csv file when reading directly from bytesIO
-                    if (type(fh) is io.BytesIO):
-                        df = pd.read_excel(fh)
-                    else:
-                        df = pd.read_csv("file.csv")
-                # Try to get df locally if google drive fails
-                except:
-                    try:
-                        df_path = self.widgets[key].display.text()
-                        df = pd.read_csv(df_path)
-                        print(f"Fetched {key} locally...")
-                    except:
-                        # Pop up dialog that errors when not all df are browsed
-                        print(f"Failed to browse {key} locally...")
-
-                if "ingredient" in key:
-                    df.set_index("INGREDIENT COMMON NAME", drop=False, inplace=True)
-
-                # Replace all nan with empty string
-                df.fillna("", inplace=True)
-                dataframes[self.widgets[key].label.text()] = df
+            fetch_name = self.widgets[key].label.text()
+            df = config.getDF(fetch_name)
+            dataframes[self.widgets[key].label.text()] = df
 
         return dataframes
