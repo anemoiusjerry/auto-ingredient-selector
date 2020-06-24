@@ -77,14 +77,14 @@
         "Customer Questionnaire": {
             "name": "Full Name",
             "email": "Email",
-            "allergies": "Multi Selection Field",
-            "medical": "Multi Selection Field 2",
-            "skin type": "Multi Selection Field 3",
+            "allergies": "Allergies, please give detail",
+            "medical": "Are you or could you be pregn",
+            "skin type": "Do you feel your skin has any",
             "skin problem": [
                 "Multi Selection Field 4",
-                "Multi Selection Field 5"
+                "Do you feel your skin has any"
             ],
-            "Additional notes": "Paragraph Field"
+            "Additional notes": "Lighter fragrance or strong f"
         },
         "Orders Spreadsheet": {
             "order number": "Order #",
@@ -100,13 +100,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
-        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/orders.csv",
-        "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/questionnaire.csv",
-        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
-        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
-        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "/Users/HG/Desktop"
+        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Ingredients.csv",
+        "Orders Spreadsheet": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/orders.csv",
+        "Customer Questionnaire": "C:/Users/jerry/Downloads/quiz4.csv",
+        "Product Catalog": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Outputs",
+        "Product Instructions Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
         "lowBound": 1,
