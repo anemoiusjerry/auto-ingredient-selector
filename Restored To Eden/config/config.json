@@ -100,13 +100,13 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/Ingredients.csv",
-        "Orders Spreadsheet": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/orders.csv",
-        "Customer Questionnaire": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/questionnaire.csv",
-        "Product Catalog": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/Formulation Templates",
+        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
+        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/orders.csv",
+        "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/questionnaire.csv",
+        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
         "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter-master/Restored To Eden/Outputs"
+        "Export Directory": "/Users/HG/Desktop"
     },
     "Values": {
         "lowBound": 1,

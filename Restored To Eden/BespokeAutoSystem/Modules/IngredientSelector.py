@@ -58,27 +58,6 @@ class IngredientSelector:
 
 
         # initialising the dataframes
-        """
-        orders = orders.applymap(lambda x:str(x).lower())
-        orders[self.customerCol] = orders[self.customerCol].apply(lambda x:" ".join(x.split()))
-        self.orders = orders
-
-        ingredients = ingredients.applymap(lambda x:str(x).lower())
-        for colname in [self.typeCol, self.skinProbCol, self.contrainsCol]:
-            ingredients[colname] = ingredients[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-        self.ingredients = ingredients
-
-        qnair = qnair.applymap(lambda x:str(x).lower())
-        qnair[self.qnameCol] = qnair[self.qnameCol].apply(lambda x:" ".join(x.split()))
-        for colname in self.skinProbCols + [self.allergyCol] + [self.medicalCol]:
-            qnair[colname] = qnair[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-        self.qnair = qnair
-
-        catalog = catalog.applymap(lambda x:str(x).lower())
-        catalog[self.productCol] = catalog[self.productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
-        catalog.set_index(self.itemCol, inplace=True)
-        self.catalog = catalog
-        """
         self.orders = orders
         self.ingredients = ingredients
         self.qnair = qnair
@@ -144,18 +123,62 @@ class IngredientSelector:
         return returns
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
+        # Ailment label format
+        _ailDict = {"bold": True,
+                    "align": "right",
+                    "bg_color": "#E696AE"}
+        ailment_format = workbook.add_format(_ailDict)
+
+        # Skin problem and Ailment header format
+        _hailDict = {"bold": True,
+                    "align": "center",
+                    "bg_color": "#DB7093",
+                    "bottom": True}
+        headail_format = workbook.add_format(_hailDict)
+
+        # Ingredient label format
+        _ingDict = {"bold": True,
+                    "align": "right",
+                    "bg_color": "#C71585",
+                    "font_color": "white"}
+        ingred_format = workbook.add_format(_ingDict)
+
+        # Nodes format
+        _nodDict = {"bold": True,
+                    "align": "center",
+                    "bg_color": "#D8BFD8"}
+        node_format = workbook.add_format(_nodDict)
 
         i=1
         for solution in solutions:
             worksheet = workbook.add_worksheet("Solution " + str(i))
-            # Write the row headers (skin problems)
+            # Write the row headers (skin problems & ingredient types)
             row = 2
             col = 0
-            worksheet.write(1,col,"Skin Problems")
+            worksheet.write(1,col,"SKIN PROBLEMS",headail_format)
+            _strLen = 0
+            check = True
+            _nrow = 0
             for problem in cols:
-                worksheet.write(row, col, problem[0])
+                if problem[0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]:
+                    _strLen = len(problem[0]) if len(problem[0]) > _strLen else _strLen
+                    _problem = problem[0][0].upper() + problem[0][1:] # capitalise first letter
+                    worksheet.write(row, col, _problem,ailment_format)
+                elif check:
+                    _nrow = row
+                    check=False
+                    row = row + 1
+                    worksheet.write(row, col, "INGREDIENT TYPE", headail_format)
+                    row = row + 1
+                    _problem = problem[0][0].upper() + problem[0][1:] # capitalise first letter
+                    worksheet.write(row, col, _problem,ailment_format)
+                else:
+                    _strLen = len(problem[0]) if len(problem[0]) > _strLen else _strLen
+                    _problem = problem[0][0].upper() + problem[0][1:] # capitalise first letter
+                    worksheet.write(row, col, _problem,ailment_format)
                 row = row+1
 
+            worksheet.set_column(col, col, round(_strLen*1))
             # Write the headings (ingredient names) and populate nodes
             hrow = 1
             hcol = 1
@@ -163,15 +186,20 @@ class IngredientSelector:
             ncol = 1
             for ingredient in solution[0]:
                 # write the heading
-                worksheet.write(hrow, hcol, ingredient)
+                _ingredient = ingredient[0].upper() + ingredient[1:] # capitalise first letter
+                worksheet.write(hrow, hcol, _ingredient,ingred_format)
+                worksheet.set_column(hcol, hcol, round(len(ingredient)*1))
                 hcol = hcol+1
 
-                # populate the nodees
-                for _row in rows: #                <---------- From here on will need testing.
-                    if _row[1] == ingredient:               # a more efficient way would be to return the nodes along with the ingredients(aka.rownames)
+                # populate the nodes
+                for _row in rows:
+                    if _row[1] == ingredient:
                         for node in _row[0]:
-                            nrow = node[0] + 2
-                            worksheet.write(nrow, ncol, "XX")
+                            if node[0] + 2 < _nrow:
+                                nrow = node[0] + 2
+                            else:
+                                nrow = node[0] + 4
+                            worksheet.write(nrow, ncol, "X", node_format)
                         break
                 ncol = ncol + 1
 
@@ -216,7 +244,6 @@ class IngredientSelector:
         matrix = DLX(cols, rows)
         solutions = matrix.dance()
 
-        print("cols: ", cols)
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
         while len(solutions) < 100 and self.upBound < self.maxupBound:
             self.upBound = self.upBound + 1
@@ -301,10 +328,11 @@ class IngredientSelector:
                     if chosen[i][1] > score:
                         chosen[i] = (solution, score, list(set(benefits_lst)))
                         break
-
+        """
         print("Best solutions: ")
         for sol in chosen:
             print(sol)
+        """
         return chosen
 
     def matrixGen(self, product, ailments, userCons):
