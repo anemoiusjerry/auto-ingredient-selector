@@ -75,7 +75,7 @@ class FormulationFiller:
                 else:
                     # Get ingredient types ???????????/// Waiting for answer to simply column
                     type_list = self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
-                    
+
                     for ingredient_type in type_list:
 
                         if "essential oil" in ingredient_type:
@@ -124,9 +124,9 @@ class FormulationFiller:
                     ingredients_df - dataframe of ingredient database
         """
         # Get template folder path
-        path = self.config.getDir("Formulation Sheets Directory") + "\\"
+        path = self.config.getDir("Formulation Sheets Directory") + "/"
         template_path = path + prod_type + " Worksheet.xlsx"
-        
+
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
@@ -141,8 +141,15 @@ class FormulationFiller:
             type_list = ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
 
             for ingredient_type in type_list:
-                if "essential oil" in ingredient_type:
-                    ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+                #if "essential oil" in ingredient_type:
+                #    ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+
+                if "essential oil" in ingredient_type:                              # Haydens Fix
+                    note = ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"]#       |
+                    if note:                                                        #       |
+                        ingredient_type = "eo " + note                              #       |
+                    else:                                                           #       \/
+                        ingredient_type = "eo middle"                               # ---------------
 
                 if ingredient_type in ww_dict:
                     # Pop off and use first weight of ingredient type

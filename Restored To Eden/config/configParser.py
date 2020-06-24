@@ -51,10 +51,12 @@ class FigMe:
 
         elif dfname == "Customer Questionnaire":
             nameCol = self.getColname("Customer Questionnaire", "name")
-            skinProbCols = self.getColname("Customer Questionnaire", "skin problem")
+            ailmentCols = self.getColname("Customer Questionnaire", "skin problem")
+            pregnancyCol = self.getColname("Customer Questionnaire", "pregnancy")
+            cusContrainCol = self.getColname("Customer Questionnaire", "contraindications")
 
             df[nameCol] = df[nameCol].apply(lambda x:" ".join(x.split()))
-            for colname in skinProbCols:
+            for colname in ailmentCols + [pregnancyCol, cusContrainCol]:
                 df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
 
         elif dfname == "Product Catalog":
@@ -91,8 +93,8 @@ class FigMe:
         constants = self.masterDict["Constants"]
 
         como = dic["comedogenic"]
-        visc = constants["Viscosity"].index(dic["viscosity"])
-        absorb = constants["Absorbency"].index(dic["absorbency"])
+        visc = constants["viscosity"].index(dic["viscosity"])
+        absorb = constants["absorbency"].index(dic["absorbency"])
 
         return [como, visc, absorb]
 

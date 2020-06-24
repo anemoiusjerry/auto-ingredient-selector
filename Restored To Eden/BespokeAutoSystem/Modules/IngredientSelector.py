@@ -5,15 +5,18 @@ import pandas as pd
 import re
 import math
 import os
+import copy
 import xlsxwriter
 from datetime import date
 from collections import defaultdict as dd
+from openpyxl import load_workbook
 
 class IngredientSelector:
     def __init__(self, orders, ingredients, qnair, catalog, filler):
         config = FigMe()
         self.config = config
         self.filler = filler
+        self.SOF = 7
         # orders columns
         self.customerCol = config.getColname("Orders Spreadsheet", "customer")
         self.orderCol = config.getColname("Orders Spreadsheet", "order number")
@@ -32,20 +35,19 @@ class IngredientSelector:
 
         # questionnaire columns
         self.qnameCol = config.getColname("Customer Questionnaire", "name")
-        self.skinProbCols = config.getColname("Customer Questionnaire", "skin problem")
         self.qemailCol = config.getColname("Customer Questionnaire", "email")
         self.ailmentCols = config.getColname("Customer Questionnaire", "skin problem")
-        self.allergyCol = config.getColname("Customer Questionnaire", "allergies")
-        self.medicalCol = config.getColname("Customer Questionnaire", "medical")
+        self.pregnancyCol = config.getColname("Customer Questionnaire", "pregnancy")
+        self.cusContrainCol = config.getColname("Customer Questionnaire", "contraindications")
 
         # catalog columns
         self.itemCol = config.getColname("Product Catalog", "item")
         self.productCol = config.getColname("Product Catalog", "products")
 
         # Constants and values
-        self.comeConst = config.getConst("ComedogenicRating")
-        self.viscConst = config.getConst("Viscosity")
-        self.absorbConst = config.getConst("Absorbency")
+        self.comeConst = config.getConst("comedogenicRating")
+        self.viscConst = config.getConst("viscosity")
+        self.absorbConst = config.getConst("absorbency")
         self.lowBound = config.getVal("lowBound")
         self.upBound = config.getVal("upBound")
         self.maxupBound = config.getVal("maxupBound")
@@ -55,7 +57,6 @@ class IngredientSelector:
         self.fitWeight = config.getVal("fitweight")
         self.numIngredWeight = config.getVal("numingredweight")
         self.addedBenefitWeight = config.getVal("addedbenefitweight") # need to finish this part
-
 
         # initialising the dataframes
         self.orders = orders
@@ -215,7 +216,8 @@ class IngredientSelector:
         # Retrieving the skin problems from customer info
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
         # Finding the customers contraindications
-        usercons = self.conFinder(qdata[self.allergyCol], qdata[self.medicalCol])
+        usercons = qdata[self.pregnancyCol] + qdata[self.cusContrainCol]
+        print("userCons", usercons)
 
         # Retrieve the rows and columns that will make up the dlx matrix
         rows, cols = self.matrixGen(product, ailments, usercons)
@@ -237,12 +239,20 @@ class IngredientSelector:
         # Check that all cols can be stisfied at least once, remove cols that cant be
         colsCovered = set([node[0] for row in rows for node in row[0]])
         unresolved = []
-        for col in range(len(cols)-1, 0, -1):
+        for col in range(len(cols)-1, -1, -1):
             if col not in colsCovered:
                 unresolved.append(cols.pop(col)[0])
                 for i in range(len(rows)):
-                    rows[i][0] = [node for node in rows[i][0] if node[0] != col]
-
+                    rows[i] = list(rows[i])
+                    #rows[i][0] = [node for node in rows[i][0] if node[0] != col]
+                    tmp = []
+                    for node in rows[i][0]:
+                        if node[0] != col:
+                            if node[0] > col:
+                                tmp.append((node[0]-1, node[1]))
+                            else:
+                                tmp.append(node)
+                    rows[i] = (tmp, rows[i][1])
 
         # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
@@ -268,16 +278,24 @@ class IngredientSelector:
         return bestSols, rows, cols, unresolved
 
     def findBestSol(self, solutions, product, ailments):
-        # Finding the best solutions
+        # Get template folder path
+        path = self.config.getDir("Formulation Sheets Directory") + "/"
+        template_path = path + product + " Worksheet.xlsx"
+        # Load the excel sheet
+        workbook = load_workbook(filename=template_path)
+        sheet = workbook.active
+        # Get all required data to fill sheet
+        ww_dict, assigned_vals = self.get_misc_items(sheet)
+
         target = self.config.getTarget(product)
         chosen = []
         _lenlst = [len(s) for s in solutions]
         maxlen, minlen = max(_lenlst), min(_lenlst)
         maxBenefits, leastBenefits = 0, 0
-
-        if len(solutions) > 10:
-            solutions = solutions[:10]
-
+        """
+        if len(solutions) > 1000:
+            solutions = solutions[:1000]
+        """
         for solution in solutions[:]:
             vals = dd(list)
             benefits = 0
@@ -310,7 +328,7 @@ class IngredientSelector:
                 elif benefits < leastBenefits:
                     leastBenefits = benefits
             # Returns the percentage composition of each ingredient in the product
-            composition = self.filler.calc_ingredient_weight(solution, product, self.ingredients)
+            composition = self.calc_ingredient_weight(solution, ww_dict, copy.deepcopy(assigned_vals))
             # Returns the point that this current solution occupies
             point = self.pointGen(composition, vals)
             # Returns the maximum distance from the target point and the distance to the point
@@ -332,11 +350,11 @@ class IngredientSelector:
                     if chosen[i][1] > score:
                         chosen[i] = (solution, score, list(set(benefits_lst)))
                         break
-        """
+
         print("Best solutions: ")
         for sol in chosen:
             print(sol)
-        """
+
         return chosen
 
     def matrixGen(self, product, ailments, userCons):
@@ -384,24 +402,11 @@ class IngredientSelector:
 
         # find the maximum distance possible from the point
         maxX = max([5-t[0], t[0]]) # comedogenic rating
-        maxY = max([len(self.config.getConst("Viscosity"))-1-t[1], t[1]]) # viscocity
-        maxZ = max([len(self.config.getConst("Absorbency"))-1-t[2], t[2]]) # absorption
+        maxY = max([len(self.config.getConst("viscosity"))-1-t[1], t[1]]) # viscocity
+        maxZ = max([len(self.config.getConst("absorbency"))-1-t[2], t[2]]) # absorption
         maxdist = math.sqrt((t[0]-maxX)**2 + (t[1]-maxY)**2 + (t[2]-maxZ)**2)
 
         return maxdist, dist
-
-    def conFinder(self, allergies, medcons):
-        cons = []
-        print("allergies", allergies)
-        print("medcons", medcons)
-        for allergy in allergies:
-            if allergy == "nut allergies":
-                cons.append("nut allergy")
-
-        for medcon in medcons:
-            if medcon == "high blood pressure":
-                cons.append("high blood pressure")
-        return cons
 
     def stockCheck(self, stock):
         if not stock.lower() == "no":
@@ -412,9 +417,10 @@ class IngredientSelector:
         # ingredCons = list of ingredient contraindications
         # userCons = list of user contraindications
         if ingredCons and userCons:
-            for con in userCons:
-                if con in ingredCons:
-                    return False
+            for ucon in userCons:
+                for icon in ingredCons:
+                    if ucon == icon:
+                        return False
         return True
 
     def useablecheck(self, ingredSolves, problems):
@@ -437,3 +443,67 @@ class IngredientSelector:
             if cure in problems:
                 nodes.append((problems.index(cure),None))
         return nodes
+
+    def calc_ingredient_weight(self, solution, ww_dict, assigned_vals):
+        """ Takes parameters from ingredient selector and calculates to ingredient weights
+            inputs: solution - [ingredient names]
+                    product type - product type string
+                    self.ingredients - dataframe of ingredient database
+        """
+        # Fill main table entries
+        for ingredient_name in solution:
+
+            # Get ingredient types ???????????/// Waiting for answer to simplify column
+            type_list = self.ingredients.loc[ingredient_name]["TYPE OF INGREDIENT"]
+
+            for ingredient_type in type_list:
+                if "essential oil" in ingredient_type:
+                    note = self.ingredients.loc[ingredient_name]["ESSENTIAL OIL NOTE"]
+                    if note:
+                        ingredient_type = "eo " + note
+                    else:
+                        ingredient_type = "eo middle"
+
+                if ingredient_type in ww_dict.keys():
+                    # Pop off and use first weight of ingredient type
+                    if len(ww_dict[ingredient_type]) > 1:
+                        assigned_vals[ingredient_name] = ww_dict[ingredient_type].pop(0)
+                    # If only one is left then keep using that one
+                    else:
+                        assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
+
+        # Scale to 100
+        tot = sum(assigned_vals.values())
+        if tot > 100:
+            for key in assigned_vals.keys():
+                assigned_vals[key] = round(assigned_vals[key] * 100/tot, 1)
+        elif tot < 100:
+            leftover = 100 - tot
+            for key in assigned_vals.keys():
+                assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
+        else:
+            pass
+        return assigned_vals
+
+    def get_misc_items(self, sheet):
+        """ Creates the dicts and values needed for reallocation
+            Returns: ww_dict - dict { ingredient type: w/w% }
+                     assigned_dict - dict { ingredient type: w/w% } init. filled with all does not change names
+        """
+        ww_dict = dd(list)
+        assigned_dict = {}
+
+        i = self.SOF
+        # Record the w/w% for all types
+        while sheet[f"C{i}"].value != None:
+            cell_ingredient = sheet[f"B{i}"].value.lower()
+            cell_weight = sheet[f"D{i}"].value
+
+            ww_dict[cell_ingredient].append(cell_weight)
+
+            # Add fixed ingredient to assigned dict
+            if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
+                assigned_dict[cell_ingredient] = cell_weight
+
+            i += 1
+        return ww_dict, assigned_dict
