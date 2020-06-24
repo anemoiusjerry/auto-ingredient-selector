@@ -42,14 +42,15 @@ class FileBrowser(QDialog):
         directory = QFileDialog.getExistingDirectory(self, "Save Location")
         if directory:
             self.display.setText(directory)
-        #config["Directories"][self.label.text()] = directory
+            # Save new path to master config
+            config.setDir(self.label.text(), directory)
 
     def findCSV(self, config):
         directory = QFileDialog.getOpenFileName(self, "Select .csv file", "", "Excel Files (*.csv *.xlsx);; All Files (*)")
         if directory:
             self.display.setText(directory[0])
-
-        #config["Directories"][self.label.text()] = directory[0]
+            # Save new path to master config
+            config.setDir(self.label.text(), directory[0])
 
     def checkPath(self):
         file = self.display.text()

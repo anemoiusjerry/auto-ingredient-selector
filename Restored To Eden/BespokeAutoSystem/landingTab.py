@@ -34,7 +34,7 @@ class LandingTab(QWidget):
 
         footer_layout = QGridLayout()
         self.run_button = QPushButton("&Run")
-        self.run_button.clicked.connect(self.runDLX)
+        self.run_button.clicked.connect(lambda: self.runDLX(config))
         self.run_button.setFixedWidth(70)
         footer_layout.addWidget(self.run_button, 0, 0)
         # Dark mode toggle button
@@ -76,11 +76,13 @@ class LandingTab(QWidget):
             dark_palette.setColor(QPalette.HighlightedText, Qt.black)
             app.setPalette(dark_palette)
 
-    def runDLX(self):
+    def runDLX(self, config):
+        config.saveConfig()
         # Load spreadsheets into pandas DataFrames
-        self.dataframes = self.createDataFrames()
+        self.dataframes = self.createDataFrames(config)
 
         filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
+        
         # Start ingredient selection process
         ingredient_selector = IngredientSelector(self.dataframes["Orders Spreadsheet"],
                                     self.dataframes["Ingredients Spreadsheet"],
@@ -92,9 +94,9 @@ class LandingTab(QWidget):
         filler.process_all(results)
 
 
-    def createDataFrames(self):
+    def createDataFrames(self, config):
         # Store all dataframes in dictionary
-        config = FigMe()
+        #config = FigMe()
         dataframes = {}
 
         for key in self.widgets.keys():

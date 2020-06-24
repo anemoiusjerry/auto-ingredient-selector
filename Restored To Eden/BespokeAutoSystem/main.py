@@ -27,9 +27,7 @@ class TabDialog(QTabWidget):
     def closeEvent(self, *args, **kwargs):
         """ Save browsed paths to config
         """
-        json_obj = json.dumps(self.config, indent=4)
-        with open("config/config.json", "w") as outfile:
-            outfile.write(json_obj)
+        self.config.saveConfig()
 
 def main():
     """ Central control point for all modules.

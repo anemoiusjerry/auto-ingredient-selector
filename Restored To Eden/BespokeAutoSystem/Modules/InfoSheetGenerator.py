@@ -12,35 +12,37 @@ from PySide2.QtWidgets import *
 from datetime import *
 from openpyxl import load_workbook
 from pathlib import Path
+from config.configParser import FigMe
 
 class InfoSheetGenerator:
 
     def __init__(self, infoSheet_df, gdriveObject):
-
+        self.config = FigMe()
         self.contents_df = infoSheet_df
         self.gdriveObject = gdriveObject
 
         # Open html template as string
-        tmpPath =  os.path.dirname(os.path.realpath(__file__)) + "\\\\InfoSheetAssets\\InfoSheetTemplate.html"
+        tmpPath =  os.path.dirname(os.path.realpath(__file__)) + "\\InfoSheetAssets\\InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
         # Jinja2 Setup
         self.template = jinja2.Environment(loader=jinja2.BaseLoader).from_string(html_tmp.read())
         # Allow use of len method in html
         self.template.globals["len"] = len
-        self.config = pdfkit.configuration(wkhtmltopdf="C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe")
+        wkhtml_path = os.path.abspath("wkhtmltopdf.exe")
+        self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape"
         }
 
     def process_all(self):
         # Get all formulation sheets from output dir
-        path = str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "\\Outputs"
+        path = self.config.getDir("Export Directory") + "\\Formulation Sheets\\"
 
         sheet_paths = []
         for f in os.listdir(path):
             if os.path.isfile(os.path.join(path, f)):
-                sheet_paths.append(path + "\\" + f)
+                sheet_paths.append(path + f)
 
         for f in sheet_paths:
             workbook = load_workbook(filename=f)
@@ -112,13 +114,12 @@ class InfoSheetGenerator:
             output_path = config["Export Directory"] + "\\Reports"
             """
             # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
-            config = FigMe()
-            output_path = config["Directories"]["Export Directory"] + "\\Reports"
+            output_path = self.config.getDir("Export Directory") + "\\Reports"
             # Create reports folder if it doesnt exist
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
 
-            pdfkit.from_string(html_str, output_path + f"\\{name}-{prod_type}-report.pdf", configuration=self.config, options=self.options)
+            pdfkit.from_string(html_str, output_path + f"\\{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):
         headings = list(df)

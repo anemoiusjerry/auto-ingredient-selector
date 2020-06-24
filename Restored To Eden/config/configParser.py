@@ -29,7 +29,7 @@ class FigMe:
                 df = pd.read_csv(dfpath)
             except:
                 # Pop up dialog that errors when not all df are browsed
-                print("Not browsed")
+                print(f"{dfname} Not browsed")
                 return None
 
         df.fillna("", inplace=True)
@@ -82,6 +82,9 @@ class FigMe:
     def getDir(self,directory):
         return self.masterDict["Directories"][directory]
 
+    def setDir(self, directory, new_path):
+        self.masterDict["Directories"][directory] = new_path
+
     def getTarget(self,product):
         # Returns the integer values in the format [como, visc, absorb]
         dic = self.masterDict["Product"][product]
@@ -92,3 +95,8 @@ class FigMe:
         absorb = constants["Absorbency"].index(dic["absorbency"])
 
         return [como, visc, absorb]
+
+    def saveConfig(self):
+        json_obj = json.dumps(self.masterDict, indent=4)
+        with open(self.path, "w") as outfile:
+            outfile.write(json_obj)

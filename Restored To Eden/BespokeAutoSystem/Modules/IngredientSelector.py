@@ -88,7 +88,7 @@ class IngredientSelector:
 
         # Creating new file for the orders to be saved into
         savedir = self.config.getDir("Export Directory")
-        parentFolderPath = savedir+"/"+"Sheets"
+        parentFolderPath = savedir + "/" + "Sheets"
         if not os.path.exists(parentFolderPath):
             os.makedirs(parentFolderPath)
 
@@ -144,24 +144,6 @@ class IngredientSelector:
         return returns
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
-        # Create the format for the ailment rows
-        _ailDict = {"bold": True,
-                    "align": "right",
-                    "bg_color": "#DB7093"}
-        ailment_format = workbook.add_format(_ailDict)
-
-        # Create the format for the ingredient columns
-        _ingDict = {"bold": True,
-                    "align": "right",
-                    "bg_color": "#C71585",
-                    "font_color": "white"}
-        ingred_format = workbook.add_format(_ingDict)
-
-        # Create the format for the nodes
-        _nodDict = {"bold": True,
-                    "align": "center",
-                    "bg_color": "#D8BFD8"}
-        node_format = workbook.add_format(_nodDict)
 
         i=1
         for solution in solutions:
@@ -169,13 +151,11 @@ class IngredientSelector:
             # Write the row headers (skin problems)
             row = 2
             col = 0
-            worksheet.write(1,col,"Skin Problems",ailment_format)
-            _strLen = 0
+            worksheet.write(1,col,"Skin Problems")
             for problem in cols:
-                _strLen = len(problem[0]) if len(problem[0]) > _strLen else _strLen
-                worksheet.write(row, col, problem[0],ailment_format)
+                worksheet.write(row, col, problem[0])
                 row = row+1
-            worksheet.set_column(col, col, round(_strLen*0.9))
+
             # Write the headings (ingredient names) and populate nodes
             hrow = 1
             hcol = 1
@@ -183,16 +163,15 @@ class IngredientSelector:
             ncol = 1
             for ingredient in solution[0]:
                 # write the heading
-                worksheet.write(hrow, hcol, ingredient,ingred_format)
-                worksheet.set_column(hcol, hcol, round(len(ingredient)*0.9))
+                worksheet.write(hrow, hcol, ingredient)
                 hcol = hcol+1
 
                 # populate the nodees
-                for _row in rows:
-                    if _row[1] == ingredient:
+                for _row in rows: #                <---------- From here on will need testing.
+                    if _row[1] == ingredient:               # a more efficient way would be to return the nodes along with the ingredients(aka.rownames)
                         for node in _row[0]:
                             nrow = node[0] + 2
-                            worksheet.write(nrow, ncol, "X", node_format)
+                            worksheet.write(nrow, ncol, "XX")
                         break
                 ncol = ncol + 1
 

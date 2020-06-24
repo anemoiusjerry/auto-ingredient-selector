@@ -51,14 +51,16 @@ class FormulationFiller:
 
         i=0
         while len(assigned_vals) > 0:
+            print(f"i={i}       length={len(assigned_vals)}")
             # End loop if not enough slots
-            if len(realloc_dict) <= 0:
+            if len(realloc_dict) <= 0 or i >= len(assigned_vals):
                 sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
+                break
 
+            ingredient_name = list(assigned_vals.keys())[i]
             # Insert ingredient into the correct row
             j=self.SOF
             while sheet[f"C{j}"].value != None:
-                ingredient_name = list(assigned_vals.keys())[i]
 
                 # Only fill w/w% if fixed ingredient
                 if ("doesn't change" in ingredient_name.lower()) or ("does not change" in ingredient_name.lower()):
@@ -72,29 +74,33 @@ class FormulationFiller:
 
                 else:
                     # Get ingredient types ???????????/// Waiting for answer to simply column
-                    type_list = str(self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]).lower()
-                    ingredient_type = re.split("\s*[,]\s*", type_list)[-1]
+                    type_list = self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
+                    
+                    for ingredient_type in type_list:
 
-                    if "essential oil" in ingredient_type:
-                        ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+                        if "essential oil" in ingredient_type:
+                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
 
-                    # Fill row in ingredient types match
-                    if (ingredient_type == sheet[f"B{j}"].value.lower()):
-                        # INCI
-                        sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name]["INGREDIENT INCI NAME"]
-                        # Ingredient Name
-                        sheet[f"B{j}"] = ingredient_name
-                        # w/w%
-                        sheet[f"D{j}"] = assigned_vals[ingredient_name]
-                        # Fill needs targted column if applicable
-                        try:
-                            if sheet[f"F{6}"].value.lower() == "needs targetting":
-                                sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name]["SKIN PROBLEM"]
-                        except:
-                            print("No needs targetting column.")
+                        # Fill row in ingredient types match
+                        if (ingredient_type == sheet[f"B{j}"].value.lower()):
+                            # INCI
+                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name]["INGREDIENT INCI NAME"]
+                            # Ingredient Name
+                            sheet[f"B{j}"] = ingredient_name
+                            # w/w%
+                            sheet[f"D{j}"] = assigned_vals[ingredient_name]
+                            # Fill needs targted column if applicable
+                            try:
+                                if sheet[f"F{6}"].value.lower() == "needs targetting":
+                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name]["SKIN PROBLEM"]
+                            except:
+                                print("No needs targetting column.")
 
-                        realloc_dict.pop(f"D{j}", None)
-                        assigned_vals.pop(ingredient_name)
+                            realloc_dict.pop(f"D{j}", None)
+                            assigned_vals.pop(ingredient_name)
+                            break
+                    # break out of inner while loop of ingredient is assigned
+                    if ingredient_name not in assigned_vals.keys():
                         break
                 j+=1
 
@@ -106,6 +112,7 @@ class FormulationFiller:
         if len(realloc_dict) > 0:
             sheet = self.too_many_slots(realloc_dict, sheet)
 
+        sheet = self.write_grams(sheet)
         filename = customer_name + "-" + prod_type + ".xlsx"
         path = self.export_to_file(workbook, filename)
         #self.gdriveObject.push_file(filename, path)
@@ -150,11 +157,11 @@ class FormulationFiller:
         tot = sum(assigned_vals.values())
         if tot > 100:
             for key in assigned_vals.keys():
-                assigned_vals[key] = assigned_vals[key] * 100/tot
+                assigned_vals[key] = round(assigned_vals[key] * 100/tot, 1)
         elif tot < 100:
             leftover = 100 - tot
             for key in assigned_vals.keys():
-                assigned_vals[key] = assigned_vals[key] + leftover * assigned_vals[key]/tot
+                assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
         else:
             pass
         return assigned_vals
@@ -223,21 +230,35 @@ class FormulationFiller:
                 continue
 
             # Get ingredient type and assign corresponding w/w%
-            i_type = self.ingredients_df.loc[ingredient]["TYPE OF INGREDIENT"].lower()
-            i_type = re.split("\s*[,]\s*", i_type)[-1]
+            type_list = self.ingredients_df.loc[ingredient]["TYPE OF INGREDIENT"]
+            for i_type in type_list:
+                if i_type in phase_dict.keys():
+                    # Insert leftovers at end of sheet
+                    sheet.insert_rows(EOF)
+                    sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient]["INGREDIENT INCI NAME"]  # INCI name
+                    sheet[f"B{EOF}"] = ingredient                                              # name
+                    sheet[f"C{EOF}"] = phase_dict[i_type]                                      # Phase
+                    sheet[f"D{EOF}"] = weight                                                  # w/w%
+        return sheet
 
-            # Insert leftovers at end of sheet
-            sheet.insert_rows(EOF)
-            sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient]["INGREDIENT INCI NAME"]  # INCI name
-            sheet[f"B{EOF}"] = ingredient                                              # name
-            sheet[f"C{EOF}"] = phase_dict[i_type]                                      # Phase
-            sheet[f"D{EOF}"] = weight                                                  # w/w%
+    def write_grams(self, sheet):
+        default_gram = 100
+        i=self.SOF
+        while sheet[f"C{i}"].value != None:
+            try:
+                sheet[f"E{i}"] = sheet[f"D{i}"].value/100 * float(sheet["B5"].value)
+            except:
+                sheet[f"E{i}"] = sheet[f"D{i}"].value/100 * default_gram
+            i+=1
         return sheet
 
     def export_to_file(self, workbook, filename):
         """ Export as excel file to current working directory
         """
-        save_path = os.getcwd() + "\\Outputs\\"
+        save_path = self.config.getDir("Export Directory") + "\\Formulation Sheets\\"
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
         workbook.save(save_path + filename)
         print("Done exporting...")
         return save_path + filename
