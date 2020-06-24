@@ -202,8 +202,12 @@ class IngredientSelector:
                             worksheet.write(nrow, ncol, "X", node_format)
                         break
                 ncol = ncol + 1
-
             i = i+1
+
+        # Write the additional info column
+        # Write the Climate conditions
+        # Write the allergies
+        # write the strength of the fragrance
 
     def orderParser(self, product, qdata):
 
