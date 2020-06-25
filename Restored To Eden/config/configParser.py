@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import re
 import pandas as pd
 from BespokeAutoSystem.Gdriver import Gdriver
@@ -7,9 +8,15 @@ from BespokeAutoSystem.Gdriver import Gdriver
 
 class FigMe:
 
-    def __init__(self, path=os.path.abspath("config/config.json")):
+    def __init__(self):
         # Get the filepath of the config file
-        self.path = path
+        # getting correct path of the application
+        if getattr(sys, 'frozen', False):
+            app_path = sys._MEIPASS
+        else:
+            app_path = os.path.dirname(os.path.abspath(__file__))
+
+        self.path = app_path + "/config/config.json"
         self.gdriveAPI = Gdriver()
         # open the config file in read only mode and retrieve dictionary
         with open(self.path, "r") as config:

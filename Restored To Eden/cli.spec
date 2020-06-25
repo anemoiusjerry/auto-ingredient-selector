@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['cli.py'],
-             pathex=['C:\\Users\\jerry\\Desktop\\Restored To Eden'],
-             binaries=[("C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe", '.')],
-             datas=[("C:\\users\jerry\Desktop\gdriveAssets", '.')],
+             pathex=['/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden'],
+             binaries=[('/usr/local/bin/wkhtmltopdf', '.')],
+             datas=[('/Users/HG/Downloads/pyinstaller instructions/gdriveAssets', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
