@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['cli.py'],
-             pathex=['C:\\Users\\jerry\\Desktop\\Restored To Eden'],
+             pathex=['C:\\Users\\jerry\\source\\repos\\ingredient-sorter\\Restored To Eden'],
              binaries=[("C:\Program Files\wkhtmltopdf\\bin\wkhtmltopdf.exe", '.')],
              datas=[("C:\\users\jerry\Desktop\gdriveAssets", '.')],
              hiddenimports=[],

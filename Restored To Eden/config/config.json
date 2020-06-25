@@ -102,13 +102,13 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Ingredients.csv",
-        "Orders Spreadsheet": "/Users/HG/Desktop/orders.csv",
-        "Customer Questionnaire": "/Users/HG/Downloads/quiz4.csv",
-        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
-        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Ingredients Spreadsheet": "C:/Users/jerry/Downloads/RTE Ingredients Database - 18.5.20 (1).xlsx",
+        "Orders Spreadsheet": "C:/Users/jerry/Downloads/orders-monnihardstone.csv",
+        "Customer Questionnaire": "C:/Users/jerry/Downloads/quiz4.csv",
+        "Product Catalog": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Formulation Templates",
         "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
-        "Export Directory": "/Users/HG/Desktop",
+        "Export Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Outputs",
         "Product Instructions Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
