@@ -33,7 +33,11 @@ class FigMe:
         except:
             try:
                 dfpath = self.masterDict["Directories"][dfname]
-                df = pd.read_csv(dfpath)
+                file_type = dfpath.split(".")[-1]
+                if file_type == "csv":
+                    df = pd.read_csv(dfpath)
+                else:
+                    df = pd.read_excel(dfpath)
             except:
                 # Pop up dialog that errors when not all df are browsed
                 print(f"{dfname} Not browsed")

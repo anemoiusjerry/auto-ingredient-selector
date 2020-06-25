@@ -108,7 +108,7 @@
         "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
         "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
         "Information Sheet Paragraphs": "C:/Users/jerry/Downloads/InformationSheet.xlsx",
-        "Export Directory": "/Users/HG/Desktop",
+        "Export Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Outputs",
         "Product Instructions Directory": "C:/Users/jerry/Desktop/Haydens commit/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {

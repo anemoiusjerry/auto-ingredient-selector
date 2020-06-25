@@ -304,7 +304,14 @@ class IngredientSelector:
                 # Finding information to calculate fit
                 # Retrieve comodegenic rating
                 _como = self.ingredients.loc[ingredient,self.comedogenicCol]
+                
+                if _como == "":
+                    vals[ingredient].append(0)  
+                else:
+                    vals[ingredient].append(self.comeConst.index(int(float(_como))))
+                """
                 vals[ingredient].append(0) if _como == "" else vals[ingredient].append(self.comeConst.index(int(float(_como))))
+                """
                 # Retrieve Viscocity
                 key = self.ingredients.loc[ingredient,self.viscocityCol]
                 try:
