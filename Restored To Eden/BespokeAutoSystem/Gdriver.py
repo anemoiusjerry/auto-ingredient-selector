@@ -28,22 +28,35 @@ class Gdriver:
         # getting correct path of the application
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
+            path = os.path.dirname(sys.executable)
+            parent = os.path.abspath(os.path.join(path, os.pardir))
         else:
             app_path = os.getcwd()
 
-        if os.path.exists(app_path + '/token.pickle'):
-            with open(app_path + '/token.pickle', 'rb') as token:
-                creds = pickle.load(token)
+        try:
+            if os.path.exists(parent + '/Resources/token.pickle'):
+                with open(parent + '/Resources/token.pickle', 'rb') as token:
+                    creds = pickle.load(token)
+        except:
+            if os.path.exists(app_path + '/token.pickle'):
+                with open(app_path + '/token.pickle', 'rb') as token:
+                    creds = pickle.load(token)
+
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(app_path + '/credentials.json', SCOPES)
+
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with open(app_path + '/token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
+            try:
+                with open(parent + '/Resources/token.pickle', 'wb') as token:
+                    pickle.dump(creds, token)
+            except:
+                with open(app_path + '/token.pickle', 'wb') as token:
+                    pickle.dump(creds, token)
 
         service = build('drive', 'v3', credentials=creds)
         return service

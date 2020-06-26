@@ -46,13 +46,14 @@ class InfoSheetGenerator:
     def process_all(self):
         print("process all")
         # Get all formulation sheets from output dir
-        path = self.config.getDir("Export Directory") + "/Formulation Sheets/"
+        path = self.config.getDir("Export Directory") + "/Formulation Sheets"
 
         # Create list of all formlation sheet files
         sheet_paths = []
+        print("path: ", path)
         for f in os.listdir(path):
             if os.path.isfile(os.path.join(path, f)):
-                sheet_paths.append(path + f)
+                sheet_paths.append(os.path.join(path, f))
 
         # Retrieve all info. needed for pdf
         for f in sheet_paths:

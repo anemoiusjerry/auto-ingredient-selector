@@ -12,11 +12,16 @@ class FigMe:
         # Get the filepath of the config file
         # getting correct path of the application
         if getattr(sys, 'frozen', False):
-            app_path = sys._MEIPASS
+            path = os.path.dirname(sys.executable)
+            parent = os.path.abspath(os.path.join(path, os.pardir))
         else:
             app_path = os.getcwd()
 
-        self.path = app_path + "/config/config.json"
+        try:
+            self.path = parent + "/Resources/config.json"
+        except:
+            self.path = app_path + "/config/config.json"
+
         self.gdriveAPI = Gdriver()
         # open the config file in read only mode and retrieve dictionary
         with open(self.path, "r") as config:
