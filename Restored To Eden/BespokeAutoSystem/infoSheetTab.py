@@ -24,7 +24,7 @@ class InfoTab(QWidget):
         # Init. load
         self.loadSheetCloud()
         self.setLayout(self.layout)
-    
+
     def run(self):
         reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
         reporter.process_all()
@@ -105,10 +105,10 @@ class InfoTab(QWidget):
 
         # Local save
         self.infoSheet_df.to_excel(self.infosheet_browser.display.text(), index=False)
-        
+
         # GDrive save
         if self.infoSheet_id != None:
-            self.gdriveAPI.push_file("InformationSheet.xlsx", 
+            self.gdriveAPI.push_file("InformationSheet.xlsx",
                                      self.infosheet_browser.display.text(),
                                      fileId=self.infoSheet_id)
 
@@ -135,7 +135,7 @@ class InfoTab(QWidget):
         layout.addWidget(button)
 
         dialog.setLayout(layout)
-        dialog.exec_() 
+        dialog.exec_()
 
 
 
@@ -154,7 +154,7 @@ class InfoTab(QWidget):
         # Delete button
         button = QPushButton()
         # Set trash icon
-        icon = QPixmap(os.getcwd() + "\\Assets\\trash.svg")
+        icon = QPixmap(os.getcwd() + "/Assets/trash.svg")
         button.setIcon(QIcon(icon))
         button.setMaximumWidth(30)
         self.del_buttons.append(ButtonWrapper(button, l, t))
@@ -166,13 +166,13 @@ class InfoTab(QWidget):
     def add_N_close(self, dialog, n_heading, n_body):
         new_section_df = pd.DataFrame({n_heading: [n_body]})
         self.infoSheet_df = pd.concat([self.infoSheet_df, new_section_df], axis=1)
-        
+
         banner_layout, t = self.create_paragraph_section(n_heading, n_body)
         # #l = QLineEdit(n_heading)
         # l = QLabel(n_heading)
         # t = QTextEdit(n_body)
         # self.txt_boxes.append((l, t))
-        
+
         # # Insert at end of UI
         # pos = self.layout.rowCount()
         # self.layout.addWidget(l, pos, 0)
@@ -194,13 +194,13 @@ class ButtonWrapper:
         self.button = button
         self.label = label
         self.text_box = text_box
-        
+
         self.button.clicked.connect(self.del_section)
-        
+
     def del_section(self):
         df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
         self.label.deleteLater()
         self.text_box.deleteLater()
         self.button.deleteLater()
-        
+
         self.df = df

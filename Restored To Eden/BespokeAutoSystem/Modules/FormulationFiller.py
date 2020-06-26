@@ -261,7 +261,7 @@ class FormulationFiller:
     def export_to_file(self, workbook, filename):
         """ Export as excel file to current working directory
         """
-        save_path = self.config.getDir("Export Directory") + "\\Formulation Sheets\\"
+        save_path = self.config.getDir("Export Directory") + "/Formulation Sheets/"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 

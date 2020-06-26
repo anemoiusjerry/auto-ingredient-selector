@@ -22,7 +22,7 @@ class InfoSheetGenerator:
         self.gdriveObject = gdriveObject
 
         # Open html template as string
-        tmpPath =  os.getcwd() + "\\Assets\\InfoSheetTemplate.html"
+        tmpPath =  os.getcwd() + "/Assets/InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
         # Jinja2 Setup
@@ -36,9 +36,10 @@ class InfoSheetGenerator:
         }
 
     def process_all(self):
+        print("process all")
         # Get all formulation sheets from output dir
-        path = self.config.getDir("Export Directory") + "\\Formulation Sheets\\"
-        
+        path = self.config.getDir("Export Directory") + "/Formulation Sheets/"
+
         # Create list of all formlation sheet files
         sheet_paths = []
         for f in os.listdir(path):
@@ -59,6 +60,7 @@ class InfoSheetGenerator:
             headings, paragraphs = self.split_sections(df)
 
             # Pass all info to gen brochure
+            print("calling generate report")
             self.generateReport(headings, paragraphs, name, prod_type)
 
     def fill_instructions(self, name, prod_type, df):
@@ -104,7 +106,7 @@ class InfoSheetGenerator:
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
-            assets_path = os.getcwd() + "\\Assets"
+            assets_path = os.getcwd() + "/Assets"
 
             html_str = self.template.render(headings=headings, paragraphs=paragraphs,
                                             name=name, prod_type=prod_type, assets_path=assets_path)
@@ -115,17 +117,19 @@ class InfoSheetGenerator:
 
             # get output path
             """
-            with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "\\config.json") as j:
+            with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "/config.json") as j:
                 config = json.load(j)
-            output_path = config["Export Directory"] + "\\Reports"
+            output_path = config["Export Directory"] + "/Reports"
             """
             # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
-            output_path = self.config.getDir("Export Directory") + "\\Reports"
+
+            output_path = self.config.getDir("Export Directory") + "/Reports"
+            print("generate report at" , output_path)
             # Create reports folder if it doesnt exist
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
 
-            pdfkit.from_string(html_str, output_path + f"\\{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
+            pdfkit.from_string(html_str, output_path + f"/{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):
         headings = list(df)
