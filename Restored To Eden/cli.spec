@@ -31,3 +31,10 @@ exe = EXE(pyz,
           upx_exclude=[],
           runtime_tmpdir=None,
           console=True )
+app = BUNDLE(exe,
+             name='cli.app',
+             icon='rte_icon.icns',
+             info_plist={
+             'NSHighResolutionCapable': 'True'
+             },
+             bundle_identifier='com.restoredtoeden.automatron')
