@@ -36,7 +36,7 @@ class InfoSheetGenerator:
         # Allow use of len method in html
         self.template.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf"
+        wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -53,6 +53,7 @@ class InfoSheetGenerator:
 
 
         for f in os.listdir(path):
+            print(os.path.join(path,f))
             if os.path.isfile(os.path.join(path, f)):
                 sheet_paths.append(os.path.join(path, f))
 
@@ -132,9 +133,8 @@ class InfoSheetGenerator:
 
         # HTML is shit. We spent 2 hours debugging code that wasnt used. poop
 
-        # get output path
         output_path = self.config.getDir("Export Directory") + "/Reports"
-        
+
         # Create reports folder if it doesnt exist
         if not os.path.exists(output_path):
             os.makedirs(output_path)
