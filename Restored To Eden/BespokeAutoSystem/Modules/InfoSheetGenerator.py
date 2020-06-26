@@ -36,7 +36,7 @@ class InfoSheetGenerator:
         # Allow use of len method in html
         self.template.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf"
+        wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -51,6 +51,7 @@ class InfoSheetGenerator:
         # Create list of all formlation sheet files
         sheet_paths = []
         for f in os.listdir(path):
+            print(os.path.join(path,f))
             if os.path.isfile(os.path.join(path, f)):
                 sheet_paths.append(path + f)
 
@@ -128,14 +129,6 @@ class InfoSheetGenerator:
         sheet = open("Information & Ingredients Sheet.html", "w")
         sheet.write(html_str)
         sheet.close()
-
-        # get output path
-        """
-        with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "/config.json") as j:
-            config = json.load(j)
-        output_path = config["Export Directory"] + "/Reports"
-        """
-        # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
 
         output_path = self.config.getDir("Export Directory") + "/Reports"
         print("generate report at" , output_path)
