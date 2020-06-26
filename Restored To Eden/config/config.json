@@ -40,6 +40,16 @@
                 "anhydrous base",
                 "essential oil"
             ]
+        },
+        "oil serum": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "anhydrous base",
+                "essential oil",
+                "anhydrous high performance"
+            ]
         }
     },
     "Constants": {
@@ -120,6 +130,7 @@
         "maxsols": 5,
         "fitweight": 0.8,
         "numingredweight": 0.1,
-        "addedbenefitweight": 0.1
+        "addedbenefitweight": 0.1,
+        "darkmode": 1
     }
 }

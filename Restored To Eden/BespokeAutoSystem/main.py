@@ -34,6 +34,7 @@ def main():
     """
     # Load UI
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     window = TabDialog(app)
     window.show()
     sys.exit(app.exec_())

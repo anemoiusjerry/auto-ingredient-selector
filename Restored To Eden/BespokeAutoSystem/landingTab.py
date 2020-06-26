@@ -14,7 +14,9 @@ class LandingTab(QWidget):
 
     def __init__(self, config, app):
         QWidget.__init__(self)
+        self.config = config
         self.gdriveAPI = Gdriver()
+        self.defaultmode, self.darkmode = self.define_palettes()
 
         # Dict of widget { wid_name: widget object }
         self.widgets = {}
@@ -37,15 +39,19 @@ class LandingTab(QWidget):
         self.run_button.clicked.connect(lambda: self.runDLX(config))
         self.run_button.setFixedWidth(70)
         footer_layout.addWidget(self.run_button, 0, 0)
+
         # Dark mode toggle button
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setMinimum(0)
         self.slider.setMaximum(1)
+        self.slider.setValue(config.getVal("darkmode"))
         self.slider.setFixedWidth(40)
         self.slider.valueChanged.connect(lambda: self.toggleDark(app))
-        toggle_layout = QGridLayout()
+        self.toggleDark(app)
         toggle_label = QLabel("Go Dark")
         toggle_label.setFixedWidth(50)
+
+        toggle_layout = QGridLayout()
         toggle_layout.addWidget(toggle_label, 0, 0)
         toggle_layout.addWidget(self.slider, 0, 1)
         footer_layout.addLayout(toggle_layout, 0, 1)
@@ -53,28 +59,31 @@ class LandingTab(QWidget):
         layout.addLayout(footer_layout)
         self.setLayout(layout)
 
+    def define_palettes(self):
+        default_palette = QPalette()
+        # Dark mode
+        dark_palette = QPalette()
+        dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
+        dark_palette.setColor(QPalette.WindowText, Qt.white)
+        dark_palette.setColor(QPalette.Base, QColor(25, 25, 25))
+        dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+        dark_palette.setColor(QPalette.ToolTipBase, Qt.white)
+        dark_palette.setColor(QPalette.ToolTipText, Qt.white)
+        dark_palette.setColor(QPalette.Text, Qt.white)
+        dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
+        dark_palette.setColor(QPalette.ButtonText, Qt.white)
+        dark_palette.setColor(QPalette.BrightText, Qt.red)
+        dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
+        dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+        dark_palette.setColor(QPalette.HighlightedText, Qt.black)
+        return default_palette, dark_palette
+
     def toggleDark(self, app):
-        app.setStyle("Fusion")
         if self.slider.value() == 0:
-            norm = QPalette()
-            app.setPalette(norm)
+            app.setPalette(self.defaultmode)
         else:
-            # Dark mode
-            dark_palette = QPalette()
-            dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
-            dark_palette.setColor(QPalette.WindowText, Qt.white)
-            dark_palette.setColor(QPalette.Base, QColor(25, 25, 25))
-            dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-            dark_palette.setColor(QPalette.ToolTipBase, Qt.white)
-            dark_palette.setColor(QPalette.ToolTipText, Qt.white)
-            dark_palette.setColor(QPalette.Text, Qt.white)
-            dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
-            dark_palette.setColor(QPalette.ButtonText, Qt.white)
-            dark_palette.setColor(QPalette.BrightText, Qt.red)
-            dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
-            dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-            dark_palette.setColor(QPalette.HighlightedText, Qt.black)
-            app.setPalette(dark_palette)
+            app.setPalette(self.darkmode)
+        self.config.setVal("darkmode", self.slider.value())
 
     def runDLX(self, config):
         config.saveConfig()
