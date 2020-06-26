@@ -33,6 +33,7 @@ class InfoTab(QWidget):
     def loadSheetLocal(self):
         try:
             # If failed then use local vers
+            print(self.infosheet_browser.display.text())
             self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
             self.loadUi(self.infoSheet_df)
         except Exception as e:
