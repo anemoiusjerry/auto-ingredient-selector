@@ -29,7 +29,7 @@ class Gdriver:
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
         else:
-            app_path = os.path.dirname(os.path.abspath(__file__))
+            app_path = os.getcwd()
 
         if os.path.exists(app_path + '/token.pickle'):
             with open(app_path + '/token.pickle', 'rb') as token:

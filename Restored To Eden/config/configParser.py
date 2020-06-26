@@ -14,7 +14,7 @@ class FigMe:
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
         else:
-            app_path = os.path.dirname(os.path.abspath(__file__))
+            app_path = os.getcwd()
 
         self.path = app_path + "/config/config.json"
         self.gdriveAPI = Gdriver()
