@@ -38,12 +38,14 @@ class InfoSheetGenerator:
     def process_all(self):
         # Get all formulation sheets from output dir
         path = self.config.getDir("Export Directory") + "\\Formulation Sheets\\"
-
+        
+        # Create list of all formlation sheet files
         sheet_paths = []
         for f in os.listdir(path):
             if os.path.isfile(os.path.join(path, f)):
                 sheet_paths.append(path + f)
 
+        # Retrieve all info. needed for pdf
         for f in sheet_paths:
             workbook = load_workbook(filename=f)
             sheet = workbook.active
@@ -61,8 +63,12 @@ class InfoSheetGenerator:
 
     def fill_instructions(self, name, prod_type, df):
         # Get product instructions
-        instructions_path = self.config.getDir("Product Instructions Directory") + f"/{prod_type} Instructions.docx"
-        f = open(instructions_path, "rb")
+        instructions_path = self.config.getDir("Product Instructions Directory") + f"/{prod_type.title()} Instructions.docx"
+        try:
+            f = open(instructions_path, "rb")
+        # If failed to open instructions then return straightaway
+        except:
+            return df
 
         fullText = name + ", "
         doc = docx.Document(f)

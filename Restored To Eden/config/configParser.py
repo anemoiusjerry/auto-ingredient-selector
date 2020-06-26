@@ -81,6 +81,8 @@ class FigMe:
 
     def getVal(self,variable):
         return self.masterDict["Values"][variable]
+    def setVal(self, variable, new_value):
+        self.masterDict["Values"][variable] = new_value
 
     def getColname(self,dataframe, col):
         return self.masterDict["Column names"][dataframe][col]
@@ -111,5 +113,5 @@ class FigMe:
 
     def saveConfig(self):
         json_obj = json.dumps(self.masterDict, indent=4)
-        with open(self.path, "w") as outfile:
-            outfile.write(json_obj)
+        with open(self.path, "w") as fp:
+            fp.write(json_obj)
