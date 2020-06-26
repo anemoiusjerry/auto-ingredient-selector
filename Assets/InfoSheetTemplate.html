@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> Information & Ingredients Sheet </title>
+
+        <style type="text/css">
+            td {
+                width: 50%;
+                padding: 15px;
+            }
+
+            header {
+                font-size: 15px;    
+                color: rgb(221, 126, 107);
+            }
+
+            h1, h2{
+                line-height: 10px;
+            }
+
+            body {
+                font-family:"Nunito";
+            }
+
+            .heading {
+                font-weight: bold;
+                color: rgb(221, 126, 107);
+            }
+
+            .paragraph {
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <header align="left"> 
+                        <h2> Restored to Eden </h2>
+                        <h1> Product Information & Ingredients </h1>
+                        <h2> {{ prod_type }} {{ name }} </h2>
+                    </header>
+
+                    <br>
+    
+                    {% for i in range(len(headings)//2) %}
+                    <div>
+                        <div class="heading"> {{ headings[i] }} </div>
+                        <div class="paragraph">{{ paragraphs[i] }}</div>
+                    </div>
+                    <br>
+                    {% endfor %}
+    
+                </td>
+                <td>
+                    <header align=right>
+                        <img src= "{{ assets_path }}\\RTELogo.png" style="width: 100px;">
+                    </header>
+
+                    {% for i in range(len(headings)//2, len(headings)) %}
+                    <div>
+                        <div class="heading"> {{ headings[i] }} </div>
+                        <div class="paragraph">{{ paragraphs[i] }}</div>
+                    </div>
+                    <br>
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
