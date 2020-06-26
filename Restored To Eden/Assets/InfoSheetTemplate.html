@@ -10,7 +10,7 @@
             }
 
             header {
-                font-size: 15px;    
+                font-size: 15px;
                 color: rgb(221, 126, 107);
             }
 
@@ -37,14 +37,14 @@
         <table>
             <tr>
                 <td>
-                    <header align="left"> 
+                    <header align="left">
                         <h2> Restored to Eden </h2>
                         <h1> Product Information & Ingredients </h1>
                         <h2> {{ prod_type }} {{ name }} </h2>
                     </header>
 
                     <br>
-    
+
                     {% for i in range(len(headings)//2) %}
                     <div>
                         <div class="heading"> {{ headings[i] }} </div>
@@ -52,11 +52,11 @@
                     </div>
                     <br>
                     {% endfor %}
-    
+
                 </td>
                 <td>
                     <header align=right>
-                        <img src= "{{ assets_path }}\\RTELogo.png" style="width: 100px;">
+                        <img src= "{{ assets_path }}/RTELogo.png" style="width: 100px;">
                     </header>
 
                     {% for i in range(len(headings)//2, len(headings)) %}

@@ -131,6 +131,6 @@
         "fitweight": 0.8,
         "numingredweight": 0.1,
         "addedbenefitweight": 0.1,
-        "darkmode": 1
+        "darkmode": 0
     }
 }
