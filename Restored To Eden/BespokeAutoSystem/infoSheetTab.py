@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 from PySide2.QtWidgets import *
 from PySide2.QtGui import QPixmap, QIcon
@@ -35,7 +36,8 @@ class InfoTab(QWidget):
             print(self.infosheet_browser.display.text())
             self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
             self.loadUi(self.infoSheet_df)
-        except:
+        except Exception as e:
+            print(e)
             print("Local load failed")
     def loadSheetCloud(self):
         try:
@@ -87,8 +89,13 @@ class InfoTab(QWidget):
 
             # Delete button
             button = QPushButton()
+            # getting correct path of the application
+            if getattr(sys, 'frozen', False):
+                app_path = sys._MEIPASS
+            else:
+                app_path = os.getcwd()
             # Set trash icon
-            icon = QPixmap(os.getcwd() + "/Assets/trash.svg")
+            icon = QPixmap(app_path + "/Assets/trash.svg")
             button.setIcon(QIcon(icon))
             button.setMaximumWidth(30)
             self.del_buttons.append(ButtonWrapper(button, l, t))
@@ -155,7 +162,12 @@ class InfoTab(QWidget):
         # Delete button
         button = QPushButton()
         # Set trash icon
-        icon = QPixmap(os.getcwd() + "/Assets/trash.svg")
+        # getting correct path of the application
+        if getattr(sys, 'frozen', False):
+            app_path = sys._MEIPASS
+        else:
+            app_path = os.getcwd()
+        icon = QPixmap(app_path + "/Assets/trash.svg")
         button.setIcon(QIcon(icon))
         button.setMaximumWidth(30)
         self.del_buttons.append(ButtonWrapper(button, l, t))

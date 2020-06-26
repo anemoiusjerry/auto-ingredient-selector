@@ -27,7 +27,6 @@ class InfoSheetGenerator:
             app_path = sys._MEIPASS
         else:
             app_path = os.getcwd()
-
         tmpPath =  app_path + "/Assets/InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
@@ -113,7 +112,7 @@ class InfoSheetGenerator:
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
-
+        # getting correct path of the application
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
         else:
