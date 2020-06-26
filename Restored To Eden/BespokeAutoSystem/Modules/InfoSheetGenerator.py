@@ -7,6 +7,7 @@ import pdfkit
 import json
 import copy
 import docx
+import argparse
 
 from PySide2.QtWidgets import *
 from datetime import *
@@ -22,17 +23,23 @@ class InfoSheetGenerator:
         self.gdriveObject = gdriveObject
 
         # Open html template as string
-        tmpPath =  os.getcwd() + "/Assets/InfoSheetTemplate.html"
+        if getattr(sys, 'frozen', False):
+            app_path = sys._MEIPASS
+        else:
+            app_path = os.getcwd()
+
+        tmpPath =  app_path + "/Assets/InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
         # Jinja2 Setup
         self.template = jinja2.Environment(loader=jinja2.BaseLoader).from_string(html_tmp.read())
         # Allow use of len method in html
         self.template.globals["len"] = len
-        wkhtml_path = os.path.abspath("wkhtmltopdf.exe")
+        wkhtml_path = os.path.abspath("wkhtmltopdf")
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
-            "orientation":"Landscape"
+            "orientation":"Landscape",
+            "enable-local-file-access":None
         }
 
     def process_all(self):
@@ -106,30 +113,36 @@ class InfoSheetGenerator:
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
-            assets_path = os.getcwd() + "/Assets"
 
-            html_str = self.template.render(headings=headings, paragraphs=paragraphs,
-                                            name=name, prod_type=prod_type, assets_path=assets_path)
+        if getattr(sys, 'frozen', False):
+            app_path = sys._MEIPASS
+        else:
+            app_path = os.getcwd()
 
-            sheet = open("Information & Ingredients Sheet.html", "w")
-            sheet.write(html_str)
-            sheet.close()
+        assets_path = app_path + "/Assets"
 
-            # get output path
-            """
-            with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "/config.json") as j:
-                config = json.load(j)
-            output_path = config["Export Directory"] + "/Reports"
-            """
-            # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
+        html_str = self.template.render(headings=headings, paragraphs=paragraphs,
+                                        name=name, prod_type=prod_type, assets_path=assets_path)
 
-            output_path = self.config.getDir("Export Directory") + "/Reports"
-            print("generate report at" , output_path)
-            # Create reports folder if it doesnt exist
-            if not os.path.exists(output_path):
-                os.makedirs(output_path)
+        sheet = open("Information & Ingredients Sheet.html", "w")
+        sheet.write(html_str)
+        sheet.close()
 
-            pdfkit.from_string(html_str, output_path + f"/{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
+        # get output path
+        """
+        with open(str(Path(os.path.dirname(os.path.realpath(__file__))).parent.parent) + "/config.json") as j:
+            config = json.load(j)
+        output_path = config["Export Directory"] + "/Reports"
+        """
+        # Hayden chnaged this ^^ to this \/ . feel free to throw potatoes at him if he messed it up
+
+        output_path = self.config.getDir("Export Directory") + "/Reports"
+        print("generate report at" , output_path)
+        # Create reports folder if it doesnt exist
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        pdfkit.from_string(html_str, output_path + f"/{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):
         headings = list(df)

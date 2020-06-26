@@ -32,6 +32,7 @@ class InfoTab(QWidget):
     def loadSheetLocal(self):
         try:
             # If failed then use local vers
+            print(self.infosheet_browser.display.text())
             self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
             self.loadUi(self.infoSheet_df)
         except:
@@ -87,7 +88,7 @@ class InfoTab(QWidget):
             # Delete button
             button = QPushButton()
             # Set trash icon
-            icon = QPixmap(os.getcwd() + "\\Assets\\trash.svg")
+            icon = QPixmap(os.getcwd() + "/Assets/trash.svg")
             button.setIcon(QIcon(icon))
             button.setMaximumWidth(30)
             self.del_buttons.append(ButtonWrapper(button, l, t))
