@@ -86,7 +86,7 @@ class InfoSheetGenerator:
 
     def fill_dates(self, sheet, df):
         date_blended = sheet["B3"].value
-        df[[list(df)[-1]]] += f"\n\nDate Blended: {date_blended}"
+        df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended}"
         return df
 
     def extract_incis(self, sheet, df):

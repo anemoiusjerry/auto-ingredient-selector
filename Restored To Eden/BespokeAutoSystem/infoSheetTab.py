@@ -73,40 +73,21 @@ class InfoTab(QWidget):
         self.del_buttons = []
         self.txt_boxes = []
         for i in range(df.shape[1]):
-            banner_layout = QGridLayout()
-
-            # Create label
-            l = QLabel(list(df)[i])
-            #l = QLineEdit(list(df)[i])
-            banner_layout.addWidget(l, 0, 0)
-
-            # Create text boxes
-            t = QTextEdit(df.iloc[0,i])
-            t.setMinimumSize(50, 50)
-            self.layout.addWidget(t, 2*i+4, 0)
-            self.txt_boxes.append((l, t))
-
-            # Delete button
-            button = QPushButton()
-            # getting correct path of the application
-            if getattr(sys, 'frozen', False):
-                app_path = sys._MEIPASS
-            else:
-                app_path = os.getcwd()
-            # Set trash icon
-            icon = QPixmap(app_path + "Restored To Eden/Assets/trash.svg")
-            button.setIcon(QIcon(icon))
-            button.setMaximumWidth(30)
-            self.del_buttons.append(ButtonWrapper(button, l, t))
-            banner_layout.addWidget(button, 0, 1)
-
-            self.layout.addLayout(banner_layout, 2*i+3, 0)
+            heading = list(df)[i]
+            body = df.iloc[0,i]
+            banner_layout, t = self.create_paragraph_section(heading, body)
+            pos = self.layout.rowCount()
+            self.layout.addLayout(banner_layout, pos, 0)
+            self.layout.addWidget(t, pos+1, 0)
 
     def save(self):
         # Update self dataframe
         new_dict = {}
         for label, txt_box in self.txt_boxes:
-            new_dict[label.text()] = [txt_box.toPlainText()]
+            try:
+                new_dict[label.text()] = [txt_box.toPlainText()]
+            except Exception as e:
+                print(e)
 
         self.infoSheet_df = pd.DataFrame.from_dict(new_dict)
 
@@ -143,8 +124,18 @@ class InfoTab(QWidget):
 
         dialog.setLayout(layout)
         dialog.exec_()
+    
+    def add_N_close(self, dialog, n_heading, n_body):
+        new_section_df = pd.DataFrame({n_heading: [n_body]})
+        self.infoSheet_df = pd.concat([self.infoSheet_df, new_section_df], axis=1)
 
+        banner_layout, t = self.create_paragraph_section(n_heading, n_body)
 
+        pos = self.layout.rowCount()
+        self.layout.addLayout(banner_layout, pos, 0)
+        self.layout.addWidget(t, pos+1, 0)
+
+        dialog.close()
 
     def create_paragraph_section(self, n_heading, n_body):
         banner_layout = QGridLayout()
@@ -161,7 +152,6 @@ class InfoTab(QWidget):
         # Delete button
         button = QPushButton()
         # Set trash icon
-        # getting correct path of the application
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
         else:
@@ -175,31 +165,6 @@ class InfoTab(QWidget):
         return banner_layout, t
 
 
-    def add_N_close(self, dialog, n_heading, n_body):
-        new_section_df = pd.DataFrame({n_heading: [n_body]})
-        self.infoSheet_df = pd.concat([self.infoSheet_df, new_section_df], axis=1)
-
-        banner_layout, t = self.create_paragraph_section(n_heading, n_body)
-        # #l = QLineEdit(n_heading)
-        # l = QLabel(n_heading)
-        # t = QTextEdit(n_body)
-        # self.txt_boxes.append((l, t))
-
-        # # Insert at end of UI
-        # pos = self.layout.rowCount()
-        # self.layout.addWidget(l, pos, 0)
-        # self.layout.addWidget(t, pos+1, 0)
-
-        #  # Delete button
-        # button = QPushButton("Del")
-        # self.del_buttons.append(ButtonWrapper(button, l, t))
-        # self.layout.addWidget(button, pos+1, 1)
-        pos = self.layout.rowCount()
-        self.layout.addLayout(banner_layout, pos, 0)
-        self.layout.addWidget(t, pos+1, 0)
-
-        dialog.close()
-
 class ButtonWrapper:
     def __init__(self, button, label, text_box):
         self.df = None
@@ -210,9 +175,8 @@ class ButtonWrapper:
         self.button.clicked.connect(self.del_section)
 
     def del_section(self):
-        df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
+        #df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
         self.label.deleteLater()
         self.text_box.deleteLater()
         self.button.deleteLater()
-
-        self.df = df
+        #return df
