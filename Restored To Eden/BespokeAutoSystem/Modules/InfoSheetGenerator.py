@@ -27,6 +27,7 @@ class InfoSheetGenerator:
             app_path = sys._MEIPASS
         else:
             app_path = os.getcwd()
+
         tmpPath =  app_path + "/Assets/InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
 
@@ -34,7 +35,8 @@ class InfoSheetGenerator:
         self.template = jinja2.Environment(loader=jinja2.BaseLoader).from_string(html_tmp.read())
         # Allow use of len method in html
         self.template.globals["len"] = len
-        wkhtml_path = os.path.abspath("wkhtmltopdf")
+
+        wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
