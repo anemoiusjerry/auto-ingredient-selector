@@ -10,6 +10,7 @@ class PrefTab(QTabWidget):
         self.setTabShape
         self.config = config
 
+        # Have individual class for each config rab
         for key, value in config.masterDict.items():
             if key == "Product":
                 self.addTab(ProductBlade(value, self.config), key)
@@ -26,12 +27,13 @@ class ProductBlade(QWidget):
 
     def __init__(self, product_dict, config):
         QWidget.__init__(self)
-        self.layout = QVBoxLayout()
+        self.layout = QVBoxLayout()  # Main layout
 
+        # Dict is the dict for each product type with all their settings
         for prod_type, prod_dict in product_dict.items():
             self.layout.addWidget(QLabel(prod_type))
 
-            # Get int values for product type constraints
+            # Get the actual int values for product type constraints
             # [Como, visc, absorp]
             constraint_vals = config.getTarget(prod_type)
             constraint_dict = {
@@ -39,7 +41,7 @@ class ProductBlade(QWidget):
                 "absorbency": constraint_vals[2],
                 "viscosity": constraint_vals[1]
             }
-            # Get number of values for ea. constant
+            # Get range of values for ea. constraint
             constraint_const_dict = {
                 "comedogenic": config.getConst("comedogenicRating"),
                 "absorbency": config.getConst("absorbency"),
@@ -50,24 +52,29 @@ class ProductBlade(QWidget):
             for constraint, value in prod_dict.items():
                 if constraint == "types":
                     continue
+                # Constraint name
                 self.layout.addWidget(QLabel(constraint))
 
                 slider_layout = QGridLayout()
                 # Create sliders for all 3 constraint options
                 slider = QSlider(Qt.Horizontal)
+                # number of ticks
                 tick_num = len(constraint_const_dict[constraint]) - 1
                 slider.setRange(0, tick_num)
                 slider.setValue(constraint_dict[constraint])
 
                 # Slider tick settingss
                 slider.setTickPosition(QSlider.TicksBelow)
-                slider.setTickInterval(1)
-                slider.setSingleStep(1)
+                slider.setTickInterval(1)  # Freq of ticks shown
+                slider.setSingleStep(1)    # Step of slider click (does work here)
+
+                # This line trys to line up ticks with tick labels
                 slider_layout.addWidget(slider, 0, 0, 1, tick_num)
 
                 # Tick labels
                 for i, tick in enumerate(constraint_const_dict[constraint]):
                     tick_label = QLabel(str(tick))
+                    # This line trys to line up tick labels with ticks above
                     slider_layout.addWidget(tick_label, 1, i, 1, i+1)
 
                 self.layout.addLayout(slider_layout)
@@ -80,12 +87,13 @@ class ColumnBlade(QWidget):
         self.layout = QVBoxLayout()
         for spreadsheet, col_dict in columns_dict.items():
             self.layout.addWidget(QLabel(spreadsheet))
+
             # Add edit boxes for each column
             for col_name, cur_value in col_dict.items():
                 edit_layout = QGridLayout()
                 col_name_label = QLabel(col_name)
                 edit_box = QLineEdit(str(cur_value))
-                
+                # Put label and editable box in same line
                 edit_layout.addWidget(col_name_label, 0, 0)
                 edit_layout.addWidget(edit_box, 0, 1)
 
@@ -97,6 +105,7 @@ class ValuesBlade(QWidget):
     def __init__(self, values_dict, config):
         QWidget.__init__(self)
         self.config = config
+        # Define more readable names for settings
         nice_names = {
             "lowBound": "Skin Needs Overlap: Lower Bound",
             "upBound": "Skin Needs Overlap: Upper Bound",
@@ -108,11 +117,13 @@ class ValuesBlade(QWidget):
             "numingredweight": "Number of ingredients weight",
             "addedbenefitweight": "Additional benefits weight"
         }
-        self.layout = QVBoxLayout()
-        incre_layout = QGridLayout()
-        weight_layout = QVBoxLayout()
         self.sliders = []
         self.incre_boxes = []
+        
+        self.layout = QVBoxLayout()
+        incre_layout = QGridLayout()  # Layout for all numeric boxes
+        weight_layout = QVBoxLayout() # Layout for all weight sliders
+
         for i, item in enumerate(values_dict.items()):
             setting = item[0]
             value = item[1]
