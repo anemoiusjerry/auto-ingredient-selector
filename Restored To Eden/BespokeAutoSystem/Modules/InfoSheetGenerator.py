@@ -14,6 +14,7 @@ from datetime import *
 from openpyxl import load_workbook
 from pathlib import Path
 from config.configParser import FigMe
+from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class InfoSheetGenerator:
 
@@ -21,6 +22,7 @@ class InfoSheetGenerator:
         self.config = config
         self.contents_df = infoSheet_df
         self.gdriveObject = gdriveObject
+        self.warn = WarningRaiser()
 
         # Open html template as string
         if getattr(sys, 'frozen', False):
@@ -44,14 +46,11 @@ class InfoSheetGenerator:
         }
 
     def process_all(self):
-        print("process all")
         # Get all formulation sheets from output dir
         path = self.config.getDir("Export Directory") + "/Formulation Sheets"
 
         # Create list of all formlation sheet files
         sheet_paths = []
-
-
         for f in os.listdir(path):
             print(os.path.join(path,f))
             if os.path.isfile(os.path.join(path, f)):
@@ -73,7 +72,10 @@ class InfoSheetGenerator:
 
             # Pass all info to gen brochure
             print("calling generate report")
-            self.generateReport(headings, paragraphs, name, prod_type)
+            try:
+                self.generateReport(headings, paragraphs, name, prod_type)
+            except:
+                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
 
     def fill_instructions(self, name, prod_type, df):
         # Get product instructions
@@ -129,7 +131,7 @@ class InfoSheetGenerator:
 
 
         html_str = self.template.render(headings=headings, paragraphs=paragraphs,
-                                        name=name, prod_type=prod_type, assets_path=assets_path)
+                                        name=name.title(), prod_type=prod_type.title(), assets_path=assets_path)
 
         # HTML is shit. We spent 2 hours debugging code that wasnt used. poop
 

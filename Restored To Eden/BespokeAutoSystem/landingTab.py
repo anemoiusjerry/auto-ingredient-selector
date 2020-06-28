@@ -50,7 +50,7 @@ class LandingTab(QWidget):
         self.toggleDark(app)
         toggle_label = QLabel("Go Dark")
         toggle_label.setFixedWidth(50)
-
+        # Widgets for dark mode toggle button
         toggle_layout = QGridLayout()
         toggle_layout.addWidget(toggle_label, 0, 0)
         toggle_layout.addWidget(self.slider, 0, 1)
@@ -111,6 +111,9 @@ class LandingTab(QWidget):
         for key in self.widgets.keys():
             # Only process to df if widget stores a spreadsheet
             fetch_name = self.widgets[key].label.text()
+            # Dont try to gen. DF if directory path
+            if "dir" in key:
+                continue
             df = config.getDF(fetch_name)
             dataframes[self.widgets[key].label.text()] = df
 

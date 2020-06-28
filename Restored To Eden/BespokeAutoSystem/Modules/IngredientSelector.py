@@ -10,11 +10,13 @@ import xlsxwriter
 from datetime import date
 from collections import defaultdict as dd
 from openpyxl import load_workbook
+from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class IngredientSelector:
     def __init__(self, orders, ingredients, qnair, catalog, filler):
         config = FigMe()
         self.config = config
+        self.warn = WarningRaiser()
         self.filler = filler
         self.SOF = 7
         # orders columns
@@ -86,7 +88,8 @@ class IngredientSelector:
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
-                # Add a warning dialog that says the name does not match any on the questionnaire
+                # Warn user if name in order and questionnaire do NOT match
+                self.warn.displayWarningDialog("", f"Order for {name.title()} has no matching questionnaire. Check that the names match between order sheet and the questionnaire.")
                 continue
 
             # Finding the products required to fulfil the order. if they cannot be found, skip to next order
@@ -110,7 +113,10 @@ class IngredientSelector:
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
 
-                solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                try:
+                    solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                except:
+                    self.warn.displayWarningDialog("orderParser failure", "Failed to find ingredients for order.")
 
                 # create a new worksheet for each solution
                 self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)

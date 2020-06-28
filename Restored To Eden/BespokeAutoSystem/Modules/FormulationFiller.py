@@ -7,19 +7,25 @@ from collections import defaultdict as dd
 import re
 
 from config.configParser import FigMe
+from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class FormulationFiller:
     SOF = 7
 
     def __init__(self, ingredients_df, gdriveObject):
         self.config = FigMe()
-        # Drop duplicates
-        self.ingredients_df = ingredients_df.loc[~ingredients_df.index.duplicated(keep="first")]
         self.gdriveObject = gdriveObject
+        self.warn = WarningRaiser()
 
     def process_all(self, results):
         for soln in results:
-            self.write_to_template(soln["Ingredients"], soln["CustomerName"], soln["ProductType"])
+            name = soln["CustomerName"].title()
+            product_type = soln["ProductType"].title()
+            try:
+                self.write_to_template(soln["Ingredients"], name, product_type)
+            except:
+                self.warn.displayWarningDialog("Write Failure", 
+                    f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
         print("All form sheet generated.")
 
     def write_to_template(self, ingredients, customer_name, prod_type):
@@ -29,16 +35,14 @@ class FormulationFiller:
                     customer_name - str of customer name
                     prod_type - str of product type
         """
-        #???????????????????? CHNAGED to google drive ?????????????????
-        # Get template folder path
-
+        # Get template path to read it
         path = self.config.getDir("Formulation Sheets Directory")
         template_path = path + "/" + prod_type + " Worksheet.xlsx"
 
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
-        #??????????????????????????????????????????????????????????????????????????????
+
 
         ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
         assigned_vals = self.calc_ingredient_weight(ingredients, prod_type, self.ingredients_df)
@@ -115,7 +119,6 @@ class FormulationFiller:
         sheet = self.write_grams(sheet)
         filename = customer_name + "-" + prod_type + ".xlsx"
         path = self.export_to_file(workbook, filename)
-        #self.gdriveObject.push_file(filename, path)
 
     def calc_ingredient_weight(self, ingredients, prod_type, ingredients_df):
         """ Takes parameters from ingredient selector and calculates to ingredient weights

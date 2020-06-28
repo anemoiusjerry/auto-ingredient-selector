@@ -4,12 +4,12 @@ import sys
 import re
 import pandas as pd
 from BespokeAutoSystem.Gdriver import Gdriver
-
+from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class FigMe:
 
     def __init__(self):
-        # Get the filepath of the config file
+        self.warn = WarningRaiser()
         # getting correct path of the application
         if getattr(sys, 'frozen', False):
             path = os.path.dirname(sys.executable)
@@ -46,6 +46,7 @@ class FigMe:
             except:
                 # Pop up dialog that errors when not all df are browsed
                 print(f"{dfname} Not browsed")
+                self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
                 return None
 
         df.fillna("", inplace=True)
