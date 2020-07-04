@@ -7,18 +7,22 @@ import math
 import os
 import copy
 import xlsxwriter
+from PySide2.QtCore import QObject, Signal, Slot
 from datetime import date
 from collections import defaultdict as dd
 from openpyxl import load_workbook
-from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
-class IngredientSelector:
-    def __init__(self, orders, ingredients, qnair, catalog, filler):
+class IngredientSelector(QObject):
+    launched = Signal(int)
+    stateChanged = Signal(str, str, int)
+    def __init__(self, orders, ingredients, qnair, catalog):
+        # signal setup
+        QObject.__init__(self)
+
         config = FigMe()
         self.config = config
-        self.warn = WarningRaiser()
-        self.filler = filler
         self.SOF = 7
+
         # orders columns
         self.customerCol = config.getColname("Orders Spreadsheet", "customer")
         self.orderCol = config.getColname("Orders Spreadsheet", "order number")
@@ -66,7 +70,12 @@ class IngredientSelector:
         self.qnair = qnair
         self.catalog = catalog
 
+        # progress variables
+        self.solsFound = 0
+
     def selectIngredients(self):
+        # send the launched signal with the length of the orders
+        self.launched.emit(self.orders.shape[0])
 
         # Creating new file for the orders to be saved into
         savedir = self.config.getDir("Export Directory")
@@ -76,11 +85,15 @@ class IngredientSelector:
 
         returns = []
         for index, order in self.orders.iterrows():
+            self.progress = index
 
             # Find the customer questionnaire using the name or email address
             # !!!! NOTE: A dialog should be added to check that the email corresponds to the correct person
             name = order[self.customerCol]
             email = order[self.emailCol]
+            # Change the state of the progress dialog
+            text = "Order " + order[self.orderCol] +", "+ name
+            self.stateChanged.emit("retrieve", text, self.progress)
 
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
@@ -88,8 +101,7 @@ class IngredientSelector:
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
-                # Warn user if name in order and questionnaire do NOT match
-                self.warn.displayWarningDialog("", f"Order for {name.title()} has no matching questionnaire. Check that the names match between order sheet and the questionnaire.")
+                # Add a warning dialog that says the name does not match any on the questionnaire
                 continue
 
             # Finding the products required to fulfil the order. if they cannot be found, skip to next order
@@ -113,10 +125,7 @@ class IngredientSelector:
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
 
-                try:
-                    solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                except:
-                    self.warn.displayWarningDialog("orderParser failure", "Failed to find ingredients for order.")
+                solutions, rows, cols, unresolved = self.orderParser(product, qdata)
 
                 # create a new worksheet for each solution
                 self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
@@ -262,6 +271,7 @@ class IngredientSelector:
 
         # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
+        matrix.sols.connect(self.getDlxSols)
         solutions = matrix.dance()
 
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
@@ -272,8 +282,9 @@ class IngredientSelector:
                 if cols[i][0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]: # Hardcoded
                     cols[i][3] = self.upBound
                 cols[i] = tuple(cols[i])
-
+            #matrix.solsFound.disconnect(self.getDlxSols)
             matrix = DLX(cols, rows)
+            matrix.sols.connect(self.getDlxSols)
             solutions = matrix.dance()
 
         print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
@@ -295,14 +306,18 @@ class IngredientSelector:
 
         target = self.config.getTarget(product)
         chosen = []
+        solLen = len(solutions)
         _lenlst = [len(s) for s in solutions]
         maxlen, minlen = max(_lenlst), min(_lenlst)
         maxBenefits, leastBenefits = 0, 0
-        """
-        if len(solutions) > 1000:
-            solutions = solutions[:1000]
-        """
-        for solution in solutions[:]:
+
+        j=0
+        for solution in solutions:
+            # send signal if the index of solution is a multiple of 100
+            if j % 500 == 0:
+                self.solsSorted(j, solLen)
+            j = j+1
+
             vals = dd(list)
             benefits = 0
             benefits_lst = []
@@ -310,14 +325,12 @@ class IngredientSelector:
                 # Finding information to calculate fit
                 # Retrieve comodegenic rating
                 _como = self.ingredients.loc[ingredient,self.comedogenicCol]
-                
+
                 if _como == "":
-                    vals[ingredient].append(0)  
+                    vals[ingredient].append(0)
                 else:
                     vals[ingredient].append(self.comeConst.index(int(float(_como))))
-                """
-                vals[ingredient].append(0) if _como == "" else vals[ingredient].append(self.comeConst.index(int(float(_como))))
-                """
+
                 # Retrieve Viscocity
                 key = self.ingredients.loc[ingredient,self.viscocityCol]
                 try:
@@ -520,3 +533,14 @@ class IngredientSelector:
 
             i += 1
         return ww_dict, assigned_dict
+
+    def solsSorted(self, i, max):
+        state = "sorting"
+        info = str(i) + " of " + str(max)
+        self.stateChanged.emit(state, info, self.progress)
+
+    @Slot(int)
+    def getDlxSols(self, i):
+        state = "finding"
+        info = str(i) + " Solutions found"
+        self.stateChanged.emit(state, info, self.progress)

@@ -1,4 +1,5 @@
 import functools
+from PySide2.QtCore import QObject, Signal, Slot
 """
 Python implementation of Donald Knuths DLX3 algorithm
 By Hayden Goodwin 2020
@@ -32,7 +33,7 @@ class Item:
         self.order = order
 
 
-class DLX:
+class DLX(QObject):
 
     PRIMARY = 0
     SECONDARY = 1
@@ -40,8 +41,10 @@ class DLX:
     MAX_LEVEL = 500
     MAX_COUNT = 10**10
 
+    sols = Signal(int)
 
     def __init__(self, cols, rows):
+        QObject.__init__(self)
         # NOTE!! All secondary items must be at the end of the rows list !!
         # columns is a list of item info where each item is in the form of a tuple
         # each item info should be formatted: (name, order,lower bound, upper bound)
@@ -352,9 +355,8 @@ class DLX:
 
             self.solutions.append(self.partialsolution)
 
-            #if len(self.solutions) % 100000 == 0:
-                #print("\nSolution found: ", len(self.solutions), " level: ", self.level)
-                #print("Latest solution", self.solutions[-1])
+            if len(self.solutions) % 5000 == 0:
+                self.solsFound(len(self.solutions))
 
             if self.count > DLX.MAX_COUNT:
                 return None
@@ -491,3 +493,6 @@ class DLX:
         tramampoline(self.forward)
 
         return self.solutions
+
+    def solsFound(self, i):
+        self.sols.emit(i)
