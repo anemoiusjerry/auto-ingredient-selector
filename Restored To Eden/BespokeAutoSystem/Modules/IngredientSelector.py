@@ -1,4 +1,5 @@
 from .FormulationFiller import FormulationFiller
+from ..WarningRaiser import WarningRaiser
 from config.configParser import FigMe
 from ..dlx3 import DLX
 import pandas as pd
@@ -21,8 +22,10 @@ class IngredientSelector(QObject):
         QObject.__init__(self)
 
         config = FigMe()
+
         self.config = config
         self.SOF = 7
+        self.warn = WarningRaiser()
 
         # orders columns
         self.customerCol = config.getColname("Orders Spreadsheet", "customer")
@@ -103,7 +106,7 @@ class IngredientSelector(QObject):
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
-                # Add a warning dialog that says the name does not match any on the questionnaire
+                #self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Qestionairre.")
                 print("no matching name found for ", name)
                 continue
 
@@ -146,7 +149,7 @@ class IngredientSelector(QObject):
         if returns:
             return returns
         return None
-        
+
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
         # Ailment label format
         _ailDict = {"bold": True,

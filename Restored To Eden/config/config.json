@@ -130,7 +130,7 @@
         "maxsols": 5,
         "fitweight": 0.8,
         "numingredweight": 0.1,
-        "addedbenefitweight": 0.1,
+        "addedbenefitweight": 0.36,
         "darkmode": 1
     }
 }

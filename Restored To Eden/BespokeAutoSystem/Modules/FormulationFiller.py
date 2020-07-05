@@ -17,7 +17,6 @@ class FormulationFiller:
         self.config = FigMe()
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
-        self.sigs = Signals()
 
     def process_all(self, results):
         for soln in results:
@@ -273,6 +272,3 @@ class FormulationFiller:
         workbook.save(save_path + filename)
         print("Done exporting...")
         return save_path + filename
-
-class Signals(QObject):
-    failed = Signal()
