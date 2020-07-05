@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from PySide2.QtCore import QObject, Signal
 # Spreadsheet library
 from openpyxl import load_workbook
 from datetime import *
@@ -16,6 +17,7 @@ class FormulationFiller:
         self.config = FigMe()
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
+        self.sigs = Signals()
 
     def process_all(self, results):
         for soln in results:
@@ -24,7 +26,7 @@ class FormulationFiller:
             try:
                 self.write_to_template(soln["Ingredients"], name, product_type)
             except:
-                self.warn.displayWarningDialog("Write Failure", 
+                self.warn.displayWarningDialog("Write Failure",
                     f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
         print("All form sheet generated.")
 
@@ -271,3 +273,6 @@ class FormulationFiller:
         workbook.save(save_path + filename)
         print("Done exporting...")
         return save_path + filename
+
+class Signals(QObject):
+    failed = Signal()

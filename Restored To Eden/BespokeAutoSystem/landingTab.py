@@ -92,15 +92,15 @@ class LandingTab(QWidget):
         self.dataframes = self.createDataFrames()
 
         # Start ingredient selection process
-        ingredient_selector = IngredientSelector(self.dataframes["Orders Spreadsheet"],
+        self.ingredient_selector = IngredientSelector(self.dataframes["Orders Spreadsheet"],
                                     self.dataframes["Ingredients Spreadsheet"],
                                     self.dataframes["Customer Questionnaire"],
                                     self.dataframes["Product Catalog"])
 
-        ingredient_selector.launched.connect(self.launchProgress)
-        ingredient_selector.stateChanged.connect(self.progStateChanged)
+        self.ingredient_selector.launched.connect(self.launchProgress)
+        self.ingredient_selector.stateChanged.connect(self.progStateChanged)
 
-        worker = Worker(ingredient_selector.selectIngredients)
+        worker = Worker(self.ingredient_selector.selectIngredients)
         worker.signals.result.connect(self.processResults)
 
         self.threadpool.start(worker)
@@ -108,8 +108,17 @@ class LandingTab(QWidget):
     @Slot(object)
     def processResults(self, results):
         # Start formulation calculations for all orders
-        filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
-        filler.process_all(results)
+        self.closeProg()
+        if not results == None:
+            filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
+            filler.process_all(results)
+        else:
+            # create a dialog which tells the user that nothing was done
+            pass
+
+    @Slot()
+    def closeProg(self):
+        self.prog.cancel()
 
     def createDataFrames(self):
         # Store all dataframes in dictionary
@@ -129,14 +138,10 @@ class LandingTab(QWidget):
 
         self.primaryMsg = "Running Ingredient Sorter\n"
         self.prog = QProgressDialog(self.primaryMsg, "Cancel", 0, end)
-
+        self.prog.canceled.connect(self.ingredient_selector.stop_)
         self.prog.setMinimumDuration(1)
-        self.prog.setFixedSize(300, 150)
-        print("launching progress dialog")
-        self.prog.exec_()#worker = Worker(self.prog.exec_)
-        #self.threadpool.start(worker)
-        print("dialog launched")
-
+        self.prog.setFixedSize(400, 150)
+        self.prog.exec_()
 
     @Slot(str, str, int)
     def progStateChanged(self, state, info, i):

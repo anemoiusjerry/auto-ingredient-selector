@@ -61,6 +61,7 @@ class DLX(QObject):
         # if no colour is being used, it should be specified as None.
         # NOTE: only secondary items have colours
 
+        self.stop = True # When this value is set to False, the program will halt
         self.updates = 0
         self.cleansings = 0
 
@@ -485,14 +486,21 @@ class DLX(QObject):
             @functools.wraps(func)
             def g(*args):
                 h = func
-                while h is not None:
+                while (h is not None) and self.stop:
                     h = h(*args)
                 return args
             return g()
 
         tramampoline(self.forward)
 
-        return self.solutions
+        if self.stop:
+            return self.solutions
+        else:
+            return None
 
     def solsFound(self, i):
         self.sols.emit(i)
+
+    @Slot()
+    def stop_(self):
+        self.stop = False

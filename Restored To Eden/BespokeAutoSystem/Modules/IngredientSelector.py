@@ -15,6 +15,7 @@ from openpyxl import load_workbook
 class IngredientSelector(QObject):
     launched = Signal(int)
     stateChanged = Signal(str, str, int)
+    cancel = Signal()
     def __init__(self, orders, ingredients, qnair, catalog):
         # signal setup
         QObject.__init__(self)
@@ -72,6 +73,7 @@ class IngredientSelector(QObject):
 
         # progress variables
         self.solsFound = 0
+        self.stop = False
 
     def selectIngredients(self):
         # send the launched signal with the length of the orders
@@ -102,6 +104,7 @@ class IngredientSelector(QObject):
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
                 # Add a warning dialog that says the name does not match any on the questionnaire
+                print("no matching name found for ", name)
                 continue
 
             # Finding the products required to fulfil the order. if they cannot be found, skip to next order
@@ -111,6 +114,7 @@ class IngredientSelector(QObject):
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
+                print("item not in catalog: ", item)
                 continue
 
             # Create a folder for the order
@@ -124,9 +128,12 @@ class IngredientSelector(QObject):
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-
+                print("running solver for", name)
                 solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-
+                print("finnished running")
+                if self.stop:
+                    workbook.close()
+                    return None
                 # create a new worksheet for each solution
                 self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
                 workbook.close()
@@ -135,9 +142,10 @@ class IngredientSelector(QObject):
                     returns.append({"Ingredients": solution[0],
                                     "CustomerName": name,
                                     "ProductType": product})
-
-        return returns
-
+        print(name, solutions)
+        if returns:
+            return returns
+        return None
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
         # Ailment label format
         _ailDict = {"bold": True,
@@ -272,6 +280,7 @@ class IngredientSelector(QObject):
         # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
         matrix.sols.connect(self.getDlxSols)
+        self.cancel.connect(matrix.stop_)
         solutions = matrix.dance()
 
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
@@ -285,6 +294,7 @@ class IngredientSelector(QObject):
             #matrix.solsFound.disconnect(self.getDlxSols)
             matrix = DLX(cols, rows)
             matrix.sols.connect(self.getDlxSols)
+            self.cancel.connect(matrix.stop_)
             solutions = matrix.dance()
 
         print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
@@ -313,6 +323,8 @@ class IngredientSelector(QObject):
 
         j=0
         for solution in solutions:
+            if self.stop:
+                return None
             # send signal if the index of solution is a multiple of 100
             if j % 500 == 0:
                 self.solsSorted(j, solLen)
@@ -544,3 +556,8 @@ class IngredientSelector(QObject):
         state = "finding"
         info = str(i) + " Solutions found"
         self.stateChanged.emit(state, info, self.progress)
+
+    @Slot()
+    def stop_(self):
+        self.stop = True
+        self.cancel.emit()
