@@ -142,10 +142,11 @@ class IngredientSelector(QObject):
                     returns.append({"Ingredients": solution[0],
                                     "CustomerName": name,
                                     "ProductType": product})
-        print(name, solutions)
+
         if returns:
             return returns
         return None
+        
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
         # Ailment label format
         _ailDict = {"bold": True,
