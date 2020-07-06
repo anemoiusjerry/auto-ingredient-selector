@@ -46,12 +46,14 @@ class FigMe:
                 else:
                     if not os.path.isdir(dfpath):
                         self.warn.displayWarningDialog("Load Error", f"File ({dfpath}) is not a csv or xlsx")
+                        raise Exception("Incorrect filetype")
                     return None
             except:
                 # Pop up dialog that errors when not all df are browsed
                 print(f"{dfname} Not browsed")
                 if not os.path.isdir(dfpath):
                     self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
+                    raise Exception("Error loading dataframe")
                 return None
 
         if self.checkCols(df, dfname):
@@ -92,7 +94,8 @@ class FigMe:
             return df
         else:
             self.warn.displayWarningDialog("Load Error", f"({dfpath}) column names do not match")
-            sys.exit()
+            raise Exception("names dont match")
+            #sys.exit()
 
     def getVal(self,variable):
         return self.masterDict["Values"][variable]
