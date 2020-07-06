@@ -179,7 +179,6 @@ class IngredientSelector(QObject):
 
         i=1
         for solution in solutions:
-            print("\n\nsolution", solution)
             #sorting the ingredients to be grouped by their type
             sortDict = dd(list)
             tmplst = []
