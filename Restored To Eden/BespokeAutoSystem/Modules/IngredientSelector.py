@@ -118,6 +118,7 @@ class IngredientSelector(QObject):
             except:
                 # add a check to make sure that all the products are within the known products
                 print("item not in catalog: ", item)
+                raise Exception("Unknown Item")
                 continue
 
             # Create a folder for the order
@@ -131,9 +132,7 @@ class IngredientSelector(QObject):
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-                print("running solver for", name)
                 solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                print("finnished running")
                 if self.stop:
                     workbook.close()
                     return None
@@ -151,6 +150,7 @@ class IngredientSelector(QObject):
         return None
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
+
         # Ailment label format
         _ailDict = {"bold": True,
                     "align": "right",
@@ -179,6 +179,22 @@ class IngredientSelector(QObject):
 
         i=1
         for solution in solutions:
+            print("\n\nsolution", solution)
+            #sorting the ingredients to be grouped by their type
+            sortDict = dd(list)
+            tmplst = []
+            for ingrd in solution[0]:
+                for r in rows:
+                    if r[1] == ingrd:
+                        type = cols[r[0][-1][0]][0]
+                        break
+                sortDict[type].append(ingrd)
+
+            for key, val in sortDict.items():
+                tmplst.extend(val)
+            solution = list(solution)
+            solution[0] = tmplst
+
             worksheet = workbook.add_worksheet("Solution " + str(i))
             # Write the row headers (skin problems & ingredient types)
             row = 2
@@ -232,10 +248,22 @@ class IngredientSelector(QObject):
                 ncol = ncol + 1
             i = i+1
 
-        # Write the additional info column
-        # Write the Climate conditions
-        # Write the allergies
-        # write the strength of the fragrance
+            # Adding the unresolved columns and additional benefits
+            row = nrow + 3
+            worksheet.write(row, 0, "Unresolved Conditions", headail_format)
+            if len(unresolved) > 0:
+                for j in range(len(unresolved)):
+                    worksheet.write(row + j + 1, 0, unresolved[j])
+            else:
+                worksheet.write(row + 1, 0, 'everything is resolved')
+
+            row = row + 2 + len(unresolved)
+            worksheet.write(row, 0, "Additional Benefits", headail_format)
+            if len(solution[2]) > 0:
+                for j in range(len(solution[2])):
+                    worksheet.write(row + 1 + j, 0, solution[2][j])
+            else:
+                worksheet.write(row + 1, 0, 'No additional benefits')
 
     def orderParser(self, product, qdata):
 
@@ -252,13 +280,11 @@ class IngredientSelector(QObject):
         # Convert cols into dlx useable format
         cols = [(cols[i],0,self.lowBound,self.upBound) for i in range(len(cols))]
 
-        # If Essential oils are part of the product recipe, make sure they are included at least once
+        # If an ingredient type is part of the product recipe, make sure they are included at least once
         for type in types:
             cols.append((type,0,self.tpyeoverlap_low,self.typeoverlap_up))
             colind = len(cols) - 1
             for row in rows:
-                # ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(row[1])
-                # ^^ this was removed due to the set_index function. If something is wrong check here
                 ingredtype = self.ingredients.loc[row[1],self.typeCol]
                 if type in ingredtype:
                     row[0].append((colind, None))
@@ -362,7 +388,7 @@ class IngredientSelector(QObject):
 
                 # Finding additional benefits
                 for skinProb in self.ingredients.loc[ingredient,self.skinProbCol]:
-                    if skinProb in ailments:
+                    if skinProb not in ailments:
                         benefits = benefits + 1
                         benefits_lst.append(skinProb)
                 if benefits > maxBenefits:
@@ -392,11 +418,11 @@ class IngredientSelector(QObject):
                     if chosen[i][1] > score:
                         chosen[i] = (solution, score, list(set(benefits_lst)))
                         break
-
+        """
         print("Best solutions: ")
         for sol in chosen:
             print(sol)
-
+        """
         return chosen
 
     def matrixGen(self, product, ailments, userCons):

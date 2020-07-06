@@ -112,7 +112,7 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/file.csv",
+        "Ingredients Spreadsheet": "/Users/HG/Desktop/RTE-Ingredients.csv",
         "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Orders Database.xlsx",
         "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
         "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
@@ -129,8 +129,8 @@
         "typeoverlap_up": 3,
         "maxsols": 5,
         "fitweight": 0.8,
-        "numingredweight": 0.1,
-        "addedbenefitweight": 0.36,
+        "numingredweight": 0.0,
+        "addedbenefitweight": 0.97,
         "darkmode": 1
     }
 }
