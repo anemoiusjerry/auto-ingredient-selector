@@ -23,15 +23,48 @@ class PrefTab(QTabWidget):
             else:
                 pass
 
+class sliderWrapper:
+    def __init__(self, lowBound, upBound, cur_value, tick_interval):
+
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(lowBound, upBound)
+        self.slider.setValue(cur_value)
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setTickInterval(tick_interval)
+        self.slider.setSingleStep(tick_interval)
+        self.slider.valueChanged.connect(self.updateVal)
+        self.label = QLabel(f"{cur_value}%")
+
+        # Ticklabel
+        self.tick_layout = QGridLayout()
+        for i in range((upBound-lowBound)//tick_interval + 1):
+            tick_label = QLabel(str(lowBound + i*tick_interval))
+            self.tick_layout.addWidget(tick_label, 0, i, 1, -1)
+
+    def updateVal(self):
+        self.label.setText(f"{self.slider.value()}%")
+
 class ProductBlade(QWidget):
 
     def __init__(self, product_dict, config):
         QWidget.__init__(self)
-        self.layout = QVBoxLayout()  # Main layout
+        self.config = config
+        self.layout = QGridLayout()  # Main layout
 
+        # Get range of values for ea. constraint
+        self.constraint_const_dict = {
+            "comedogenic": config.getConst("comedogenicRating"),
+            "absorbency": config.getConst("absorbency"),
+            "viscosity": config.getConst("viscosity")
+        }
+
+        # All widgets stored to save to config
+        self.wids = {}
         # Dict is the dict for each product type with all their settings
-        for prod_type, prod_dict in product_dict.items():
-            self.layout.addWidget(QLabel(prod_type))
+        for i, item in enumerate(product_dict.items()):
+            prod_type = item[0]
+            prod_dict = item[1]
+            self.wids[prod_type] = {}
 
             # Get the actual int values for product type constraints
             # [Como, visc, absorp]
@@ -41,64 +74,107 @@ class ProductBlade(QWidget):
                 "absorbency": constraint_vals[2],
                 "viscosity": constraint_vals[1]
             }
-            # Get range of values for ea. constraint
-            constraint_const_dict = {
-                "comedogenic": config.getConst("comedogenicRating"),
-                "absorbency": config.getConst("absorbency"),
-                "viscosity": config.getConst("viscosity")
-            }
             
+            prod_layout = QVBoxLayout()
+            # Bold product type label
+            header = QtGui.QFont("Avenir", 10, QtGui.QFont.Bold)
+            prod_label = QLabel(prod_type.title())
+            prod_label.setFont(header)
+            prod_layout.addWidget(prod_label)
             # Display the constraint values
             for constraint, value in prod_dict.items():
                 if constraint == "types":
                     continue
-                # Constraint name
-                self.layout.addWidget(QLabel(constraint))
-
                 slider_layout = QGridLayout()
+                # Constraint name
+                header2 = QtGui.QFont("Avenir", 8, QtGui.QFont.Bold)
+                l = QLabel(constraint.title())
+                l.setFont(header2)
+                slider_layout.addWidget(l, 0 ,0)
+
                 # Create sliders for all 3 constraint options
-                slider = QSlider(Qt.Horizontal)
-                # number of ticks
-                tick_num = len(constraint_const_dict[constraint]) - 1
-                slider.setRange(0, tick_num)
-                slider.setValue(constraint_dict[constraint])
-
-                # Slider tick settingss
-                slider.setTickPosition(QSlider.TicksBelow)
-                slider.setTickInterval(1)  # Freq of ticks shown
-                slider.setSingleStep(1)    # Step of slider click (does work here)
-
-                # This line trys to line up ticks with tick labels
-                slider_layout.addWidget(slider, 0, 0, 1, tick_num)
+                tick_num = len(self.constraint_const_dict[constraint])
+                # x10 everything to get slider mouse click working
+                sliderObj = sliderWrapper(0, (tick_num-1)*10, constraint_dict[constraint]*10, 10)
+                slider_layout.addWidget(sliderObj.slider, 0, 1)
 
                 # Tick labels
-                for i, tick in enumerate(constraint_const_dict[constraint]):
+                tick_layout = QGridLayout()
+                for j, tick in enumerate(self.constraint_const_dict[constraint]):
                     tick_label = QLabel(str(tick))
                     # This line trys to line up tick labels with ticks above
-                    slider_layout.addWidget(tick_label, 1, i, 1, i+1)
+                    tick_layout.addWidget(tick_label, 0, j, 1, -1)
+                slider_layout.addLayout(tick_layout, 1, 1)
+                prod_layout.addLayout(slider_layout)
+                # Save slider object
+                self.wids[prod_type][constraint] = sliderObj
+            
+            self.layout.addLayout(prod_layout, i//2, i%2)
 
-                self.layout.addLayout(slider_layout)
-            self.setLayout(self.layout)
+        # Save button
+        self.save_button = QPushButton("Save")
+        self.save_button.clicked.connect(self.saveSettings)
+        self.layout.addWidget(self.save_button, 2,1)
+        self.setLayout(self.layout)
+
+    def saveSettings(self):
+        for prod_type in self.wids.keys():
+            for setting, slider in self.wids[prod_type].items():
+                int_val = slider.value()/10  # int x10 actual value
+                actual_val = self.constraint_const_dict[setting][int_val] # string
+                self.config.setProduct(prod_type, setting, self.constraint_const_dict[setting][int_val])
 
 class ColumnBlade(QWidget):
 
     def __init__(self, columns_dict, config):
         QWidget.__init__(self)
-        self.layout = QVBoxLayout()
-        for spreadsheet, col_dict in columns_dict.items():
-            self.layout.addWidget(QLabel(spreadsheet))
+        self.config = config
+        self.layout = QGridLayout()
+        # Dict to store all line edit widgets
+        self.colSettings = {}
 
+        for i, item in enumerate(columns_dict.items()):
+            spreadsheet = item[0]
+            col_dict = item[1]
+            self.colSettings[spreadsheet] = {}
+
+            sheet_layout = QVBoxLayout()
+            sheet_layout.addWidget(QLabel(spreadsheet))
             # Add edit boxes for each column
             for col_name, cur_value in col_dict.items():
-                edit_layout = QGridLayout()
                 col_name_label = QLabel(col_name)
-                edit_box = QLineEdit(str(cur_value))
+                if type(cur_value) == list:
+                    cur_value = ','.join(cur_value)
+                edit_box = QLineEdit(cur_value)
                 # Put label and editable box in same line
-                edit_layout.addWidget(col_name_label, 0, 0)
-                edit_layout.addWidget(edit_box, 0, 1)
+                edit_layout = QVBoxLayout()
+                edit_layout.addWidget(col_name_label)
+                edit_layout.addWidget(edit_box)
 
-                self.layout.addLayout(edit_layout)
+                sheet_layout.addLayout(edit_layout)
+
+                # Save line widget to dict for saving to config
+                self.colSettings[spreadsheet][col_name] = edit_box
+
+            self.layout.addLayout(sheet_layout, i//2, i%2)
+
+        # Save button
+        self.save_button = QPushButton("Save")
+        self.save_button.clicked.connect(self.saveSettings)
+        self.layout.addWidget(self.save_button)
+
         self.setLayout(self.layout)
+
+    def saveSettings(self):
+        for spreadsheet in self.colSettings.keys():
+            for col_name in self.colSettings[spreadsheet].keys():
+                wid_value = self.colSettings[spreadsheet][col_name].text()
+                # Save necessary cols as list
+                wid_value = wid_value.split(',')
+                if len(wid_value) == 1:
+                    wid_value = wid_value[0]
+                self.config.setColname(spreadsheet, col_name, wid_value)
+
 
 class ValuesBlade(QWidget):
 
@@ -167,22 +243,4 @@ class ValuesBlade(QWidget):
         for setting, spinbox in self.incre_boxes:
             self.config.setVal(setting, spinbox.value())
 
-class sliderWrapper:
-    def __init__(self, lowBound, upBound, cur_value, tick_interval):
 
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(lowBound, upBound)
-        self.slider.setValue(cur_value)
-        self.slider.setTickPosition(QSlider.TicksBelow)
-        self.slider.setTickInterval(tick_interval)
-        self.slider.valueChanged.connect(self.updateVal)
-        self.label = QLabel(f"{cur_value}%")
-
-        # Ticklabel
-        self.tick_layout = QGridLayout()
-        for i in range((upBound-lowBound)//tick_interval + 1):
-            tick_label = QLabel(str(lowBound + i*tick_interval))
-            self.tick_layout.addWidget(tick_label, 0, i, -1, -1)
-
-    def updateVal(self):
-        self.label.setText(f"{self.slider.value()}%")

@@ -13,6 +13,7 @@ class FormulationFiller:
     SOF = 7
 
     def __init__(self, ingredients_df, gdriveObject):
+        self.ingredients_df = ingredients_df
         self.config = FigMe()
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
@@ -21,11 +22,14 @@ class FormulationFiller:
         for soln in results:
             name = soln["CustomerName"].title()
             product_type = soln["ProductType"].title()
-            try:
-                self.write_to_template(soln["Ingredients"], name, product_type)
-            except:
-                self.warn.displayWarningDialog("Write Failure", 
-                    f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
+            self.write_to_template(soln["Ingredients"], name, product_type)
+            # try:
+            #     self.write_to_template(soln["Ingredients"], name, product_type)
+            # except Exception as e:
+            #     print(e)
+            #     self.warn.displayWarningDialog("Write Failure", 
+            #         f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbeded formating.")
+                
         print("All form sheet generated.")
 
     def write_to_template(self, ingredients, customer_name, prod_type):
@@ -44,7 +48,7 @@ class FormulationFiller:
         sheet = workbook.active
 
 
-        ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
+        ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
         assigned_vals = self.calc_ingredient_weight(ingredients, prod_type, self.ingredients_df)
 
         # Fill header info
@@ -135,7 +139,8 @@ class FormulationFiller:
         sheet = workbook.active
 
         # Get all required data to fill sheet
-        ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
+        ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
+        assigned_vals = {}
 
         # Fill main table entries
         for ingredient_name in ingredients:
@@ -161,19 +166,31 @@ class FormulationFiller:
                     # If only one is left then keep using that one
                     else:
                         assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
+        # Scale to 100
+        assigned_vals = self.scale_water_weight(assigned_vals, ww_dict)
+        return assigned_vals
+
+    def scale_water_weight(self, assigned_vals, ww_dict):
+        # Get fixed weight %
+        fixed_weight = 0
+        for ingredient, weight in ww_dict.items():
+            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
+                fixed_weight += weight[0]
 
         # Scale to 100
         tot = sum(assigned_vals.values())
-        if tot > 100:
+        target = 100 - fixed_weight
+        if tot > target:
             for key in assigned_vals.keys():
-                assigned_vals[key] = round(assigned_vals[key] * 100/tot, 1)
-        elif tot < 100:
-            leftover = 100 - tot
+                assigned_vals[key] = round(assigned_vals[key] * (target)/tot, 1)
+        elif tot < target:
+            leftover = target - tot
             for key in assigned_vals.keys():
                 assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
         else:
             pass
         return assigned_vals
+
 
     def get_misc_items(self, sheet):
         """ Creates the dicts and values needed for reallocation
@@ -186,7 +203,7 @@ class FormulationFiller:
         ww_dict = dd(list)
         phase_dict = {}
         realloc_dict = {}
-        assigned_dict = {}
+        #assigned_dict = {}
 
         i = self.SOF
         # Record the w/w% for all types
@@ -197,16 +214,18 @@ class FormulationFiller:
             ww_dict[cell_ingredient].append(cell_weight)
             phase_dict[cell_ingredient] = sheet[F"C{i}"].value
 
-            # Add fixed ingredient to assigned dict
-            if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
-                assigned_dict[cell_ingredient] = cell_weight
-            # If no fixed, add to dict to be reallocated
-            else:
+            # # Add fixed ingredient to assigned dict
+            # if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
+            #     assigned_dict[cell_ingredient] = cell_weight
+            # # If no fixed, add to dict to be reallocated
+            # else:
+            #     realloc_dict[f"D{i}"] = cell_weight
+            if not(("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient)):
                 realloc_dict[f"D{i}"] = cell_weight
 
             i += 1
         EOF = i
-        return ww_dict, phase_dict, realloc_dict, assigned_dict, EOF
+        return ww_dict, phase_dict, realloc_dict, EOF
 
     def too_many_slots(self, realloc_dict, sheet):
         """ Reallocates extra percentages to other ingredients.

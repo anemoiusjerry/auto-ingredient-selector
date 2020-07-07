@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 from PySide2.QtWidgets import *
 from PySide2.QtGui import QPixmap, QIcon
+import copy
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
@@ -13,18 +14,47 @@ class InfoTab(QWidget):
     def __init__(self, config):
         QWidget.__init__(self)
         self.config=config
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
         self.gdriveAPI = Gdriver()
 
+        init_layout = self.load_init_layout(config)
+        self.layout.addLayout(init_layout)
+
+        # Init. load
+        self.loadSheetLocal()
+        self.setLayout(self.layout)
+
+    def load_init_layout(self, config):
+        # Sheets + edit box layout
+        sheets_layout = QGridLayout()
         self.infosheet_browser = FileBrowser("csv", "Information Sheet Paragraphs", config)
         self.infosheet_browser.button.clicked.connect(self.loadSheetLocal)
-        self.layout.addWidget(self.infosheet_browser)
+        sheets_layout.addWidget(self.infosheet_browser, 0, 0)
 
         self.instruction_browser = FileBrowser("dir", "Product Instructions Directory", config)
-        self.layout.addWidget(self.instruction_browser)
-        # Init. load
-        self.loadSheetCloud()
-        self.setLayout(self.layout)
+        sheets_layout.addWidget(self.instruction_browser,0, 1)
+
+        # Address and website edits
+        sheets_layout.addWidget(QLabel("Address"), 1, 0)
+        self.address = QLineEdit(self.config.getMisc("address"))
+        self.address.editingFinished.connect(lambda: self.save_misc_entry("address", self.address.text()))
+        self.address.setMinimumSize(200, 25)
+        sheets_layout.addWidget(self.address, 2, 0)
+
+        sheets_layout.addWidget(QLabel("Website"), 1, 1)
+        self.website = QLineEdit(self.config.getMisc("website"))
+        self.website.editingFinished.connect(lambda: self.save_misc_entry("website", self.website.text()))
+        self.website.setMinimumSize(200, 25)
+        sheets_layout.addWidget(self.website, 2, 1)
+
+        sheets_layout.addWidget(QLabel("Font"), 1, 2)
+        self.font = QLineEdit(self.config.getMisc("font"))
+        self.font.editingFinished.connect(lambda: self.save_misc_entry("font", self.font.text()))
+        self.font.setMinimumSize(200, 25)
+        sheets_layout.addWidget(self.font, 2, 2)
+        
+        return sheets_layout
+
 
     def run(self):
         reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
@@ -33,23 +63,11 @@ class InfoTab(QWidget):
     def loadSheetLocal(self):
         try:
             # If failed then use local vers
-            print(self.infosheet_browser.display.text())
             self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
             self.loadUi(self.infoSheet_df)
         except Exception as e:
             print(e)
             print("Local load failed")
-    def loadSheetCloud(self):
-        try:
-            # Query Gdrive for info sheet
-            fh, file_id = self.gdriveAPI.fetch_file("InformationSheet")
-            self.infoSheet_id = file_id
-            self.infoSheet_df = pd.read_excel(fh)
-            self.loadUi(self.infoSheet_df)
-        except:
-            print("Could not Load from GDrive, trying load locally...")
-            self.loadSheetLocal()
-
 
     def loadUi(self, df):
 
@@ -69,22 +87,24 @@ class InfoTab(QWidget):
         add_button.clicked.connect(self.add_section)
         button_layout.addWidget(add_button, 0, 2)
 
-        self.layout.addLayout(button_layout, 2, 0)
-
-        self.del_buttons = []
+        self.layout.addLayout(button_layout, 2)
+        
+        self.sections = []
         self.txt_boxes = []
         for i in range(df.shape[1]):
             heading = list(df)[i]
             body = df.iloc[0,i]
-            banner_layout, t = self.create_paragraph_section(heading, body)
-            pos = self.layout.rowCount()
-            self.layout.addLayout(banner_layout, pos, 0)
-            self.layout.addWidget(t, pos+1, 0)
+            section_layout = self.create_paragraph_section(heading, body)
+            self.layout.addLayout(section_layout)
+
+        
 
     def save(self):
         # Update self dataframe
         new_dict = {}
+
         for label, txt_box in self.txt_boxes:
+            print(label.text())
             try:
                 new_dict[label.text()] = [txt_box.toPlainText()]
             except Exception as e:
@@ -94,12 +114,6 @@ class InfoTab(QWidget):
 
         # Local save
         self.infoSheet_df.to_excel(self.infosheet_browser.display.text(), index=False)
-
-        # GDrive save
-        if self.infoSheet_id != None:
-            self.gdriveAPI.push_file("InformationSheet.xlsx",
-                                     self.infosheet_browser.display.text(),
-                                     fileId=self.infoSheet_id)
 
     def add_section(self):
         dialog = QDialog()
@@ -132,9 +146,8 @@ class InfoTab(QWidget):
 
         banner_layout, t = self.create_paragraph_section(n_heading, n_body)
 
-        pos = self.layout.rowCount()
-        self.layout.addLayout(banner_layout, pos, 0)
-        self.layout.addWidget(t, pos+1, 0)
+        self.layout.addLayout(banner_layout)
+        self.layout.addWidget(t)
 
         dialog.close()
 
@@ -143,41 +156,115 @@ class InfoTab(QWidget):
 
         # Create label
         l = QLabel(n_heading)
+        l.setMinimumSize(50, 50)
         banner_layout.addWidget(l, 0, 0)
-
+        
         # Create text boxes
-        t = QTextEdit(n_body)
+        if type(n_body) == str:
+            t = QTextEdit(n_body)
+        else:
+            t = QTextEdit("AutoFilled by system")
+            t.setReadOnly(True)
+
         t.setMinimumSize(50, 50)
         self.txt_boxes.append((l, t))
 
+        # Up button
+        upButton = self.create_button_icon("/Assets/caret-up.svg")
+        banner_layout.addWidget(upButton, 0, 1)
+        # Down button
+        downButton = self.create_button_icon("/Assets/caret-down.svg")   
+        banner_layout.addWidget(downButton, 0, 2)
         # Delete button
+        del_button = self.create_button_icon("/Assets/trash.svg")
+        banner_layout.addWidget(del_button, 0, 3)
+
+        # Package banner label and textbox into one layout
+        section_layout = QVBoxLayout()
+        section_layout.addLayout(banner_layout)
+        section_layout.addWidget(t)
+
+        #self.del_buttons.append(ButtonWrapper(button, l, t, self.layout))
+        self.sections.append(SectionWrapper(upButton, downButton, del_button, l, t, section_layout, self.layout, self.txt_boxes))
+        return section_layout
+
+    def create_button_icon(self, pic_path):
         button = QPushButton()
-        # Set trash icon
+        # Set icon
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
         else:
             app_path = os.getcwd()
-        icon = QPixmap(app_path + "/Assets/trash.svg")
+        icon = QPixmap(app_path + pic_path)
         button.setIcon(QIcon(icon))
         button.setMaximumWidth(30)
-        self.del_buttons.append(ButtonWrapper(button, l, t))
-        banner_layout.addWidget(button, 0, 1)
+        return button
 
-        return banner_layout, t
+    def save_misc_entry(self, key, text):
+        self.config.setMisc(key, text)
 
-
-class ButtonWrapper:
-    def __init__(self, button, label, text_box):
-        self.df = None
+class SectionWrapper:
+    def __init__(self, upButton, downButton, button, l, t, section_layout, layout, txt_boxes):
+        self.upButton = upButton
+        self.downButton = downButton
         self.button = button
-        self.label = label
-        self.text_box = text_box
+        self.l = l
+        self.t = t
+        self.section_layout = section_layout
+        self.layout = layout
 
+        self.upButton.clicked.connect(lambda: self.move("up"))
+        self.downButton.clicked.connect(lambda: self.move("down"))
         self.button.clicked.connect(self.del_section)
+        
+        self.txt_boxes = txt_boxes
+
+    def move(self, direction):
+        # make a copy of layout
+        copy_banner = QGridLayout()
+        copy_banner.addWidget(self.l, 0, 0)
+        copy_banner.addWidget(self.upButton, 0, 1)
+        copy_banner.addWidget(self.downButton, 0, 2)
+        copy_banner.addWidget(self.button, 0, 3)
+
+        copy_sec = QVBoxLayout()
+        copy_sec.addLayout(copy_banner)
+        copy_sec.addWidget(self.t)
+        
+        ix = self.layout.indexOf(self.section_layout)
+        if direction == "down":
+            self.layout.insertLayout(ix+2, copy_sec)
+            loc = self.txt_boxes.index((self.l, self.t))
+            self.txt_boxes.insert(loc+1, self.txt_boxes.pop(loc))
+        else:
+            self.layout.insertLayout(ix-1, copy_sec)
+            loc = self.txt_boxes.index((self.l, self.t))
+            self.txt_boxes.insert(loc-1, self.txt_boxes.pop(loc))
+
+        self.section_layout.deleteLater()
+        self.section_layout = copy_sec
 
     def del_section(self):
-        #df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
-        self.label.deleteLater()
-        self.text_box.deleteLater()
+        self.upButton.deleteLater()
+        self.downButton.deleteLater()
         self.button.deleteLater()
-        #return df
+        self.l.deleteLater()
+        self.t.deleteLater()
+        self.section_layout.deleteLater()
+
+
+# class ButtonWrapper:
+#     def __init__(self, button, label, text_box):
+#         self.button = button
+#         self.label = label
+#         self.text_box = text_box
+#         self.button.clicked.connect(self.del_section)
+
+#         self.layout = layout
+
+#     def del_section(self):
+#         #df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
+#         self.label.deleteLater()
+#         self.text_box.deleteLater()
+#         self.button.deleteLater()
+#         #return df

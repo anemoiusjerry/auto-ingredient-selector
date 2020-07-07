@@ -26,7 +26,7 @@ class FileBrowser(QDialog):
         layout.addWidget(self.display,1,0)
         layout.addWidget(self.button,1,1)
         self.setLayout(layout)
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(200)
         self.setFixedHeight(80)
 
     def createButton(self, type, config):
