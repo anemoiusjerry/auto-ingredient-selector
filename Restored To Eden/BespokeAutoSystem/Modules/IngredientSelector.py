@@ -1,4 +1,5 @@
 from .FormulationFiller import FormulationFiller
+from ..WarningRaiser import WarningRaiser
 from config.configParser import FigMe
 from ..dlx3 import DLX
 import pandas as pd
@@ -7,18 +8,25 @@ import math
 import os
 import copy
 import xlsxwriter
+from PySide2.QtCore import QObject, Signal, Slot
 from datetime import date
 from collections import defaultdict as dd
 from openpyxl import load_workbook
-from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
-class IngredientSelector:
-    def __init__(self, orders, ingredients, qnair, catalog, filler):
+class IngredientSelector(QObject):
+    launched = Signal(int)
+    stateChanged = Signal(str, str, int)
+    cancel = Signal()
+    def __init__(self, orders, ingredients, qnair, catalog):
+        # signal setup
+        QObject.__init__(self)
+
         config = FigMe()
+
         self.config = config
-        self.warn = WarningRaiser()
-        self.filler = filler
         self.SOF = 7
+        self.warn = WarningRaiser()
+
         # orders columns
         self.customerCol = config.getColname("Orders Spreadsheet", "customer")
         self.orderCol = config.getColname("Orders Spreadsheet", "order number")
@@ -66,7 +74,13 @@ class IngredientSelector:
         self.qnair = qnair
         self.catalog = catalog
 
+        # progress variables
+        self.solsFound = 0
+        self.stop = False
+
     def selectIngredients(self):
+        # send the launched signal with the length of the orders
+        self.launched.emit(self.orders.shape[0])
 
         # Creating new file for the orders to be saved into
         savedir = self.config.getDir("Export Directory")
@@ -76,11 +90,15 @@ class IngredientSelector:
 
         returns = []
         for index, order in self.orders.iterrows():
+            self.progress = index
 
             # Find the customer questionnaire using the name or email address
             # !!!! NOTE: A dialog should be added to check that the email corresponds to the correct person
             name = order[self.customerCol]
             email = order[self.emailCol]
+            # Change the state of the progress dialog
+            text = "Order " + order[self.orderCol] +", "+ name
+            self.stateChanged.emit("retrieve", text, self.progress)
 
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
@@ -88,8 +106,8 @@ class IngredientSelector:
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
-                # Warn user if name in order and questionnaire do NOT match
-                self.warn.displayWarningDialog("", f"Order for {name.title()} has no matching questionnaire. Check that the names match between order sheet and the questionnaire.")
+                #self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Qestionairre.")
+                print("no matching name found for ", name)
                 continue
 
             # Finding the products required to fulfil the order. if they cannot be found, skip to next order
@@ -99,6 +117,8 @@ class IngredientSelector:
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
+                print("item not in catalog: ", item)
+                raise Exception("Unknown Item")
                 continue
 
             # Create a folder for the order
@@ -112,12 +132,10 @@ class IngredientSelector:
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-
-                try:
-                    solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                except:
-                    self.warn.displayWarningDialog("orderParser failure", "Failed to find ingredients for order.")
-
+                solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                if self.stop:
+                    workbook.close()
+                    return None
                 # create a new worksheet for each solution
                 self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
                 workbook.close()
@@ -127,9 +145,12 @@ class IngredientSelector:
                                     "CustomerName": name,
                                     "ProductType": product})
 
-        return returns
+        if returns:
+            return returns
+        return None
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
+
         # Ailment label format
         _ailDict = {"bold": True,
                     "align": "right",
@@ -158,6 +179,21 @@ class IngredientSelector:
 
         i=1
         for solution in solutions:
+            #sorting the ingredients to be grouped by their type
+            sortDict = dd(list)
+            tmplst = []
+            for ingrd in solution[0]:
+                for r in rows:
+                    if r[1] == ingrd:
+                        type = cols[r[0][-1][0]][0]
+                        break
+                sortDict[type].append(ingrd)
+
+            for key, val in sortDict.items():
+                tmplst.extend(val)
+            solution = list(solution)
+            solution[0] = tmplst
+
             worksheet = workbook.add_worksheet("Solution " + str(i))
             # Write the row headers (skin problems & ingredient types)
             row = 2
@@ -211,10 +247,22 @@ class IngredientSelector:
                 ncol = ncol + 1
             i = i+1
 
-        # Write the additional info column
-        # Write the Climate conditions
-        # Write the allergies
-        # write the strength of the fragrance
+            # Adding the unresolved columns and additional benefits
+            row = nrow + 3
+            worksheet.write(row, 0, "Unresolved Conditions", headail_format)
+            if len(unresolved) > 0:
+                for j in range(len(unresolved)):
+                    worksheet.write(row + j + 1, 0, unresolved[j])
+            else:
+                worksheet.write(row + 1, 0, 'everything is resolved')
+
+            row = row + 2 + len(unresolved)
+            worksheet.write(row, 0, "Additional Benefits", headail_format)
+            if len(solution[2]) > 0:
+                for j in range(len(solution[2])):
+                    worksheet.write(row + 1 + j, 0, solution[2][j])
+            else:
+                worksheet.write(row + 1, 0, 'No additional benefits')
 
     def orderParser(self, product, qdata):
 
@@ -231,13 +279,11 @@ class IngredientSelector:
         # Convert cols into dlx useable format
         cols = [(cols[i],0,self.lowBound,self.upBound) for i in range(len(cols))]
 
-        # If Essential oils are part of the product recipe, make sure they are included at least once
+        # If an ingredient type is part of the product recipe, make sure they are included at least once
         for type in types:
             cols.append((type,0,self.tpyeoverlap_low,self.typeoverlap_up))
             colind = len(cols) - 1
             for row in rows:
-                # ind = ingredients["INGREDIENT COMMON NAME"].values.tolist().index(row[1])
-                # ^^ this was removed due to the set_index function. If something is wrong check here
                 ingredtype = self.ingredients.loc[row[1],self.typeCol]
                 if type in ingredtype:
                     row[0].append((colind, None))
@@ -262,6 +308,8 @@ class IngredientSelector:
 
         # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
+        matrix.sols.connect(self.getDlxSols)
+        self.cancel.connect(matrix.stop_)
         solutions = matrix.dance()
 
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
@@ -272,8 +320,10 @@ class IngredientSelector:
                 if cols[i][0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]: # Hardcoded
                     cols[i][3] = self.upBound
                 cols[i] = tuple(cols[i])
-
+            #matrix.solsFound.disconnect(self.getDlxSols)
             matrix = DLX(cols, rows)
+            matrix.sols.connect(self.getDlxSols)
+            self.cancel.connect(matrix.stop_)
             solutions = matrix.dance()
 
         print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
@@ -295,14 +345,20 @@ class IngredientSelector:
 
         target = self.config.getTarget(product)
         chosen = []
+        solLen = len(solutions)
         _lenlst = [len(s) for s in solutions]
         maxlen, minlen = max(_lenlst), min(_lenlst)
         maxBenefits, leastBenefits = 0, 0
-        """
-        if len(solutions) > 1000:
-            solutions = solutions[:1000]
-        """
-        for solution in solutions[:]:
+
+        j=0
+        for solution in solutions:
+            if self.stop:
+                return None
+            # send signal if the index of solution is a multiple of 100
+            if j % 500 == 0:
+                self.solsSorted(j, solLen)
+            j = j+1
+
             vals = dd(list)
             benefits = 0
             benefits_lst = []
@@ -310,14 +366,12 @@ class IngredientSelector:
                 # Finding information to calculate fit
                 # Retrieve comodegenic rating
                 _como = self.ingredients.loc[ingredient,self.comedogenicCol]
-                
+
                 if _como == "":
-                    vals[ingredient].append(0)  
+                    vals[ingredient].append(0)
                 else:
                     vals[ingredient].append(self.comeConst.index(int(float(_como))))
-                """
-                vals[ingredient].append(0) if _como == "" else vals[ingredient].append(self.comeConst.index(int(float(_como))))
-                """
+
                 # Retrieve Viscocity
                 key = self.ingredients.loc[ingredient,self.viscocityCol]
                 try:
@@ -333,7 +387,7 @@ class IngredientSelector:
 
                 # Finding additional benefits
                 for skinProb in self.ingredients.loc[ingredient,self.skinProbCol]:
-                    if skinProb in ailments:
+                    if skinProb not in ailments:
                         benefits = benefits + 1
                         benefits_lst.append(skinProb)
                 if benefits > maxBenefits:
@@ -363,11 +417,11 @@ class IngredientSelector:
                     if chosen[i][1] > score:
                         chosen[i] = (solution, score, list(set(benefits_lst)))
                         break
-
+        """
         print("Best solutions: ")
         for sol in chosen:
             print(sol)
-
+        """
         return chosen
 
     def matrixGen(self, product, ailments, userCons):
@@ -520,3 +574,19 @@ class IngredientSelector:
 
             i += 1
         return ww_dict, assigned_dict
+
+    def solsSorted(self, i, max):
+        state = "sorting"
+        info = str(i) + " of " + str(max)
+        self.stateChanged.emit(state, info, self.progress)
+
+    @Slot(int)
+    def getDlxSols(self, i):
+        state = "finding"
+        info = str(i) + " Solutions found"
+        self.stateChanged.emit(state, info, self.progress)
+
+    @Slot()
+    def stop_(self):
+        self.stop = True
+        self.cancel.emit()

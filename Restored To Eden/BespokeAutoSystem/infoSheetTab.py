@@ -139,7 +139,7 @@ class InfoTab(QWidget):
 
         dialog.setLayout(layout)
         dialog.exec_()
-    
+
     def add_N_close(self, dialog, n_heading, n_body):
         new_section_df = pd.DataFrame({n_heading: [n_body]})
         self.infoSheet_df = pd.concat([self.infoSheet_df, new_section_df], axis=1)

@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from PySide2.QtCore import QObject, Signal
 # Spreadsheet library
 from openpyxl import load_workbook
 from datetime import *
@@ -22,14 +23,11 @@ class FormulationFiller:
         for soln in results:
             name = soln["CustomerName"].title()
             product_type = soln["ProductType"].title()
-            self.write_to_template(soln["Ingredients"], name, product_type)
-            # try:
-            #     self.write_to_template(soln["Ingredients"], name, product_type)
-            # except Exception as e:
-            #     print(e)
-            #     self.warn.displayWarningDialog("Write Failure", 
-            #         f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbeded formating.")
-                
+            try:
+                self.write_to_template(soln["Ingredients"], name, product_type)
+            except:
+                self.warn.displayWarningDialog("Write Failure",
+                    f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
         print("All form sheet generated.")
 
     def write_to_template(self, ingredients, customer_name, prod_type):

@@ -1,5 +1,5 @@
 import os
-import sys
+import traceback, sys
 import logging
 import pandas as pd
 import jinja2

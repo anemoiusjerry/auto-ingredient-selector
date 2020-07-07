@@ -130,8 +130,8 @@
         "typeoverlap_up": 3,
         "maxsols": 1,
         "fitweight": 0.8,
-        "numingredweight": 0.1,
-        "addedbenefitweight": 0.1,
+        "numingredweight": 0.0,
+        "addedbenefitweight": 0.97,
         "darkmode": 1
     },
     "Misc": {

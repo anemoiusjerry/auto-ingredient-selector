@@ -41,60 +41,71 @@ class FigMe:
                 file_type = dfpath.split(".")[-1]
                 if file_type == "csv":
                     df = pd.read_csv(dfpath)
-                else:
+                elif file_type == "xlsx":
                     df = pd.read_excel(dfpath)
+                else:
+                    if not os.path.isdir(dfpath):
+                        self.warn.displayWarningDialog("Load Error", f"File ({dfpath}) is not a csv or xlsx")
+                        raise Exception("Incorrect filetype")
+                    return None
             except:
                 # Pop up dialog that errors when not all df are browsed
                 print(f"{dfname} Not browsed")
-                self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
+                if not os.path.isdir(dfpath):
+                    self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
+                    raise Exception("Error loading dataframe")
                 return None
+   
+        if self.checkCols(df, dfname):
+            df.fillna("", inplace=True)
 
-        df.fillna("", inplace=True)
-        
+            # Save a copy of original INCI formatting
+            inci_names = None
+            if dfname == "Ingredients Spreadsheet":
+                inciCol = self.getColname("Ingredients Spreadsheet", "inci")
+                inci_names = df[[inciCol]]
 
-        # Dont apply lower() to INCI column in ingrdients
-        inciCol = self.getColname("Ingredients Spreadsheet", "inci")
-        inci_names = None
-        if dfname == "Ingredients Spreadsheet":
-            inci_names = df[[inciCol]]
+            # Convert all string to lowercase
+            df = df.applymap(lambda x:str(x).lower())
 
-        df = df.applymap(lambda x:str(x).lower())
-
-        if dfname == "Ingredients Spreadsheet":
-            typeCol = self.getColname("Ingredients Spreadsheet", "type")
-            skinProbCol = self.getColname("Ingredients Spreadsheet", "skin problem")
-            contrainsCol = self.getColname("Ingredients Spreadsheet", "contraindications")
-            nameCol = self.getColname("Ingredients Spreadsheet", "name")
-
-            # Replace with not lowercased inci
-            df[[inciCol]] = inci_names
+            if dfname == "Ingredients Spreadsheet":
+                typeCol = self.getColname("Ingredients Spreadsheet", "type")
+                skinProbCol = self.getColname("Ingredients Spreadsheet", "skin problem")
+                contrainsCol = self.getColname("Ingredients Spreadsheet", "contraindications")
+                nameCol = self.getColname("Ingredients Spreadsheet", "name")
+                # Replace with not lowercased inci
+                df[[inciCol]] = inci_names
             
-            for colname in [typeCol, skinProbCol, contrainsCol]:
-                df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
-            df.set_index(nameCol, drop=False, inplace=True)
+                for colname in [typeCol, skinProbCol, contrainsCol]:
+                    df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
+                df.set_index(nameCol, drop=False, inplace=True)
 
-        elif dfname == "Orders Spreadsheet":
-            customerCol = self.getColname("Orders Spreadsheet", "customer")
-            df[customerCol] = df[customerCol].apply(lambda x:" ".join(x.split()))
+            elif dfname == "Orders Spreadsheet":
+                customerCol = self.getColname("Orders Spreadsheet", "customer")
+                df[customerCol] = df[customerCol].apply(lambda x:" ".join(x.split()))
 
-        elif dfname == "Customer Questionnaire":
-            nameCol = self.getColname("Customer Questionnaire", "name")
-            ailmentCols = self.getColname("Customer Questionnaire", "skin problem")
-            pregnancyCol = self.getColname("Customer Questionnaire", "pregnancy")
-            cusContrainCol = self.getColname("Customer Questionnaire", "contraindications")
+            elif dfname == "Customer Questionnaire":
+                nameCol = self.getColname("Customer Questionnaire", "name")
+                ailmentCols = self.getColname("Customer Questionnaire", "skin problem")
+                pregnancyCol = self.getColname("Customer Questionnaire", "pregnancy")
+                cusContrainCol = self.getColname("Customer Questionnaire", "contraindications")
 
-            df[nameCol] = df[nameCol].apply(lambda x:" ".join(x.split()))
-            for colname in ailmentCols + [pregnancyCol, cusContrainCol]:
-                df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
+                df[nameCol] = df[nameCol].apply(lambda x:" ".join(x.split()))
+                for colname in ailmentCols + [pregnancyCol, cusContrainCol]:
+                    df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
 
-        elif dfname == "Product Catalog":
-            itemCol = self.getColname("Product Catalog", "item")
-            productCol = self.getColname("Product Catalog", "products")
+            elif dfname == "Product Catalog":
+                itemCol = self.getColname("Product Catalog", "item")
+                productCol = self.getColname("Product Catalog", "products")
 
-            df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
-            df.set_index(itemCol, inplace=True)
+                df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
+                df.set_index(itemCol, inplace=True)
 
-        return df
+            return df
+        else:
+            self.warn.displayWarningDialog("Load Error", f"({dfpath}) column names do not match")
+            raise Exception("names dont match")
+            #sys.exit()
 
     def getVal(self,variable):
         return self.masterDict["Values"][variable]
@@ -140,3 +151,14 @@ class FigMe:
         json_obj = json.dumps(self.masterDict, indent=4)
         with open(self.path, "w") as fp:
             fp.write(json_obj)
+
+    def checkCols(self, df, dfname):
+        dfCols = set(list(df.columns))
+        knownCols = []
+        for key, val in self.masterDict["Column names"][dfname].items():
+            if type(val) == list:
+                knownCols.extend(val)
+            else:
+                knownCols.append(val)
+
+        return set(knownCols).issubset(dfCols)
