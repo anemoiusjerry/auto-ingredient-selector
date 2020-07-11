@@ -137,6 +137,10 @@
     "Misc": {
         "address": "xxxxxxxx",
         "website": "www.restoredtoeden.com",
-        "font": "Raleway"
+        "font": "Raleway",
+        "gdrive": 1
+    },
+    "GoogleDrive": {
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest"
     }
 }

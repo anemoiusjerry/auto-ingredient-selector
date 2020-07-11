@@ -18,7 +18,7 @@ class Gdriver:
         """
         # If modifying these scopes, delete the file token.pickle.
         SCOPES = ['https://www.googleapis.com/auth/drive',
-                'https://www.googleapis.com/auth/spreadsheets']
+                  'https://www.googleapis.com/auth/spreadsheets']
 
         creds = None
         # The file token.pickle stores the user's access and refresh tokens, and is

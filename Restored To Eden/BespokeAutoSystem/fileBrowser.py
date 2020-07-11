@@ -4,7 +4,7 @@ from PySide2.QtWidgets import *
 
 class FileBrowser(QDialog):
 
-    def __init__(self, type, label, config, parent=None):
+    def __init__(self, type, label, config, parent=None, **kwargs):
         super(FileBrowser,self).__init__(parent)
 
         frameStyle = QFrame.Sunken | QFrame.StyledPanel
@@ -23,8 +23,19 @@ class FileBrowser(QDialog):
 
         layout = QGridLayout()
         layout.addWidget(self.label,0,0)
-        layout.addWidget(self.display,1,0)
-        layout.addWidget(self.button,1,1)
+
+        # Check whether google drive for this property is enabled
+        if kwargs.get("Gdrive"):
+            self.gdriveName = QLineEdit(config.getGdrive(label))
+            self.gdriveName.setPlaceholderText("Google Drive filename")
+            self.gdriveName.editingFinished.connect(lambda: config.setGdrive(label, self.gdriveName.text()))
+            layout.addWidget(self.gdriveName,1,0)
+            layout.addWidget(self.display,1,1)
+            layout.addWidget(self.button,1,2)
+        else:
+            layout.addWidget(self.display,1,0)
+            layout.addWidget(self.button,1,1)
+
         self.setLayout(layout)
         self.setMinimumWidth(200)
         self.setFixedHeight(80)

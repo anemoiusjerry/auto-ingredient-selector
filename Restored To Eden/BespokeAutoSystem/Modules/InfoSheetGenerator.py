@@ -8,6 +8,7 @@ import json
 import copy
 import docx
 import argparse
+import math
 
 from PySide2.QtWidgets import *
 from datetime import *
@@ -111,7 +112,20 @@ class InfoSheetGenerator:
 
     def fill_dates(self, sheet, df):
         date_blended = sheet["B3"].value
-        df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended}"
+        expiry_date = sheet["B6"].value
+        try:
+            dt = expiry_date - date_blended
+        except:
+            self.warn.displayWarningDialog("", "Date not in the format of dd/mm/yyyy")
+        # Always round down to nearest month
+        months = math.floor(dt.days / 30)
+        text = df.loc[0]["Used By & Best Before Date"]
+        df[["Used By & Best Before Date"]] = text.replace("...", f" {months} ")
+        
+        date_blended_str = datetime.strftime(date_blended, "%d/%m/%Y")
+        expiry_date_str = datetime.strftime(expiry_date, "%d/%m/%Y")
+        df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended_str}\
+                                                \nBest Before Date: {expiry_date_str}"
         return df
 
     def extract_incis(self, sheet, df):
@@ -127,6 +141,7 @@ class InfoSheetGenerator:
             if inci != None:
                 inci_str += inci + ", "
             i+=1
+        # Remove final comma with full stop
         inci_str = inci_str[:-2] + "."
 
         df[["Ingredients"]] = inci_str

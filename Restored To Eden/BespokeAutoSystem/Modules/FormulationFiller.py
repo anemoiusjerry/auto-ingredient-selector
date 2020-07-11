@@ -11,7 +11,7 @@ from config.configParser import FigMe
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class FormulationFiller:
-    SOF = 7
+    SOF = 8
 
     def __init__(self, ingredients_df, gdriveObject):
         self.ingredients_df = ingredients_df
@@ -45,19 +45,17 @@ class FormulationFiller:
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
 
-
         ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
         assigned_vals = self.calc_ingredient_weight(ingredients, prod_type, self.ingredients_df)
 
         # Fill header info
         sheet["B1"] = customer_name
         sheet["B2"] = prod_type
-        if sheet["B5"].value == None:
+        if type(sheet["B5"].value) != int:
             sheet["B5"] = 100 # placeholder (varies)
 
         i=0
         while len(assigned_vals) > 0:
-            print(f"i={i}       length={len(assigned_vals)}")
             # End loop if not enough slots
             if len(realloc_dict) <= 0 or i >= len(assigned_vals):
                 sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
@@ -80,17 +78,20 @@ class FormulationFiller:
 
                 else:
                     # Get ingredient types ???????????/// Waiting for answer to simply column
-                    type_list = self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
+                    type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+                    type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
 
                     for ingredient_type in type_list:
 
                         if "essential oil" in ingredient_type:
-                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+                            eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
+                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name][eo_note_col_name].lower()
 
                         # Fill row in ingredient types match
                         if (ingredient_type == sheet[f"B{j}"].value.lower()):
                             # INCI
-                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name]["INGREDIENT INCI NAME"]
+                            inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name][inci_col_name]
                             # Ingredient Name
                             sheet[f"B{j}"] = ingredient_name
                             # w/w%
@@ -98,7 +99,8 @@ class FormulationFiller:
                             # Fill needs targted column if applicable
                             try:
                                 if sheet[f"F{6}"].value.lower() == "needs targetting":
-                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name]["SKIN PROBLEM"]
+                                    prob_col_name = self.config.getColname("Ingredients Spreadsheet", "skin problem")
+                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name][prob_col_name]
                             except:
                                 print("No needs targetting column.")
 
@@ -118,7 +120,7 @@ class FormulationFiller:
         if len(realloc_dict) > 0:
             sheet = self.too_many_slots(realloc_dict, sheet)
 
-        sheet = self.write_grams(sheet)
+        #sheet = self.write_grams(sheet)
         filename = customer_name + "-" + prod_type + ".xlsx"
         path = self.export_to_file(workbook, filename)
 
@@ -144,14 +146,14 @@ class FormulationFiller:
         for ingredient_name in ingredients:
 
             # Get ingredient types ???????????/// Waiting for answer to simplify column
-            type_list = ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
+            type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+            type_list = ingredients_df.loc[ingredient_name][type_col_name]
 
             for ingredient_type in type_list:
-                #if "essential oil" in ingredient_type:
-                #    ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
-
-                if "essential oil" in ingredient_type:                              # Haydens Fix
-                    note = ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"]#       |
+                # EO is labelled diff in form sheets
+                if "essential oil" in ingredient_type:     
+                    eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")                         # Haydens Fix
+                    note = ingredients_df.loc[ingredient_name][eo_note_col_name]    #       |
                     if note:                                                        #       |
                         ingredient_type = "eo " + note                              #       |
                     else:                                                           #       \/
@@ -201,7 +203,6 @@ class FormulationFiller:
         ww_dict = dd(list)
         phase_dict = {}
         realloc_dict = {}
-        #assigned_dict = {}
 
         i = self.SOF
         # Record the w/w% for all types
@@ -256,12 +257,14 @@ class FormulationFiller:
                 continue
 
             # Get ingredient type and assign corresponding w/w%
-            type_list = self.ingredients_df.loc[ingredient]["TYPE OF INGREDIENT"]
+            type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+            type_list = self.ingredients_df.loc[ingredient][type_col_name]
             for i_type in type_list:
                 if i_type in phase_dict.keys():
                     # Insert leftovers at end of sheet
                     sheet.insert_rows(EOF)
-                    sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient]["INGREDIENT INCI NAME"]  # INCI name
+                    inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+                    sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient][inci_col_name]      # INCI name
                     sheet[f"B{EOF}"] = ingredient                                              # name
                     sheet[f"C{EOF}"] = phase_dict[i_type]                                      # Phase
                     sheet[f"D{EOF}"] = weight                                                  # w/w%
