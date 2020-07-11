@@ -28,14 +28,17 @@ class FigMe:
             self.masterDict = json.load(config)
 
     def getDF(self, dfname):
-
-        try:
-            # Retrieve from gdrive
-            list(3)
-            fh, file_id = self.gdriveAPI.fetch_file(dfname)
-            df = pd.read_excel(fh)
-        # Try to get df locally if google drive fails
-        except:
+        """ dfname is the label of in landing tab
+        """
+        if (dfname == "Ingredients Spreadsheet") and (self.getMisc("gdrive") != 0):
+            try:
+                # Retrieve from gdrive
+                gdrive_name = self.getGdrive(dfname)
+                fh, file_id = self.gdriveAPI.fetch_file(gdrive_name)
+                df = pd.read_excel(fh)
+            except:
+                self.warn.displayWarningDialog("", f"Cannot fetch {dfname} from Google Drive - check filename in drive and your internet connection.")
+        else:
             try:
                 dfpath = self.masterDict["Directories"][dfname]
                 file_type = dfpath.split(".")[-1]
@@ -58,6 +61,14 @@ class FigMe:
 
         if self.checkCols(df, dfname):
             df.fillna("", inplace=True)
+
+            # Save a copy of original INCI formatting
+            inci_names = None
+            if dfname == "Ingredients Spreadsheet":
+                inciCol = self.getColname("Ingredients Spreadsheet", "inci")
+                inci_names = df[[inciCol]]
+
+            # Convert all string to lowercase
             df = df.applymap(lambda x:str(x).lower())
 
             if dfname == "Ingredients Spreadsheet":
@@ -65,7 +76,9 @@ class FigMe:
                 skinProbCol = self.getColname("Ingredients Spreadsheet", "skin problem")
                 contrainsCol = self.getColname("Ingredients Spreadsheet", "contraindications")
                 nameCol = self.getColname("Ingredients Spreadsheet", "name")
-
+                # Replace with not lowercased inci
+                df[[inciCol]] = inci_names
+            
                 for colname in [typeCol, skinProbCol, contrainsCol]:
                     df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
                 df.set_index(nameCol, drop=False, inplace=True)
@@ -91,6 +104,9 @@ class FigMe:
                 df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
                 df.set_index(itemCol, inplace=True)
 
+            # Remove duplicates
+            df = df.loc[~df.index.duplicated(keep="first")]
+
             return df
         else:
             self.warn.displayWarningDialog("Load Error", f"({dfpath}) column names do not match")
@@ -104,6 +120,8 @@ class FigMe:
 
     def getColname(self,dataframe, col):
         return self.masterDict["Column names"][dataframe][col]
+    def setColname(self, dataframe, col, new_value):
+        self.masterDict["Column names"][dataframe][col] = new_value
 
     def getConst(self,key):
         # Constants are stored as a list of values, key refers to the constant name
@@ -111,10 +129,11 @@ class FigMe:
 
     def getProduct(self,product, var):
         return self.masterDict["Product"][product][var]
+    def setProduct(self, product, var, new_value):
+        self.masterDict["Product"][product][var] = new_value
 
     def getDir(self,directory):
         return self.masterDict["Directories"][directory]
-
     def setDir(self, directory, new_path):
         self.masterDict["Directories"][directory] = new_path
 
@@ -128,6 +147,16 @@ class FigMe:
         absorb = constants["absorbency"].index(dic["absorbency"])
 
         return [como, visc, absorb]
+
+    def getMisc(self, key):
+        return self.masterDict["Misc"][key]       
+    def setMisc(self, key, new_value):
+        self.masterDict["Misc"][key] = new_value
+
+    def getGdrive(self, key):
+        return self.masterDict["GoogleDrive"][key]
+    def setGdrive(self, key, new_value):
+        self.masterDict["GoogleDrive"][key] = new_value
 
     def saveConfig(self):
         json_obj = json.dumps(self.masterDict, indent=4)

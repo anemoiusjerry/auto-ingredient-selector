@@ -22,11 +22,11 @@ class LandingTab(QWidget):
         # Dict of widget { wid_name: widget object }
         self.widgets = {}
         # UI Datasheets
+        self.widgets["orders_sheet"] = FileBrowser("csv", "Orders Spreadsheet", self.config)
         self.widgets["patient_sheet"] = FileBrowser("csv", "Customer Questionnaire", self.config)
         self.widgets["catalog_sheet"] = FileBrowser("csv", "Product Catalog", self.config)
-        self.widgets["ingredient_sheet"] = FileBrowser("csv", "Ingredients Spreadsheet", self.config)
-        self.widgets["orders_sheet"] = FileBrowser("csv", "Orders Spreadsheet", self.config)
-
+        self.widgets["ingredient_sheet"] = FileBrowser("csv", "Ingredients Spreadsheet", self.config, Gdrive=True)
+        # Directories
         self.widgets["formulation_dir"] = FileBrowser("dir", "Formulation Sheets Directory", self.config)
         self.widgets["save_dir"] = FileBrowser("dir", "Export Directory", self.config)
 
@@ -34,31 +34,46 @@ class LandingTab(QWidget):
         layout = QVBoxLayout()
         for wid in self.widgets.values():
             layout.addWidget(wid)
-
+        
         footer_layout = QGridLayout()
         self.run_button = QPushButton("&Run")
         self.run_button.clicked.connect(self.runDLX)
         self.run_button.setFixedWidth(70)
         footer_layout.addWidget(self.run_button, 0, 0)
 
-        # Dark mode toggle button
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(1)
-        self.slider.setValue(config.getVal("darkmode"))
-        self.slider.setFixedWidth(40)
-        self.slider.valueChanged.connect(lambda: self.toggleDark(app))
-        self.toggleDark(app)
-        toggle_label = QLabel("Go Dark")
-        toggle_label.setFixedWidth(50)
+        # Google drive toggle button
+        gdrive_toggle_layout = self.create_toggle_button("G-Drive")
+        footer_layout.addLayout(gdrive_toggle_layout, 0, 1)
+        self.gdrive_slider = gdrive_toggle_layout.itemAt(1).widget()
+        # Set val from config
+        self.gdrive_slider.setValue(config.getMisc("gdrive"))
+        self.gdrive_slider.valueChanged.connect(lambda: config.setMisc("gdrive", self.gdrive_slider.value()))
 
-        toggle_layout = QGridLayout()
-        toggle_layout.addWidget(toggle_label, 0, 0)
-        toggle_layout.addWidget(self.slider, 0, 1)
-        footer_layout.addLayout(toggle_layout, 0, 1)
+        # Dark mode toggle button
+        dark_toggle_layout = self.create_toggle_button("Go Dark")
+        footer_layout.addLayout(dark_toggle_layout, 0, 2)
+        self.dark_slider = dark_toggle_layout.itemAt(1).widget()
+        # Set last value from config
+        self.dark_slider.setValue(config.getVal("darkmode"))
+        self.dark_slider.valueChanged.connect(lambda: self.toggleDark(app))
+        self.toggleDark(app)
 
         layout.addLayout(footer_layout)
         self.setLayout(layout)
+
+    def create_toggle_button(self, label):
+        toggle_label = QLabel(label)
+        toggle_label.setFixedWidth(50)
+
+        slider = QSlider(Qt.Horizontal)
+        slider.setMinimum(0)
+        slider.setMaximum(1)
+        slider.setFixedWidth(40)
+        # Package into layout
+        toggle_layout = QGridLayout()
+        toggle_layout.addWidget(toggle_label, 0, 0)
+        toggle_layout.addWidget(slider, 0, 1)
+        return toggle_layout
 
     def define_palettes(self):
         default_palette = QPalette()
@@ -80,11 +95,11 @@ class LandingTab(QWidget):
         return default_palette, dark_palette
 
     def toggleDark(self, app):
-        if self.slider.value() == 0:
+        if self.dark_slider.value() == 0:
             app.setPalette(self.defaultmode)
         else:
             app.setPalette(self.darkmode)
-        self.config.setVal("darkmode", self.slider.value())
+        self.config.setVal("darkmode", self.dark_slider.value())
 
     def runDLX(self):
         self.config.saveConfig()
@@ -122,14 +137,14 @@ class LandingTab(QWidget):
 
     def createDataFrames(self):
         # Store all dataframes in dictionary
-        #config = FigMe()
         dataframes = {}
 
         for key in self.widgets.keys():
             # Only process to df if widget stores a spreadsheet
-            fetch_name = self.widgets[key].label.text()
-            df = self.config.getDF(fetch_name)
-            dataframes[self.widgets[key].label.text()] = df
+            if not ("dir" in key): 
+                fetch_name = self.widgets[key].label.text()
+                df = self.config.getDF(fetch_name)
+                dataframes[self.widgets[key].label.text()] = df
 
         return dataframes
 

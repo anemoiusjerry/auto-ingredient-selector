@@ -11,9 +11,10 @@ from config.configParser import FigMe
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class FormulationFiller:
-    SOF = 7
+    SOF = 8
 
     def __init__(self, ingredients_df, gdriveObject):
+        self.ingredients_df = ingredients_df
         self.config = FigMe()
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
@@ -44,19 +45,17 @@ class FormulationFiller:
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
 
-
-        ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
+        ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
         assigned_vals = self.calc_ingredient_weight(ingredients, prod_type, self.ingredients_df)
 
         # Fill header info
         sheet["B1"] = customer_name
         sheet["B2"] = prod_type
-        if sheet["B5"].value == None:
+        if type(sheet["B5"].value) != int:
             sheet["B5"] = 100 # placeholder (varies)
 
         i=0
         while len(assigned_vals) > 0:
-            print(f"i={i}       length={len(assigned_vals)}")
             # End loop if not enough slots
             if len(realloc_dict) <= 0 or i >= len(assigned_vals):
                 sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
@@ -79,17 +78,20 @@ class FormulationFiller:
 
                 else:
                     # Get ingredient types ???????????/// Waiting for answer to simply column
-                    type_list = self.ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
+                    type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+                    type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
 
                     for ingredient_type in type_list:
 
                         if "essential oil" in ingredient_type:
-                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
+                            eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
+                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name][eo_note_col_name].lower()
 
                         # Fill row in ingredient types match
                         if (ingredient_type == sheet[f"B{j}"].value.lower()):
                             # INCI
-                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name]["INGREDIENT INCI NAME"]
+                            inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name][inci_col_name]
                             # Ingredient Name
                             sheet[f"B{j}"] = ingredient_name
                             # w/w%
@@ -97,7 +99,8 @@ class FormulationFiller:
                             # Fill needs targted column if applicable
                             try:
                                 if sheet[f"F{6}"].value.lower() == "needs targetting":
-                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name]["SKIN PROBLEM"]
+                                    prob_col_name = self.config.getColname("Ingredients Spreadsheet", "skin problem")
+                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name][prob_col_name]
                             except:
                                 print("No needs targetting column.")
 
@@ -117,7 +120,7 @@ class FormulationFiller:
         if len(realloc_dict) > 0:
             sheet = self.too_many_slots(realloc_dict, sheet)
 
-        sheet = self.write_grams(sheet)
+        #sheet = self.write_grams(sheet)
         filename = customer_name + "-" + prod_type + ".xlsx"
         path = self.export_to_file(workbook, filename)
 
@@ -136,20 +139,21 @@ class FormulationFiller:
         sheet = workbook.active
 
         # Get all required data to fill sheet
-        ww_dict, phase_dict, realloc_dict, assigned_vals, EOF = self.get_misc_items(sheet)
+        ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
+        assigned_vals = {}
 
         # Fill main table entries
         for ingredient_name in ingredients:
 
             # Get ingredient types ???????????/// Waiting for answer to simplify column
-            type_list = ingredients_df.loc[ingredient_name]["TYPE OF INGREDIENT"]
+            type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+            type_list = ingredients_df.loc[ingredient_name][type_col_name]
 
             for ingredient_type in type_list:
-                #if "essential oil" in ingredient_type:
-                #    ingredient_type = "eo " + ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"].lower()
-
-                if "essential oil" in ingredient_type:                              # Haydens Fix
-                    note = ingredients_df.loc[ingredient_name]["ESSENTIAL OIL NOTE"]#       |
+                # EO is labelled diff in form sheets
+                if "essential oil" in ingredient_type:     
+                    eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")                         # Haydens Fix
+                    note = ingredients_df.loc[ingredient_name][eo_note_col_name]    #       |
                     if note:                                                        #       |
                         ingredient_type = "eo " + note                              #       |
                     else:                                                           #       \/
@@ -162,19 +166,31 @@ class FormulationFiller:
                     # If only one is left then keep using that one
                     else:
                         assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
+        # Scale to 100
+        assigned_vals = self.scale_water_weight(assigned_vals, ww_dict)
+        return assigned_vals
+
+    def scale_water_weight(self, assigned_vals, ww_dict):
+        # Get fixed weight %
+        fixed_weight = 0
+        for ingredient, weight in ww_dict.items():
+            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
+                fixed_weight += weight[0]
 
         # Scale to 100
         tot = sum(assigned_vals.values())
-        if tot > 100:
+        target = 100 - fixed_weight
+        if tot > target:
             for key in assigned_vals.keys():
-                assigned_vals[key] = round(assigned_vals[key] * 100/tot, 1)
-        elif tot < 100:
-            leftover = 100 - tot
+                assigned_vals[key] = round(assigned_vals[key] * (target)/tot, 1)
+        elif tot < target:
+            leftover = target - tot
             for key in assigned_vals.keys():
                 assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
         else:
             pass
         return assigned_vals
+
 
     def get_misc_items(self, sheet):
         """ Creates the dicts and values needed for reallocation
@@ -187,7 +203,6 @@ class FormulationFiller:
         ww_dict = dd(list)
         phase_dict = {}
         realloc_dict = {}
-        assigned_dict = {}
 
         i = self.SOF
         # Record the w/w% for all types
@@ -198,16 +213,18 @@ class FormulationFiller:
             ww_dict[cell_ingredient].append(cell_weight)
             phase_dict[cell_ingredient] = sheet[F"C{i}"].value
 
-            # Add fixed ingredient to assigned dict
-            if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
-                assigned_dict[cell_ingredient] = cell_weight
-            # If no fixed, add to dict to be reallocated
-            else:
+            # # Add fixed ingredient to assigned dict
+            # if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
+            #     assigned_dict[cell_ingredient] = cell_weight
+            # # If no fixed, add to dict to be reallocated
+            # else:
+            #     realloc_dict[f"D{i}"] = cell_weight
+            if not(("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient)):
                 realloc_dict[f"D{i}"] = cell_weight
 
             i += 1
         EOF = i
-        return ww_dict, phase_dict, realloc_dict, assigned_dict, EOF
+        return ww_dict, phase_dict, realloc_dict, EOF
 
     def too_many_slots(self, realloc_dict, sheet):
         """ Reallocates extra percentages to other ingredients.
@@ -240,12 +257,14 @@ class FormulationFiller:
                 continue
 
             # Get ingredient type and assign corresponding w/w%
-            type_list = self.ingredients_df.loc[ingredient]["TYPE OF INGREDIENT"]
+            type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+            type_list = self.ingredients_df.loc[ingredient][type_col_name]
             for i_type in type_list:
                 if i_type in phase_dict.keys():
                     # Insert leftovers at end of sheet
                     sheet.insert_rows(EOF)
-                    sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient]["INGREDIENT INCI NAME"]  # INCI name
+                    inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+                    sheet[f"A{EOF}"] = self.ingredients_df.loc[ingredient][inci_col_name]      # INCI name
                     sheet[f"B{EOF}"] = ingredient                                              # name
                     sheet[f"C{EOF}"] = phase_dict[i_type]                                      # Phase
                     sheet[f"D{EOF}"] = weight                                                  # w/w%

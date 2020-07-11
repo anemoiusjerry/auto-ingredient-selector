@@ -8,6 +8,7 @@ import json
 import copy
 import docx
 import argparse
+import math
 
 from PySide2.QtWidgets import *
 from datetime import *
@@ -30,13 +31,19 @@ class InfoSheetGenerator:
         else:
             app_path = os.getcwd()
 
+        # Normal template
         tmpPath =  app_path + "/Assets/InfoSheetTemplate.html"
         html_tmp = open(tmpPath, 'r')
-
-        # Jinja2 Setup
         self.template = jinja2.Environment(loader=jinja2.BaseLoader).from_string(html_tmp.read())
+
+        # Men template
+        menPath = app_path + "/Assets/CourageousTemplate.html"
+        cour_tmp = open(menPath, 'r')
+        self.courTemplate = jinja2.Environment(loader=jinja2.BaseLoader).from_string(cour_tmp.read())
+
         # Allow use of len method in html
         self.template.globals["len"] = len
+        self.courTemplate.globals["len"] = len
 
         wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
@@ -44,10 +51,18 @@ class InfoSheetGenerator:
             "orientation":"Landscape",
             "enable-local-file-access":None
         }
+        self.app_path = app_path
 
     def process_all(self):
         # Get all formulation sheets from output dir
         path = self.config.getDir("Export Directory") + "/Formulation Sheets"
+
+        # Pass all non-order dependent information
+        self.misc_values = {}
+        self.misc_values["assetsPath"] = self.app_path + "/Assets"
+        self.misc_values["address"] = self.config.getMisc("address")
+        self.misc_values["website"] = self.config.getMisc("website")
+        self.misc_values["font"] = self.config.getMisc("font")
 
         # Create list of all formlation sheet files
         sheet_paths = []
@@ -72,10 +87,11 @@ class InfoSheetGenerator:
 
             # Pass all info to gen brochure
             print("calling generate report")
-            try:
-                self.generateReport(headings, paragraphs, name, prod_type)
-            except:
-                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
+            self.generateReport(headings, paragraphs, name, prod_type)
+            # try:
+            #     self.generateReport(headings, paragraphs, name, prod_type)
+            # except:
+            #     self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
 
     def fill_instructions(self, name, prod_type, df):
         # Get product instructions
@@ -91,12 +107,25 @@ class InfoSheetGenerator:
         for para in doc.paragraphs:
             fullText += para.text
 
-        df.insert(0, "Recommedations For Use", fullText)
+        df[["Recommendations For Use"]] = fullText
         return df
 
     def fill_dates(self, sheet, df):
         date_blended = sheet["B3"].value
-        df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended}"
+        expiry_date = sheet["B6"].value
+        try:
+            dt = expiry_date - date_blended
+        except:
+            self.warn.displayWarningDialog("", "Date not in the format of dd/mm/yyyy")
+        # Always round down to nearest month
+        months = math.floor(dt.days / 30)
+        text = df.loc[0]["Used By & Best Before Date"]
+        df[["Used By & Best Before Date"]] = text.replace("...", f" {months} ")
+        
+        date_blended_str = datetime.strftime(date_blended, "%d/%m/%Y")
+        expiry_date_str = datetime.strftime(expiry_date, "%d/%m/%Y")
+        df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended_str}\
+                                                \nBest Before Date: {expiry_date_str}"
         return df
 
     def extract_incis(self, sheet, df):
@@ -112,26 +141,20 @@ class InfoSheetGenerator:
             if inci != None:
                 inci_str += inci + ", "
             i+=1
+        # Remove final comma with full stop
         inci_str = inci_str[:-2] + "."
 
-        # insert position at second to last column
-        pos = df.shape[1] - 1
-        df.insert(pos, "Ingredients", inci_str)
+        df[["Ingredients"]] = inci_str
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
-        # getting correct path of the application
-
-        if getattr(sys, 'frozen', False):
-            app_path = sys._MEIPASS
+        # Use male template if a male product
+        if "man" in prod_type.lower():
+            html_str = self.courTemplate.render(headings=headings, paragraphs=paragraphs,
+                name=name.title(), prod_type=prod_type.title(), misc_vals=self.misc_values)
         else:
-            app_path = os.getcwd()
-
-        assets_path = app_path + "/Assets"
-
-
-        html_str = self.template.render(headings=headings, paragraphs=paragraphs,
-                                        name=name.title(), prod_type=prod_type.title(), assets_path=assets_path)
+            html_str = self.template.render(headings=headings, paragraphs=paragraphs,
+                name=name.title(), prod_type=prod_type.title(), misc_vals=self.misc_values)
 
         # HTML is shit. We spent 2 hours debugging code that wasnt used. poop
 
@@ -141,7 +164,9 @@ class InfoSheetGenerator:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        pdfkit.from_string(html_str, output_path + f"/{name}-{prod_type}-report.pdf", configuration=self.pdfkitConfig, options=self.options)
+        pdfkit.from_string(html_str, 
+            output_path + f"/{name}-{prod_type}-report.pdf", 
+            configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):
         headings = list(df)

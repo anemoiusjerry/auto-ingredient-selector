@@ -36,9 +36,9 @@ class TabDialog(QTabWidget):
 def main():
     """ Central control point for all modules.
     """
-    # This line changes cwd to RTE folder (for Windows)
-    if os.name == "nt":
-        os.chdir(os.getcwd() + "/Restored To Eden")
+    # # This line changes cwd to RTE folder (for Windows)
+    # if os.name == "nt":
+    #     os.chdir(os.getcwd() + "/Restored To Eden")
     # Load UI
     app = QApplication(sys.argv)
     app.setStyle("Fusion")

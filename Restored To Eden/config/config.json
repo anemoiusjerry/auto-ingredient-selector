@@ -75,6 +75,7 @@
     "Column names": {
         "Ingredients Spreadsheet": {
             "name": "INGREDIENT COMMON NAME",
+            "inci": "INGREDIENT INCI NAME",
             "stock": "In Stock",
             "type": "TYPE OF INGREDIENT",
             "EO note": "ESSENTIAL OIL NOTE",
@@ -127,10 +128,19 @@
         "maxupBound": 50,
         "tpyeoverlap_low": 1,
         "typeoverlap_up": 3,
-        "maxsols": 5,
+        "maxsols": 1,
         "fitweight": 0.8,
         "numingredweight": 0.0,
         "addedbenefitweight": 0.97,
         "darkmode": 1
+    },
+    "Misc": {
+        "address": "xxxxxxxx",
+        "website": "www.restoredtoeden.com",
+        "font": "Raleway",
+        "gdrive": 1
+    },
+    "GoogleDrive": {
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest"
     }
 }
