@@ -114,7 +114,7 @@
     },
     "Directories": {
         "Ingredients Spreadsheet": "/Users/HG/Desktop/RTE-Ingredients-Database-Latest.xlsx",
-        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Orders Database.xlsx",
+        "Orders Spreadsheet": "/Users/HG/Desktop/orders-monnihardstone.csv",
         "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
         "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
         "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
@@ -138,7 +138,7 @@
         "address": "xxxxxxxx",
         "website": "www.restoredtoeden.com",
         "font": "Raleway",
-        "gdrive": 1
+        "gdrive": 0
     },
     "GoogleDrive": {
         "Ingredients Spreadsheet": "RTE Ingredients Database - Latest"
