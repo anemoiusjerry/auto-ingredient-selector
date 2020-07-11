@@ -366,6 +366,7 @@ class IngredientSelector(QObject):
                 # Finding information to calculate fit
                 # Retrieve comodegenic rating
                 _como = self.ingredients.loc[ingredient,self.comedogenicCol]
+                print("como", _como)
 
                 if _como == "":
                     vals[ingredient].append(0)
