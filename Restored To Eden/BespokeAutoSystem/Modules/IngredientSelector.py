@@ -24,7 +24,7 @@ class IngredientSelector(QObject):
         config = FigMe()
 
         self.config = config
-        self.SOF = 8
+        self.SOF = 7
         self.warn = WarningRaiser()
 
         # orders columns
@@ -42,6 +42,7 @@ class IngredientSelector(QObject):
         self.comedogenicCol = config.getColname("Ingredients Spreadsheet", "comedogenic")
         self.viscocityCol = config.getColname("Ingredients Spreadsheet", "viscosity")
         self.absorptionCol = config.getColname("Ingredients Spreadsheet", "absorption")
+        self.EOnoteCol = config.getColname("Ingredients Spreadsheet", "EO note")
 
         # questionnaire columns
         self.qnameCol = config.getColname("Customer Questionnaire", "name")
@@ -344,7 +345,7 @@ class IngredientSelector(QObject):
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active
         # Get all required data to fill sheet
-        ww_dict = self.get_misc_items(sheet)
+        ww_dict, assigned_vals = self.get_misc_items(sheet)
 
         target = self.config.getTarget(product)
         chosen = []
@@ -398,7 +399,7 @@ class IngredientSelector(QObject):
                 elif benefits < leastBenefits:
                     leastBenefits = benefits
             # Returns the percentage composition of each ingredient in the product
-            composition = self.calc_ingredient_weight(solution, ww_dict)
+            composition = self.calc_ingredient_weight(solution, ww_dict, copy.deepcopy(assigned_vals))
             # Returns the point that this current solution occupies
             point = self.pointGen(composition, vals)
             # Returns the maximum distance from the target point and the distance to the point
@@ -514,22 +515,21 @@ class IngredientSelector(QObject):
                 nodes.append((problems.index(cure),None))
         return nodes
 
-    def calc_ingredient_weight(self, solution, ww_dict):
+    def calc_ingredient_weight(self, solution, ww_dict, assigned_vals):
         """ Takes parameters from ingredient selector and calculates to ingredient weights
             inputs: solution - [ingredient names]
                     product type - product type string
                     self.ingredients - dataframe of ingredient database
         """
-        assigned_vals = {}
         # Fill main table entries
         for ingredient_name in solution:
 
             # Get ingredient types ???????????/// Waiting for answer to simplify column
-            type_list = self.ingredients.loc[ingredient_name][self.config.getColname("Ingredients Spreadsheet", "type")]
+            type_list = self.ingredients.loc[ingredient_name][self.typeCol]
 
             for ingredient_type in type_list:
                 if "essential oil" in ingredient_type:
-                    note = self.ingredients.loc[ingredient_name]["ESSENTIAL OIL NOTE"]
+                    note = self.ingredients.loc[ingredient_name][self.EOnoteCol]
                     if note:
                         ingredient_type = "eo " + note
                     else:
@@ -544,11 +544,25 @@ class IngredientSelector(QObject):
                         assigned_vals[ingredient_name] = ww_dict[ingredient_type][0]
 
         # Scale to 100
-        assigned_vals = self.scale_water_weight(assigned_vals, ww_dict)
+        tot = sum(assigned_vals.values())
+        if tot > 100:
+            for key in assigned_vals.keys():
+                assigned_vals[key] = round(assigned_vals[key] * 100/tot, 1)
+        elif tot < 100:
+            leftover = 100 - tot
+            for key in assigned_vals.keys():
+                assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
+        else:
+            pass
         return assigned_vals
 
     def get_misc_items(self, sheet):
+        """ Creates the dicts and values needed for reallocation
+            Returns: ww_dict - dict { ingredient type: w/w% }
+                     assigned_dict - dict { ingredient type: w/w% } init. filled with all does not change names
+        """
         ww_dict = dd(list)
+        assigned_dict = {}
 
         i = self.SOF
         # Record the w/w% for all types
@@ -557,29 +571,13 @@ class IngredientSelector(QObject):
             cell_weight = sheet[f"D{i}"].value
 
             ww_dict[cell_ingredient].append(cell_weight)
+
+            # Add fixed ingredient to assigned dict
+            if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
+                assigned_dict[cell_ingredient] = cell_weight
+
             i += 1
-        return ww_dict
-
-    def scale_water_weight(self, assigned_vals, ww_dict):
-        # Get fixed weight %
-        fixed_weight = 0
-        for ingredient, weight in ww_dict.items():
-            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
-                fixed_weight += weight[0]
-
-        # Scale to 100
-        tot = sum(assigned_vals.values())
-        target = 100 - fixed_weight
-        if tot > target:
-            for key in assigned_vals.keys():
-                assigned_vals[key] = round(assigned_vals[key] * (target)/tot, 1)
-        elif tot < target:
-            leftover = target - tot
-            for key in assigned_vals.keys():
-                assigned_vals[key] = round(assigned_vals[key] + leftover * assigned_vals[key]/tot, 1)
-        else:
-            pass
-        return assigned_vals
+        return ww_dict, assigned_dict
 
     def solsSorted(self, i, max):
         state = "sorting"
