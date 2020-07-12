@@ -275,13 +275,13 @@ class IngredientSelector(QObject):
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
         # Finding the customers contraindications
         usercons = qdata[self.pregnancyCol] + qdata[self.cusContrainCol]
-        print("userCons", usercons)
 
         # Retrieve the rows and columns that will make up the dlx matrix
         rows, cols = self.matrixGen(product, ailments, usercons)
 
         # Convert cols into dlx useable format
         cols = [(cols[i],0,self.lowBound,self.upBound) for i in range(len(cols))]
+        last = len(cols) - 1
 
         # If an ingredient type is part of the product recipe, make sure they are included at least once
         for type in types:
@@ -297,10 +297,11 @@ class IngredientSelector(QObject):
         unresolved = []
         for col in range(len(cols)-1, -1, -1):
             if col not in colsCovered:
+                if col <= last:
+                    last = last - 1
                 unresolved.append(cols.pop(col)[0])
                 for i in range(len(rows)):
                     rows[i] = list(rows[i])
-                    #rows[i][0] = [node for node in rows[i][0] if node[0] != col]
                     tmp = []
                     for node in rows[i][0]:
                         if node[0] != col:
@@ -310,32 +311,72 @@ class IngredientSelector(QObject):
                                 tmp.append(node)
                     rows[i] = (tmp, rows[i][1])
 
+        # check the amount of ingredient types can fulfil the tpyeoverlap_low constraint
+        mintype = dd(int)
+        mining = dd(int)
+        for row in rows:
+            for node in row[0]:
+                if node[0] > last:
+                    mintype[node[0]] = mintype[node[0]] + 1
+                else:
+                    mining[node[0]] = mining[node[0]] + 1
+
+        for key, val in mintype.items():
+            if val < self.tpyeoverlap_low:
+                cols[key] = list(cols[key])
+                cols[key][2] = val
+                cols[key] = tuple(cols[key])
+
+        for key, val in mining.items():
+            if val < self.lowBound:
+                cols[key] = list(cols[key])
+                cols[key][2] = val
+                cols[key] = tuple(cols[key])
+
         # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
-        matrix.sols.connect(self.getDlxSols)
-        self.cancel.connect(matrix.stop_)
-        solutions = matrix.dance()
+        solutions = self.solve(matrix)
 
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
-        while len(solutions) < 100 and self.upBound < self.maxupBound:
-            self.upBound = self.upBound + 1
-            for i in range(len(cols)):
-                cols[i] = list(cols[i])
-                if cols[i][0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]: # Hardcoded
-                    cols[i][3] = self.upBound
-                cols[i] = tuple(cols[i])
-            #matrix.solsFound.disconnect(self.getDlxSols)
-            matrix = DLX(cols, rows)
-            matrix.sols.connect(self.getDlxSols)
-            self.cancel.connect(matrix.stop_)
-            solutions = matrix.dance()
+        while len(solutions) < 100 and self.typeoverlap_up <= len(rows):
+
+            upBound = self.upBound
+            while len(solutions) < 100 and upBound <= len(rows):
+                upBound = upBound + 1
+                for i in range(0,last+1):
+                    cols[i] = list(cols[i])
+                    cols[i][3] = upBound
+                    cols[i] = tuple(cols[i])
+                matrix = DLX(cols, rows)
+                solutions = self.solve(matrix)
+
+            if len(solutions) < 100:
+                self.typeoverlap_up = self.typeoverlap_up + 1
+                for i in range(last+1,len(cols)):
+                    cols[i] = list(cols[i])
+                    cols[i][3] = self.typeoverlap_up
+                    cols[i] = tuple(cols[i])
+                matrix = DLX(cols, rows)
+                solutions = self.solve(matrix)
+            else:
+                break
 
         print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
         print(len(solutions))
-
-        bestSols = self.findBestSol(solutions, product, ailments)
         print("Unresolved: ", unresolved)
+
+        try:
+            bestSols = self.findBestSol(solutions, product, ailments)
+        except:
+            print("error occured while finding best solution")
+            raise
+
         return bestSols, rows, cols, unresolved
+
+    def solve(self, matrix):
+        matrix.sols.connect(self.getDlxSols)
+        self.cancel.connect(matrix.stop_)
+        return matrix.dance()
 
     def findBestSol(self, solutions, product, ailments):
         # Get template folder path

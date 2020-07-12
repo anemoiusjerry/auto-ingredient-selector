@@ -336,21 +336,20 @@ class DLX(QObject):
             k = self.itms[k].next
 
         if self.score < DLX.INFTY:
+            #unused spot have to look what this means
             a =1
-
 
         if self.score <= 0:
             return self.backdown
         if self.score == DLX.INFTY:
-            #print("level: ", self.level)
+
             self.count += 1
             self.partialsolution = []
             for i in range(self.level):
                 pp = self.choice[i]
                 cc = pp if pp < self.last_itm else self.nodes[pp].itm
 
-                #self.record_option(pp)
-
+                # Record the partial solution
                 if not(pp < self.last_itm or pp >= self.last_node or self.nodes[pp].itm <= 0):
                     self.partialsolution.append(self.rownames[self.rowid[pp]])
 
