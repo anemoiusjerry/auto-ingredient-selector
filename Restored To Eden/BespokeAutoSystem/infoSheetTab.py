@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 from PySide2.QtWidgets import *
 from PySide2.QtGui import QPixmap, QIcon
+from PySide2.QtCore import Qt, QSize
 import copy
 
 from .fileBrowser import FileBrowser
@@ -33,25 +34,6 @@ class InfoTab(QWidget):
 
         self.instruction_browser = FileBrowser("dir", "Product Instructions Directory", config)
         sheets_layout.addWidget(self.instruction_browser,0, 1)
-
-        # Address and website edits
-        sheets_layout.addWidget(QLabel("Address"), 1, 0)
-        self.address = QLineEdit(self.config.getMisc("address"))
-        self.address.editingFinished.connect(lambda: self.save_misc_entry("address", self.address.text()))
-        self.address.setMinimumSize(200, 25)
-        sheets_layout.addWidget(self.address, 2, 0)
-
-        sheets_layout.addWidget(QLabel("Website"), 1, 1)
-        self.website = QLineEdit(self.config.getMisc("website"))
-        self.website.editingFinished.connect(lambda: self.save_misc_entry("website", self.website.text()))
-        self.website.setMinimumSize(200, 25)
-        sheets_layout.addWidget(self.website, 2, 1)
-
-        sheets_layout.addWidget(QLabel("Font"), 1, 2)
-        self.font = QLineEdit(self.config.getMisc("font"))
-        self.font.editingFinished.connect(lambda: self.save_misc_entry("font", self.font.text()))
-        self.font.setMinimumSize(200, 25)
-        sheets_layout.addWidget(self.font, 2, 2)
         
         return sheets_layout
 
@@ -61,13 +43,15 @@ class InfoTab(QWidget):
         reporter.process_all()
 
     def loadSheetLocal(self):
-        try:
-            # If failed then use local vers
-            self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
-            self.loadUi(self.infoSheet_df)
-        except Exception as e:
-            print(e)
-            print("Local load failed")
+        self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
+        self.loadUi(self.infoSheet_df)
+        # try:
+        #     # If failed then use local vers
+        #     self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
+        #     self.loadUi(self.infoSheet_df)
+        # except Exception as e:
+        #     print(e)
+        #     print("Local load failed")
 
     def loadUi(self, df):
 
@@ -88,16 +72,26 @@ class InfoTab(QWidget):
         button_layout.addWidget(add_button, 0, 2)
 
         self.layout.addLayout(button_layout, 2)
+
+        # Scroll area for paragraphs
+        self.scroll = QScrollArea()
+        self.widget = QWidget()
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setWidget(self.widget)
         
+        self.para_layout = QVBoxLayout()
         self.sections = []
         self.txt_boxes = []
         for i in range(df.shape[1]):
             heading = list(df)[i]
             body = df.iloc[0,i]
             section_layout = self.create_paragraph_section(heading, body)
-            self.layout.addLayout(section_layout)
-
+            self.para_layout.addLayout(section_layout)
         
+        self.widget.setLayout(self.para_layout)
+        self.layout.addWidget(self.scroll)
 
     def save(self):
         # Update self dataframe
@@ -185,7 +179,7 @@ class InfoTab(QWidget):
         section_layout.addWidget(t)
 
         #self.del_buttons.append(ButtonWrapper(button, l, t, self.layout))
-        self.sections.append(SectionWrapper(upButton, downButton, del_button, l, t, section_layout, self.layout, self.txt_boxes))
+        self.sections.append(SectionWrapper(upButton, downButton, del_button, l, t, section_layout, self.para_layout, self.txt_boxes))
         return section_layout
 
     def create_button_icon(self, pic_path):
@@ -204,14 +198,14 @@ class InfoTab(QWidget):
         self.config.setMisc(key, text)
 
 class SectionWrapper:
-    def __init__(self, upButton, downButton, button, l, t, section_layout, layout, txt_boxes):
+    def __init__(self, upButton, downButton, button, l, t, section_layout, para_layout, txt_boxes):
         self.upButton = upButton
         self.downButton = downButton
         self.button = button
         self.l = l
         self.t = t
         self.section_layout = section_layout
-        self.layout = layout
+        self.para_layout = para_layout
 
         self.upButton.clicked.connect(lambda: self.move("up"))
         self.downButton.clicked.connect(lambda: self.move("down"))
@@ -231,13 +225,13 @@ class SectionWrapper:
         copy_sec.addLayout(copy_banner)
         copy_sec.addWidget(self.t)
         
-        ix = self.layout.indexOf(self.section_layout)
+        ix = self.para_layout.indexOf(self.section_layout)
         if direction == "down":
-            self.layout.insertLayout(ix+2, copy_sec)
+            self.para_layout.insertLayout(ix+2, copy_sec)
             loc = self.txt_boxes.index((self.l, self.t))
             self.txt_boxes.insert(loc+1, self.txt_boxes.pop(loc))
         else:
-            self.layout.insertLayout(ix-1, copy_sec)
+            self.para_layout.insertLayout(ix-1, copy_sec)
             loc = self.txt_boxes.index((self.l, self.t))
             self.txt_boxes.insert(loc-1, self.txt_boxes.pop(loc))
 

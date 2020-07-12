@@ -39,10 +39,21 @@ class FormulationFiller:
         """
         # Get template path to read it
         path = self.config.getDir("Formulation Sheets Directory")
-        template_path = path + "/" + prod_type + " Worksheet.xlsx"
+        formSheet_name = f"{prod_type} Worksheet"
+        template_path = f"{path}/{formSheet_name}.xlsx"
 
         # Load the excel sheet
-        workbook = load_workbook(filename=template_path)
+        try:
+            if self.config.masterDict["gdrive"]:
+                error_msg = "Failed to fetch formulation template from Google Drive."
+                fh, file_id = self.gdriveObject.fetch_file(formSheet_name)
+                workbook = load_workbook(fh)
+            else:
+                error_msg = "Failed to load formulation template."
+                workbook = load_workbook(filename=template_path)
+        except:
+            self.warn.displayWarningDialog("", error_msg)
+        
         sheet = workbook.active
 
         ww_dict, phase_dict, realloc_dict, EOF = self.get_misc_items(sheet)
@@ -121,8 +132,8 @@ class FormulationFiller:
             sheet = self.too_many_slots(realloc_dict, sheet)
 
         #sheet = self.write_grams(sheet)
-        filename = customer_name + "-" + prod_type + ".xlsx"
-        path = self.export_to_file(workbook, filename)
+        filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
+        path = self.export_to_file(workbook, filename, customer)
 
     def calc_ingredient_weight(self, ingredients, prod_type, ingredients_df):
         """ Takes parameters from ingredient selector and calculates to ingredient weights
@@ -281,10 +292,10 @@ class FormulationFiller:
             i+=1
         return sheet
 
-    def export_to_file(self, workbook, filename):
+    def export_to_file(self, workbook, filename, customer_name):
         """ Export as excel file to current working directory
         """
-        save_path = self.config.getDir("Export Directory") + "/Formulation Sheets/"
+        save_path = self.config.getDir("Export Directory") + f"/{customer_name}/"
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 

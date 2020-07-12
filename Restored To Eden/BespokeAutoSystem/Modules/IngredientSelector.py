@@ -84,9 +84,9 @@ class IngredientSelector(QObject):
 
         # Creating new file for the orders to be saved into
         savedir = self.config.getDir("Export Directory")
-        parentFolderPath = savedir + "/" + "Sheets"
-        if not os.path.exists(parentFolderPath):
-            os.makedirs(parentFolderPath)
+        # parentFolderPath = savedir + "/" + "Sheets"
+        # if not os.path.exists(parentFolderPath):
+        #     os.makedirs(parentFolderPath)
 
         returns = []
         for index, order in self.orders.iterrows():
@@ -122,15 +122,18 @@ class IngredientSelector(QObject):
                 continue
 
             # Create a folder for the order
-            ordername = str(order[self.customerCol]) + " " + str(date.today().strftime("%b-%d-%Y"))
-            orderFolderName = parentFolderPath + "/" + ordername
+            customer_name = str(order[self.customerCol]).title()
+
+            ordername =  str(date.today().strftime("%d.%m.%Y")) + f" - {customer_name} - Skin Analysis"
+            #orderFolderName = parentFolderPath + "/" + ordername
+            orderFolderName = savedir + "/" + customer_name
             if not os.path.exists(orderFolderName):
                 os.makedirs(orderFolderName)
 
             for product in products:
                 # Get the solutions
                 # create a new excel workbook for the order
-                wbookname = orderFolderName + "/" + str(product) + ".xlsx"
+                wbookname = orderFolderName + "/" + ordername + "-" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
                 solutions, rows, cols, unresolved = self.orderParser(product, qdata)
                 if self.stop:
@@ -410,7 +413,7 @@ class IngredientSelector(QObject):
             # Need to find the additional benefits <----------------------------------------------------------------------
 
             if len(chosen) < self.maxSols:
-                chosen.append((solution, score))
+                chosen.append((solution, score, list(set(benefits_lst))))
             elif score < max([sol[1] for sol in chosen]):
                 # remove the old maximum and add the solution to the list
                 for i in range(len(chosen)):

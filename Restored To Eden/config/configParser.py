@@ -30,7 +30,8 @@ class FigMe:
     def getDF(self, dfname):
         """ dfname is the label of in landing tab
         """
-        if (dfname == "Ingredients Spreadsheet") and (self.getMisc("gdrive") != 0):
+        # Attempt google drive retrieval for ingredients df
+        if (dfname == "Ingredients Spreadsheet") and (self.masterDict["gdrive"]):
             try:
                 # Retrieve from gdrive
                 gdrive_name = self.getGdrive(dfname)
@@ -157,6 +158,9 @@ class FigMe:
         return self.masterDict["GoogleDrive"][key]
     def setGdrive(self, key, new_value):
         self.masterDict["GoogleDrive"][key] = new_value
+
+    def setter(self, key, new_value):
+        self.masterDict[key] = new_value
 
     def saveConfig(self):
         json_obj = json.dumps(self.masterDict, indent=4)

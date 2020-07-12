@@ -14,12 +14,12 @@ class PrefTab(QTabWidget):
         for key, value in config.masterDict.items():
             if key == "Product":
                 self.addTab(ProductBlade(value, self.config), key)
-            elif key == "Constants":
-                continue
             elif key == "Column names":
                 self.addTab(ColumnBlade(value, self.config), key)
             elif key == "Values":
                 self.addTab(ValuesBlade(value, self.config), key)
+            elif key == "Misc":
+                self.addTab(MiscBlade(value, self.config), key)
             else:
                 pass
 
@@ -33,6 +33,7 @@ class sliderWrapper:
         self.slider.setTickInterval(tick_interval)
         self.slider.setSingleStep(tick_interval)
         self.slider.valueChanged.connect(self.updateVal)
+
         self.label = QLabel(f"{cur_value}%")
 
         # Ticklabel
@@ -81,6 +82,7 @@ class ProductBlade(QWidget):
             prod_label = QLabel(prod_type.title())
             prod_label.setFont(header)
             prod_layout.addWidget(prod_label)
+
             # Display the constraint values
             for constraint, value in prod_dict.items():
                 if constraint == "types":
@@ -105,6 +107,7 @@ class ProductBlade(QWidget):
                     # This line trys to line up tick labels with ticks above
                     tick_layout.addWidget(tick_label, 0, j, 1, -1)
                 slider_layout.addLayout(tick_layout, 1, 1)
+                
                 prod_layout.addLayout(slider_layout)
                 # Save slider object
                 self.wids[prod_type][constraint] = sliderObj
@@ -112,9 +115,11 @@ class ProductBlade(QWidget):
             self.layout.addLayout(prod_layout, i//2, i%2)
 
         # Save button
+        pos = self.layout.rowCount()
         self.save_button = QPushButton("Save")
+        self.save_button.setFixedWidth(100)
         self.save_button.clicked.connect(self.saveSettings)
-        self.layout.addWidget(self.save_button, 2,1)
+        self.layout.addWidget(self.save_button, pos+1, 0)
         self.setLayout(self.layout)
 
     def saveSettings(self):
@@ -138,6 +143,11 @@ class ColumnBlade(QWidget):
             col_dict = item[1]
             self.colSettings[spreadsheet] = {}
 
+            scroll = QScrollArea()
+            widget = QWidget()
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(widget)
+
             sheet_layout = QVBoxLayout()
             sheet_layout.addWidget(QLabel(spreadsheet))
             # Add edit boxes for each column
@@ -155,11 +165,14 @@ class ColumnBlade(QWidget):
 
                 # Save line widget to dict for saving to config
                 self.colSettings[spreadsheet][col_name] = edit_box
-
-            self.layout.addLayout(sheet_layout, i//2, i%2)
+            
+            widget.setLayout(sheet_layout)
+            self.layout.addWidget(scroll, i//2, i%2)
+            #self.layout.addLayout(sheet_layout, i//2, i%2)
 
         # Save button
         self.save_button = QPushButton("Save")
+        self.save_button.setFixedWidth(100)
         self.save_button.clicked.connect(self.saveSettings)
         self.layout.addWidget(self.save_button)
 
@@ -183,15 +196,15 @@ class ValuesBlade(QWidget):
         self.config = config
         # Define more readable names for settings
         nice_names = {
-            "lowBound": "Skin Needs Overlap: Lower Bound",
-            "upBound": "Skin Needs Overlap: Upper Bound",
-            "maxupBound": "Maximum Skin Needs Overlap bound",
-            "tpyeoverlap_low": "Ingredient Type Overlap Lower Bound",
-            "typeoverlap_up": "Ingredient Type Ovrelap Upper Bound",
-            "maxsols": "Maximum solutions returned",
-            "fitweight": "Best constraint fit Weight",
-            "numingredweight": "Number of ingredients weight",
-            "addedbenefitweight": "Additional benefits weight"
+            "lowBound": "Skin Needs Overlap: Min",
+            "upBound": "Skin Needs Overlap: Max",
+            "maxupBound": "Max Skin Needs Overlap",
+            "tpyeoverlap_low": "Ingredient Type Overlap: Min",
+            "typeoverlap_up": "Ingredient Type Ovrelap: Max",
+            "maxsols": "Max Solutions",
+            "fitweight": "Constraint Fit Weight",
+            "numingredweight": "Number of Ingredients Weight",
+            "addedbenefitweight": "Additional Benefits Weight"
         }
         self.sliders = []
         self.incre_boxes = []
@@ -213,6 +226,7 @@ class ValuesBlade(QWidget):
 
             if "weight" in setting:
                 w_slider = sliderWrapper(0, 100, int(value*100), 10)
+                w_slider.label.setFixedWidth(25)
 
                 edit_layout.addWidget(w_slider.label, 1, 0)
                 edit_layout.addWidget(w_slider.slider, 1, 1)
@@ -233,6 +247,7 @@ class ValuesBlade(QWidget):
         self.layout.addLayout(weight_layout)
         # Save button
         self.save_button = QPushButton("Save")
+        self.save_button.setFixedWidth(100)
         self.save_button.clicked.connect(self.saveSettings)
         self.layout.addWidget(self.save_button)
         self.setLayout(self.layout)
@@ -243,4 +258,30 @@ class ValuesBlade(QWidget):
         for setting, spinbox in self.incre_boxes:
             self.config.setVal(setting, spinbox.value())
 
+class MiscBlade(QWidget):
+    def __init__(self, misc_dict, config):
+        QWidget.__init__(self)
+        self.config = config
+        self.layout = QVBoxLayout()
 
+        self.misc_widgets = {}
+        for i, item in enumerate(misc_dict.items()):
+            setting = item[0]
+            value = item[1]
+            
+            self.layout.addWidget(QLabel(setting))
+            editField = QLineEdit(self.config.getMisc(setting))
+            self.misc_widgets[setting] = editField
+            self.layout.addWidget(editField)
+
+        # Save button
+        self.save_button = QPushButton("Save")
+        self.save_button.setFixedWidth(100)
+        self.save_button.clicked.connect(self.saveSettings)
+        self.layout.addWidget(self.save_button)
+        self.setLayout(self.layout)
+
+    def saveSettings(self):
+        for setting in self.misc_widgets.keys():
+            wid_value = self.misc_widgets[setting].text()
+            self.config.setMisc(setting, wid_value)

@@ -46,15 +46,15 @@ class LandingTab(QWidget):
         footer_layout.addLayout(gdrive_toggle_layout, 0, 1)
         self.gdrive_slider = gdrive_toggle_layout.itemAt(1).widget()
         # Set val from config
-        self.gdrive_slider.setValue(config.getMisc("gdrive"))
-        self.gdrive_slider.valueChanged.connect(lambda: config.setMisc("gdrive", self.gdrive_slider.value()))
+        self.gdrive_slider.setValue(config.masterDict["gdrive"])
+        self.gdrive_slider.valueChanged.connect(lambda: config.setter("gdrive", self.gdrive_slider.value()))
 
         # Dark mode toggle button
         dark_toggle_layout = self.create_toggle_button("Go Dark")
         footer_layout.addLayout(dark_toggle_layout, 0, 2)
         self.dark_slider = dark_toggle_layout.itemAt(1).widget()
         # Set last value from config
-        self.dark_slider.setValue(config.getVal("darkmode"))
+        self.dark_slider.setValue(config.masterDict["darkmode"])
         self.dark_slider.valueChanged.connect(lambda: self.toggleDark(app))
         self.toggleDark(app)
 
@@ -99,7 +99,7 @@ class LandingTab(QWidget):
             app.setPalette(self.defaultmode)
         else:
             app.setPalette(self.darkmode)
-        self.config.setVal("darkmode", self.dark_slider.value())
+        self.config.setter("darkmode", self.dark_slider.value())
 
     def runDLX(self):
         self.config.saveConfig()

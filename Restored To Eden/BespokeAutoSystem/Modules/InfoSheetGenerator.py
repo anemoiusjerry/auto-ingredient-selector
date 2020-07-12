@@ -60,9 +60,11 @@ class InfoSheetGenerator:
         # Pass all non-order dependent information
         self.misc_values = {}
         self.misc_values["assetsPath"] = self.app_path + "/Assets"
-        self.misc_values["address"] = self.config.getMisc("address")
-        self.misc_values["website"] = self.config.getMisc("website")
-        self.misc_values["font"] = self.config.getMisc("font")
+        self.misc_values["address"] = self.config.getMisc("Address")
+        self.misc_values["website"] = self.config.getMisc("Website")
+        self.misc_values["font"] = self.config.getMisc("Font")
+        self.misc_values["contactNumber"] = self.config.getMisc("Contact number")
+        self.misc_values["abn"] = self.config.getMisc("ABN")
 
         # Create list of all formlation sheet files
         sheet_paths = []
@@ -87,25 +89,33 @@ class InfoSheetGenerator:
 
             # Pass all info to gen brochure
             print("calling generate report")
-            self.generateReport(headings, paragraphs, name, prod_type)
-            # try:
-            #     self.generateReport(headings, paragraphs, name, prod_type)
-            # except:
-            #     self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
+            try:
+                self.generateReport(headings, paragraphs, name, prod_type)
+            except:
+                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
 
     def fill_instructions(self, name, prod_type, df):
+        instructions_filename = f"{prod_type.title()} Instructions"
+        
         # Get product instructions
-        instructions_path = self.config.getDir("Product Instructions Directory") + f"/{prod_type.title()} Instructions.docx"
         try:
-            f = open(instructions_path, "rb")
+            if (self.config.masterDict["gdrive"]):
+                error_msg = "Failed to fetch product instructions from Google Drive."
+                f, file_id = self.gdriveObject.fetch_file(instructions_filename)
+            else:
+                error_msg = "Failed to fetch product instructions."
+                instructions_path = self.config.getDir("Product Instructions Directory/") + \
+                    instructions_filename + ".docx"
+                f = open(instructions_path, "rb")
         # If failed to open instructions then return straightaway
         except:
+            self.warn.displayWarningDialog("", error_msg)
             return df
 
         fullText = name + ", "
         doc = docx.Document(f)
         for para in doc.paragraphs:
-            fullText += para.text
+            fullText += para.text + "\n"
 
         df[["Recommendations For Use"]] = fullText
         return df
@@ -115,8 +125,10 @@ class InfoSheetGenerator:
         expiry_date = sheet["B6"].value
         try:
             dt = expiry_date - date_blended
+        # Return df if exception to allow for manual user editing
         except:
             self.warn.displayWarningDialog("", "Date not in the format of dd/mm/yyyy")
+            return df
         # Always round down to nearest month
         months = math.floor(dt.days / 30)
         text = df.loc[0]["Used By & Best Before Date"]
@@ -148,24 +160,27 @@ class InfoSheetGenerator:
         return df
 
     def generateReport(self, headings, paragraphs, name, prod_type):
+        name = name.title()
+        prod_type = prod_type.title()
+
         # Use male template if a male product
         if "man" in prod_type.lower():
             html_str = self.courTemplate.render(headings=headings, paragraphs=paragraphs,
-                name=name.title(), prod_type=prod_type.title(), misc_vals=self.misc_values)
+                name=name, prod_type=prod_type, misc_vals=self.misc_values)
         else:
             html_str = self.template.render(headings=headings, paragraphs=paragraphs,
-                name=name.title(), prod_type=prod_type.title(), misc_vals=self.misc_values)
+                name=name, prod_type=prod_type, misc_vals=self.misc_values)
 
         # HTML is shit. We spent 2 hours debugging code that wasnt used. poop
 
-        output_path = self.config.getDir("Export Directory") + "/Reports"
+        output_path = self.config.getDir("Export Directory") + f"/{name}"
 
         # Create reports folder if it doesnt exist
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
         pdfkit.from_string(html_str, 
-            output_path + f"/{name}-{prod_type}-report.pdf", 
+            output_path + f"/{name} - {prod_type} - PIIS.pdf", 
             configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):

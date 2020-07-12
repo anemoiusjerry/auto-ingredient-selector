@@ -73,9 +73,19 @@ class Gdriver:
 
         # Check file type and send request appropriately
         if 'application/vnd.google-apps' in file_type:
-            request = self.service.files().export_media(fileId=file_id,
-                mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            # Google drive file types
+            google_filetype = file_type.split(".")[-1]
+            if google_filetype == "spreadsheet":
+                download_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            elif google_filetype == "document":
+                download_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            request = self.service.files().export_media(fileId=file_id, mimeType=download_type)
             fh = io.BytesIO()
+        # Microsoft office types
+        elif "wordprocessing" in file_type or "spreadsheet" in file_type:
+            request = self.service.files().get_media(fileId=file_id)
+            fh = io.BytesIO()
+        # csv
         else:
             request = self.service.files().get_media(fileId=file_id)
             fh = io.FileIO("file.csv", "wb")
@@ -86,7 +96,6 @@ class Gdriver:
         while done is False:
             status, done = downloader.next_chunk()
            # print("Download %d%%." % int(status.progress() * 100))
-
         return fh, file_id
 
     def push_file(self, filename, file_path, **kwargs):
