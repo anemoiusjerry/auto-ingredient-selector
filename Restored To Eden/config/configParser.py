@@ -31,12 +31,15 @@ class FigMe:
         """ dfname is the label of in landing tab
         """
         # Attempt google drive retrieval for ingredients df
-        if (dfname == "Ingredients Spreadsheet") and (self.masterDict["gdrive"]):
+        if (dfname == "Ingredients Spreadsheet" or dfname == "Product Catalog") and self.masterDict["gdrive"]:
             try:
                 # Retrieve from gdrive
                 gdrive_name = self.getGdrive(dfname)
                 fh, file_id = self.gdriveAPI.fetch_file(gdrive_name)
-                df = pd.read_excel(fh)
+                try:
+                    df = pd.read_excel(fh)
+                except:
+                    df = pd.read_csv("file.csv")
             except:
                 self.warn.displayWarningDialog("", f"Cannot fetch {dfname} from Google Drive - check filename in drive and your internet connection.")
         else:
@@ -67,7 +70,10 @@ class FigMe:
             inci_names = None
             if dfname == "Ingredients Spreadsheet":
                 inciCol = self.getColname("Ingredients Spreadsheet", "inci")
+                nameCol = self.getColname("Ingredients Spreadsheet", "name")
                 inci_names = df[[inciCol]]
+                ing_names = df[[nameCol]]
+
 
             # Convert all string to lowercase
             df = df.applymap(lambda x:str(x).lower())
@@ -79,6 +85,7 @@ class FigMe:
                 nameCol = self.getColname("Ingredients Spreadsheet", "name")
                 # Replace with not lowercased inci
                 df[[inciCol]] = inci_names
+                df[[nameCol]] = ing_names
             
                 for colname in [typeCol, skinProbCol, contrainsCol]:
                     df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))

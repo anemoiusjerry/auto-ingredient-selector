@@ -1,11 +1,12 @@
+import re
 import os
 import pandas as pd
+from copy import copy
 from PySide2.QtCore import QObject, Signal
 # Spreadsheet library
 from openpyxl import load_workbook
 from datetime import *
 from collections import defaultdict as dd
-import re
 
 from config.configParser import FigMe
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
@@ -23,11 +24,12 @@ class FormulationFiller:
         for soln in results:
             name = soln["CustomerName"].title()
             product_type = soln["ProductType"].title()
-            try:
-                self.write_to_template(soln["Ingredients"], name, product_type)
-            except:
-                self.warn.displayWarningDialog("Write Failure",
-                    f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
+            self.write_to_template(soln["Ingredients"], name, product_type)
+            # try:
+            #     self.write_to_template(soln["Ingredients"], name, product_type)
+            # except:
+            #     self.warn.displayWarningDialog("Write Failure",
+            #         f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
         print("All form sheet generated.")
 
     def write_to_template(self, ingredients, customer_name, prod_type):
@@ -133,7 +135,7 @@ class FormulationFiller:
 
         #sheet = self.write_grams(sheet)
         filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
-        path = self.export_to_file(workbook, filename, customer)
+        path = self.export_to_file(workbook, filename, customer_name)
 
     def calc_ingredient_weight(self, ingredients, prod_type, ingredients_df):
         """ Takes parameters from ingredient selector and calculates to ingredient weights
@@ -279,6 +281,16 @@ class FormulationFiller:
                     sheet[f"B{EOF}"] = ingredient                                              # name
                     sheet[f"C{EOF}"] = phase_dict[i_type]                                      # Phase
                     sheet[f"D{EOF}"] = weight                                                  # w/w%
+                    sheet[f"E{EOF}"] = f"=B5*D{EOF}/100"
+                    # Copy over cell styles
+                    for col_index in range(1,6):
+                        sheet.cell(row=EOF, column=col_index).font = copy(sheet.cell(row=self.SOF, column=col_index).font)
+                        sheet.cell(row=EOF, column=col_index).border = copy(sheet.cell(row=self.SOF, column=col_index).border)
+                        sheet.cell(row=EOF, column=col_index).fill = copy(sheet.cell(row=self.SOF, column=col_index).fill)
+                        sheet.cell(row=EOF, column=col_index).number_format = copy(sheet.cell(row=self.SOF, column=col_index).number_format)
+                        sheet.cell(row=EOF, column=col_index).protection = copy(sheet.cell(row=self.SOF, column=col_index).protection)
+                        sheet.cell(row=EOF, column=col_index).alignment = copy(sheet.cell(row=self.SOF, column=col_index).alignment)
+
         return sheet
 
     def write_grams(self, sheet):

@@ -55,7 +55,7 @@ class InfoSheetGenerator:
 
     def process_all(self):
         # Get all formulation sheets from output dir
-        path = self.config.getDir("Export Directory") + "/Formulation Sheets"
+        path = self.config.getDir("Export Directory")
 
         # Pass all non-order dependent information
         self.misc_values = {}
@@ -68,14 +68,18 @@ class InfoSheetGenerator:
 
         # Create list of all formlation sheet files
         sheet_paths = []
-        for f in os.listdir(path):
-            print(os.path.join(path,f))
-            if os.path.isfile(os.path.join(path, f)):
-                sheet_paths.append(os.path.join(path, f))
+        for _folder in os.listdir(path):
+            print(_folder)
+            _folder_path = os.path.join(path, _folder)
+            if os.path.isdir(_folder_path):
+                for _file in os.listdir(_folder_path):
+                    print(_file)
+                    _file_path = os.path.join(_folder_path, _file)
+                    if os.path.isfile(_file_path) and "Worksheet" in _file:
+                        sheet_paths.append(_file_path)
 
         # Retrieve all info. needed for pdf
         for f in sheet_paths:
-
             workbook = load_workbook(filename=f)
             sheet = workbook.active
 
@@ -104,8 +108,7 @@ class InfoSheetGenerator:
                 f, file_id = self.gdriveObject.fetch_file(instructions_filename)
             else:
                 error_msg = "Failed to fetch product instructions."
-                instructions_path = self.config.getDir("Product Instructions Directory/") + \
-                    instructions_filename + ".docx"
+                instructions_path = self.config.getDir("Product Instructions Directory") + f"/{instructions_filename}.docx"
                 f = open(instructions_path, "rb")
         # If failed to open instructions then return straightaway
         except:

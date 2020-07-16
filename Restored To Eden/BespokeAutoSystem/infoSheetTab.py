@@ -43,15 +43,15 @@ class InfoTab(QWidget):
         reporter.process_all()
 
     def loadSheetLocal(self):
-        self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
-        self.loadUi(self.infoSheet_df)
-        # try:
-        #     # If failed then use local vers
-        #     self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
-        #     self.loadUi(self.infoSheet_df)
-        # except Exception as e:
-        #     print(e)
-        #     print("Local load failed")
+        # self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
+        # self.loadUi(self.infoSheet_df)
+        try:
+            # If failed then use local vers
+            self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
+            self.loadUi(self.infoSheet_df)
+        except Exception as e:
+            print(e)
+            print("Local load failed")
 
     def loadUi(self, df):
 

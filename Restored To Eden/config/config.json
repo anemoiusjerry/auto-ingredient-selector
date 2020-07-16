@@ -113,20 +113,20 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/RTE Ingredients Database - Latest.xlsx",
-        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/orders-monnihardstone.csv",
-        "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
-        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
-        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
-        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "/Users/HG/Desktop",
-        "Product Instructions Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Product Information"
+        "Ingredients Spreadsheet": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/RTE Ingredients Database - Latest.xlsx",
+        "Orders Spreadsheet": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/orders-monnihardstone.csv",
+        "Customer Questionnaire": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
+        "Product Catalog": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Outputs",
+        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
-        "lowBound": 2,
+        "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 3,
-        "typeoverlap_up": 3,
+        "tpyeoverlap_low": 0,
+        "typeoverlap_up": 2,
         "maxupBound": 50,
         "maxsols": 1,
         "fitweight": 0.8,
@@ -141,8 +141,9 @@
         "Font": "Raleway"
     },
     "GoogleDrive": {
-        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest"
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
+        "Product Catalog": "catalog_products"
     },
-    "gdrive": 0,
+    "gdrive": 1,
     "darkmode": 1
 }

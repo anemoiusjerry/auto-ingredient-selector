@@ -24,7 +24,7 @@ class LandingTab(QWidget):
         # UI Datasheets
         self.widgets["orders_sheet"] = FileBrowser("csv", "Orders Spreadsheet", self.config)
         self.widgets["patient_sheet"] = FileBrowser("csv", "Customer Questionnaire", self.config)
-        self.widgets["catalog_sheet"] = FileBrowser("csv", "Product Catalog", self.config)
+        self.widgets["catalog_sheet"] = FileBrowser("csv", "Product Catalog", self.config, Gdrive=True)
         self.widgets["ingredient_sheet"] = FileBrowser("csv", "Ingredients Spreadsheet", self.config, Gdrive=True)
         # Directories
         self.widgets["formulation_dir"] = FileBrowser("dir", "Formulation Sheets Directory", self.config)
