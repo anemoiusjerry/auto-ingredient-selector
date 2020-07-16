@@ -41,7 +41,7 @@ class FormulationFiller:
         """
         # Get template path to read it
         path = self.config.getDir("Formulation Sheets Directory")
-        formSheet_name = f"{prod_type} Worksheet"
+        formSheet_name = f"{prod_type} Worksheet Template"
         template_path = f"{path}/{formSheet_name}.xlsx"
 
         # Load the excel sheet
