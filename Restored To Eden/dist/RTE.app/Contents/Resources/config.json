@@ -141,8 +141,8 @@
         "Font": "Raleway"
     },
     "GoogleDrive": {
-        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
-        "Product Catalog": "catalog_products"
+        "Ingredients Spreadsheet": "",
+        "Product Catalog": ""
     },
     "gdrive": 1,
     "darkmode": 1
