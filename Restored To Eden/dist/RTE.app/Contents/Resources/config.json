@@ -1,0 +1,149 @@
+{
+    "Product": {
+        "day cream": {
+            "viscosity": "light",
+            "absorbency": "fast",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
+        },
+        "man cream": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil"
+            ]
+        },
+        "night cream": {
+            "viscosity": "heavy",
+            "absorbency": "slow",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "anhydrous base",
+                "essential oil"
+            ]
+        },
+        "oil cleanser": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "anhydrous base",
+                "essential oil"
+            ]
+        },
+        "oil serum": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "anhydrous base",
+                "essential oil",
+                "anhydrous high performance"
+            ]
+        }
+    },
+    "Constants": {
+        "viscosity": [
+            "light",
+            "medium",
+            "heavy"
+        ],
+        "absorbency": [
+            "slow",
+            "medium",
+            "fast"
+        ],
+        "comedogenicRating": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ]
+    },
+    "Column names": {
+        "Ingredients Spreadsheet": {
+            "name": "INGREDIENT COMMON NAME",
+            "inci": "INGREDIENT INCI NAME",
+            "stock": "In Stock",
+            "type": "TYPE OF INGREDIENT",
+            "EO note": "ESSENTIAL OIL NOTE",
+            "skin problem": "SKIN PROBLEM",
+            "contraindications": "CONTRAINDICATIONS",
+            "viscosity": "VISCOSITY",
+            "absorption": "ABSORPTION RATE",
+            "comedogenic": "COMEDOGENIC RATING"
+        },
+        "Customer Questionnaire": {
+            "name": "Full Name",
+            "email": "Email",
+            "pregnancy": "Are you or could you be pregn",
+            "contraindications": "Do you suffer any of the foll",
+            "skin problem": [
+                "Multi Selection Field 4",
+                "Do you feel your skin has any"
+            ],
+            "Additional": [
+                "Lighter fragrance or strong f",
+                "Allergies, please give detail"
+            ]
+        },
+        "Orders Spreadsheet": {
+            "order number": "Order #",
+            "date": "Date",
+            "time": "Time",
+            "customer": "Billing Customer",
+            "email": "Buyer's Email",
+            "item": "Item's Name"
+        },
+        "Product Catalog": {
+            "item": "name",
+            "products": "additionalInfoDescription6"
+        }
+    },
+    "Directories": {
+        "Ingredients Spreadsheet": "",
+        "Orders Spreadsheet": "",
+        "Customer Questionnaire": "",
+        "Product Catalog": "",
+        "Formulation Sheets Directory": "",
+        "Information Sheet Paragraphs": "",
+        "Export Directory": "",
+        "Product Instructions Directory": ""
+    },
+    "Values": {
+        "lowBound": 1,
+        "upBound": 2,
+        "tpyeoverlap_low": 0,
+        "typeoverlap_up": 2,
+        "maxupBound": 50,
+        "maxsols": 1,
+        "fitweight": 0.8,
+        "numingredweight": 0.0,
+        "addedbenefitweight": 0.2
+    },
+    "Misc": {
+        "Address": "Suite 93, 139 Cardigan Street, Carlton, VIC, 3053",
+        "Contact number": "03 9111 5762",
+        "ABN": "94 113 762 673",
+        "Website": "www.restoredtoeden.com",
+        "Font": "Raleway"
+    },
+    "GoogleDrive": {
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
+        "Product Catalog": "catalog_products"
+    },
+    "gdrive": 1,
+    "darkmode": 1
+}
