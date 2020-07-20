@@ -113,14 +113,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "",
-        "Orders Spreadsheet": "",
-        "Customer Questionnaire": "",
-        "Product Catalog": "",
-        "Formulation Sheets Directory": "",
-        "Information Sheet Paragraphs": "",
-        "Export Directory": "",
-        "Product Instructions Directory": ""
+        "Ingredients Spreadsheet": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/RTE Ingredients Database - Latest.xlsx",
+        "Orders Spreadsheet": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/orders-monnihardstone.csv",
+        "Customer Questionnaire": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
+        "Product Catalog": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/jerry/Desktop/beta ouput",
+        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
         "lowBound": 1,
@@ -141,8 +141,8 @@
         "Font": "Raleway"
     },
     "GoogleDrive": {
-        "Ingredients Spreadsheet": "",
-        "Product Catalog": ""
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
+        "Product Catalog": "catalog_products"
     },
     "gdrive": 1,
     "darkmode": 1

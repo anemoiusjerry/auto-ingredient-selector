@@ -154,7 +154,7 @@ class InfoTab(QWidget):
         banner_layout.addWidget(l, 0, 0)
         
         # Create text boxes
-        if type(n_body) == str:
+        if type(n_body) == str and n_body != "AutoFilled by system":
             t = QTextEdit(n_body)
         else:
             t = QTextEdit("AutoFilled by system")

@@ -381,7 +381,7 @@ class IngredientSelector(QObject):
     def findBestSol(self, solutions, product, ailments):
         # Get template folder path
         path = self.config.getDir("Formulation Sheets Directory") + "/"
-        template_path = path + product + " Worksheet.xlsx"
+        template_path = path + product + " Worksheet Template.xlsx"
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
         sheet = workbook.active

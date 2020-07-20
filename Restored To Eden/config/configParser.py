@@ -41,7 +41,7 @@ class FigMe:
                 except:
                     df = pd.read_csv("file.csv")
             except:
-                self.warn.displayWarningDialog("", f"Cannot fetch {dfname} from Google Drive - check filename in drive and your internet connection.")
+                self.warn.displayWarningDialog("", f"Cannot fetch {gdrive_name} from Google Drive - check filename in drive and your internet connection.")
         else:
             try:
                 dfpath = self.masterDict["Directories"][dfname]

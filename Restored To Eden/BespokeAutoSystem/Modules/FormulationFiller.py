@@ -145,7 +145,7 @@ class FormulationFiller:
         """
         # Get template folder path
         path = self.config.getDir("Formulation Sheets Directory") + "/"
-        template_path = path + prod_type + " Worksheet.xlsx"
+        template_path = path + prod_type + " Worksheet Template.xlsx"
 
         # Load the excel sheet
         workbook = load_workbook(filename=template_path)
@@ -219,7 +219,7 @@ class FormulationFiller:
 
         i = self.SOF
         # Record the w/w% for all types
-        while sheet[f"C{i}"].value != None:
+        while sheet[f"C{i}"].value != None and sheet[f"B{i}"].value != None:
             cell_ingredient = sheet[f"B{i}"].value.lower()
             cell_weight = sheet[f"D{i}"].value
 
