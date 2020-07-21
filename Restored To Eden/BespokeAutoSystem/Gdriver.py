@@ -88,7 +88,17 @@ class Gdriver:
         # csv
         else:
             request = self.service.files().get_media(fileId=file_id)
-            fh = io.FileIO("file.csv", "wb")
+            if getattr(sys, 'frozen', False):
+                path = os.path.dirname(sys.executable)
+                parent = os.path.abspath(os.path.join(path, os.pardir))
+            else:
+                app_path = os.getcwd()
+
+            try:
+                path = parent + "/Resources/file.csv"
+            except:
+                path = app_path + "/file.csv"
+            fh = io.FileIO(path, "wb")
 
         downloader = MediaIoBaseDownload(fh, request)
 

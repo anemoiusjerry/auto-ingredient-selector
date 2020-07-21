@@ -45,7 +45,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -100,7 +100,7 @@ class InfoSheetGenerator:
 
     def fill_instructions(self, name, prod_type, df):
         instructions_filename = f"{prod_type.title()} Instructions"
-        
+
         # Get product instructions
         try:
             if (self.config.masterDict["gdrive"]):
@@ -136,7 +136,7 @@ class InfoSheetGenerator:
         months = math.floor(dt.days / 30)
         text = df.loc[0]["Used By & Best Before Date"]
         df[["Used By & Best Before Date"]] = text.replace("...", f" {months} ")
-        
+
         date_blended_str = datetime.strftime(date_blended, "%d/%m/%Y")
         expiry_date_str = datetime.strftime(expiry_date, "%d/%m/%Y")
         df[["Used By & Best Before Date"]] += f"\n\nDate Blended: {date_blended_str}\
@@ -182,8 +182,8 @@ class InfoSheetGenerator:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        pdfkit.from_string(html_str, 
-            output_path + f"/{name} - {prod_type} - PIIS.pdf", 
+        pdfkit.from_string(html_str,
+            output_path + f"/{name} - {prod_type} - PIIS.pdf",
             configuration=self.pdfkitConfig, options=self.options)
 
     def split_sections(self, df):

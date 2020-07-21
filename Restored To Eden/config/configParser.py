@@ -31,6 +31,7 @@ class FigMe:
         """ dfname is the label of in landing tab
         """
         # Attempt google drive retrieval for ingredients df
+
         if (dfname == "Ingredients Spreadsheet" or dfname == "Product Catalog") and self.masterDict["gdrive"]:
             try:
                 # Retrieve from gdrive
@@ -39,8 +40,23 @@ class FigMe:
                 try:
                     df = pd.read_excel(fh)
                 except:
-                    df = pd.read_csv("file.csv")
-            except:
+                    if getattr(sys, 'frozen', False):
+                        path = os.path.dirname(sys.executable)
+                        parent = os.path.abspath(os.path.join(path, os.pardir))
+                    else:
+                        app_path = os.getcwd()
+
+                    try:
+                        path = parent + "/Resources/file.csv"
+                    except:
+                        path = app_path + "/file.csv"
+                    df = pd.read_csv(path)
+            except Exception as e:
+                if getattr(sys, 'frozen', False):
+                    path = os.path.dirname(sys.executable)
+                    parent = os.path.abspath(os.path.join(path, os.pardir))
+                    with open(parent + "/Resources/debug.txt", "w") as debug:
+                        debug.write(str(e) + "\n" + "configparser; getDF\n")
                 self.warn.displayWarningDialog("", f"Cannot fetch {gdrive_name} from Google Drive - check filename in drive and your internet connection.")
         else:
             try:
@@ -86,7 +102,7 @@ class FigMe:
                 # Replace with not lowercased inci
                 df[[inciCol]] = inci_names
                 df[[nameCol]] = ing_names
-            
+
                 for colname in [typeCol, skinProbCol, contrainsCol]:
                     df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
                 df.set_index(nameCol, drop=False, inplace=True)
@@ -157,7 +173,7 @@ class FigMe:
         return [como, visc, absorb]
 
     def getMisc(self, key):
-        return self.masterDict["Misc"][key]       
+        return self.masterDict["Misc"][key]
     def setMisc(self, key, new_value):
         self.masterDict["Misc"][key] = new_value
 
