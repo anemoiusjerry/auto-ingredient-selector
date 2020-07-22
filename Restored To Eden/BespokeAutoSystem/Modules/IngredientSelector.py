@@ -1,5 +1,4 @@
 from .FormulationFiller import FormulationFiller
-from ..WarningRaiser import WarningRaiser
 from config.configParser import FigMe
 from ..dlx3 import DLX
 import pandas as pd
@@ -17,6 +16,7 @@ class IngredientSelector(QObject):
     launched = Signal(int)
     stateChanged = Signal(str, str, int)
     cancel = Signal()
+    error = Signal(str)
     def __init__(self, orders, ingredients, qnair, catalog):
         # signal setup
         QObject.__init__(self)
@@ -25,7 +25,6 @@ class IngredientSelector(QObject):
 
         self.config = config
         self.SOF = 7
-        self.warn = WarningRaiser()
 
         # orders columns
         self.customerCol = config.getColname("Orders Spreadsheet", "customer")
@@ -154,7 +153,7 @@ class IngredientSelector(QObject):
 
         if returns:
             if allErrorString != "":
-                self.warn.displayWarningDialog("Error", allErrorString)
+                self.error.emit(allErrorString)
             return returns
         return None
 

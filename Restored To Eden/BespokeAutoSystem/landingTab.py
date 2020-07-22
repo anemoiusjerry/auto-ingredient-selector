@@ -9,6 +9,7 @@ from .Gdriver import Gdriver
 from .Modules.IngredientSelector import IngredientSelector
 from .Modules import FormulationFiller
 from config.configParser import FigMe
+from .WarningRaiser import WarningRaiser
 
 class LandingTab(QWidget):
 
@@ -18,6 +19,7 @@ class LandingTab(QWidget):
         self.config = config
         self.gdriveAPI = Gdriver()
         self.defaultmode, self.darkmode = self.define_palettes()
+        self.warn = WarningRaiser()
 
         # Dict of widget { wid_name: widget object }
         self.widgets = {}
@@ -34,7 +36,7 @@ class LandingTab(QWidget):
         layout = QVBoxLayout()
         for wid in self.widgets.values():
             layout.addWidget(wid)
-        
+
         footer_layout = QGridLayout()
         self.run_button = QPushButton("&Run")
         self.run_button.clicked.connect(self.runDLX)
@@ -114,6 +116,7 @@ class LandingTab(QWidget):
 
         self.ingredient_selector.launched.connect(self.launchProgress)
         self.ingredient_selector.stateChanged.connect(self.progStateChanged)
+        self.ingredient_selector.error.connect(self.showError)
 
         worker = Worker(self.ingredient_selector.selectIngredients)
         worker.signals.result.connect(self.processResults)
@@ -128,12 +131,16 @@ class LandingTab(QWidget):
             filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
             filler.process_all(results)
         else:
-            # create a dialog which tells the user that nothing was done
-            pass
+            self.warn.displayWarningDialog("No Orers Fulfilled",
+                "No Orders Fulfilled\n\nError can occur when:\n- Searching and sorting operation was cancelled.\n- No Matching orders and questionnaires were found.")
 
     @Slot()
     def closeProg(self):
         self.prog.cancel()
+
+    @Slot(str)
+    def showError(self, errors):
+        self.warn.displayWarningDialog("Error", errors)
 
     def createDataFrames(self):
         # Store all dataframes in dictionary
@@ -141,7 +148,7 @@ class LandingTab(QWidget):
 
         for key in self.widgets.keys():
             # Only process to df if widget stores a spreadsheet
-            if not ("dir" in key): 
+            if not ("dir" in key):
                 fetch_name = self.widgets[key].label.text()
                 df = self.config.getDF(fetch_name)
                 dataframes[self.widgets[key].label.text()] = df
