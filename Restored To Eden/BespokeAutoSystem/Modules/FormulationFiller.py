@@ -71,6 +71,8 @@ class FormulationFiller:
         while len(assigned_vals) > 0:
             # End loop if not enough slots
             if len(realloc_dict) <= 0 or i >= len(assigned_vals):
+                sheet, EOF = self.too_many_slots(realloc_dict, sheet)
+                realloc_dict = {}
                 sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
                 break
 
@@ -131,7 +133,7 @@ class FormulationFiller:
 
         # Reallocate surplus %
         if len(realloc_dict) > 0:
-            sheet = self.too_many_slots(realloc_dict, sheet)
+            sheet, last_i = self.too_many_slots(realloc_dict, sheet)
 
         #sheet = self.write_grams(sheet)
         filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
@@ -242,7 +244,7 @@ class FormulationFiller:
     def too_many_slots(self, realloc_dict, sheet):
         """ Reallocates extra percentages to other ingredients.
             Inputs: realloc_dict - { cell ID (D?): w/w% } ingredients still need to be allocated
-            Returns: sheet with new values written
+            Returns: sheet with new values written and the new LAST row index.
         """
         # Write 0 to unallocated rows to mark for delete
         for cell in realloc_dict.keys():
@@ -254,7 +256,7 @@ class FormulationFiller:
                 sheet.delete_rows(i)
             else:
                 i+=1
-        return sheet
+        return sheet, i
 
     def too_few_slots(self, leftovers, phase_dict, EOF, sheet):
         """
@@ -273,6 +275,9 @@ class FormulationFiller:
             type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
             type_list = self.ingredients_df.loc[ingredient][type_col_name]
             for i_type in type_list:
+                if i_type == "essential oil":
+                    i_type = self.convert_eo_label(ingredient)
+
                 if i_type in phase_dict.keys():
                     # Insert leftovers at end of sheet
                     sheet.insert_rows(EOF)
@@ -292,6 +297,15 @@ class FormulationFiller:
                         sheet.cell(row=EOF, column=col_index).alignment = copy(sheet.cell(row=self.SOF, column=col_index).alignment)
 
         return sheet
+
+    def convert_eo_label(self, ingredient_name):  
+        eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
+        note = self.ingredients_df.loc[ingredient_name][eo_note_col_name]    
+        if note:                                                        
+            ingredient_type = "eo " + note                              
+        else:                                                           
+            ingredient_type = "eo middle"  
+        return ingredient_type
 
     def write_grams(self, sheet):
         default_gram = 100

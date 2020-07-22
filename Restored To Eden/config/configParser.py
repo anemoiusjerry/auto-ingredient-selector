@@ -117,6 +117,9 @@ class FigMe:
                 pregnancyCol = self.getColname("Customer Questionnaire", "pregnancy")
                 cusContrainCol = self.getColname("Customer Questionnaire", "contraindications")
 
+                # Set names as index
+                df.set_index(nameCol, drop=False, inplace=True)
+                
                 df[nameCol] = df[nameCol].apply(lambda x:" ".join(x.split()))
                 for colname in ailmentCols + [pregnancyCol, cusContrainCol]:
                     df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))

@@ -80,6 +80,8 @@ class IngredientSelector(QObject):
         self.stop = False
 
     def selectIngredients(self):
+        allErrorString = ""
+
         # send the launched signal with the length of the orders
         self.launched.emit(self.orders.shape[0])
 
@@ -107,7 +109,7 @@ class IngredientSelector(QObject):
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
             else:
-                #self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Qestionairre.")
+                self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Questionnaire.")
                 print("no matching name found for ", name)
                 continue
 
@@ -118,8 +120,9 @@ class IngredientSelector(QObject):
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
-                print("item not in catalog: ", item)
-                raise Exception("Unknown Item")
+                #self.warn.displayWarningDialog("Not Found Error", f"Ordered product named {item} not found in catalog.")
+                #raise Exception("Unknown Item")
+                allErrorString += f"Ordered product named {item} not found in catalog.\n"
                 continue
 
             # Create a folder for the order
@@ -150,6 +153,8 @@ class IngredientSelector(QObject):
                                     "ProductType": product})
 
         if returns:
+            if allErrorString != "":
+                self.warn.displayWarningDialog("Error", allErrorString)
             return returns
         return None
 
@@ -367,9 +372,8 @@ class IngredientSelector(QObject):
 
         try:
             bestSols = self.findBestSol(solutions, product, ailments)
-        except:
-            print("error occured while finding best solution")
-            raise
+        except Exception as e:
+            self.warn.displayWarningDialog("Error", f"error occured while finding best solution: {str(e)}")
 
         return bestSols, rows, cols, unresolved
 

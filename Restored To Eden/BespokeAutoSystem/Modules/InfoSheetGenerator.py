@@ -28,8 +28,12 @@ class InfoSheetGenerator:
         # Open html template as string
         if getattr(sys, 'frozen', False):
             app_path = sys._MEIPASS
+            path = os.path.dirname(sys.executable)
+            self.footer_save_path = os.path.abspath(os.path.join(path, os.pardir)) + "/Resources"
         else:
             app_path = os.getcwd()
+            self.footer_save_path = app_path
+        self.app_path = app_path
 
         # Normal template
         tmpPath =  app_path + "/Assets/InfoSheetTemplate.html"
@@ -53,6 +57,13 @@ class InfoSheetGenerator:
         }
         self.app_path = app_path
 
+    def genFooter(self):
+        footer_tmp = open(self.app_path + "/Assets/footerTmp.html")
+        footerTemplate = jinja2.Environment(loader=jinja2.BaseLoader).from_string(footer_tmp.read())
+        html_str = footerTemplate.render(misc_vals=self.misc_values)
+        with open(f"{self.footer_save_path}/footer.html", "w") as f:
+            f.write(html_str)
+
     def process_all(self):
         # Get all formulation sheets from output dir
         path = self.config.getDir("Export Directory")
@@ -65,6 +76,10 @@ class InfoSheetGenerator:
         self.misc_values["font"] = self.config.getMisc("Font")
         self.misc_values["contactNumber"] = self.config.getMisc("Contact number")
         self.misc_values["abn"] = self.config.getMisc("ABN")
+
+        # Generate Footer html
+        self.genFooter()
+        self.options["footer-html"] = self.footer_save_path + "/footer.html"
 
         # Create list of all formlation sheet files
         sheet_paths = []
@@ -95,8 +110,8 @@ class InfoSheetGenerator:
             print("calling generate report")
             try:
                 self.generateReport(headings, paragraphs, name, prod_type)
-            except:
-                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF")
+            except Exception as e:
+                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF.\n{str(e)}")
 
     def fill_instructions(self, name, prod_type, df):
         instructions_filename = f"{prod_type.title()} Instructions"
@@ -124,13 +139,15 @@ class InfoSheetGenerator:
         return df
 
     def fill_dates(self, sheet, df):
-        date_blended = sheet["B3"].value
-        expiry_date = sheet["B6"].value
+        # Convert date strings to datetime object
         try:
+            
+            date_blended = datetime.strptime(sheet["B3"].value, "%d.%m.%Y")
+            expiry_date = datetime.strptime(sheet["B6"].value, "%d.%m.%Y")
             dt = expiry_date - date_blended
         # Return df if exception to allow for manual user editing
         except:
-            self.warn.displayWarningDialog("", "Date not in the format of dd/mm/yyyy")
+            self.warn.displayWarningDialog("", "Date not in the format of dd.mm.yyyy")
             return df
         # Always round down to nearest month
         months = math.floor(dt.days / 30)
