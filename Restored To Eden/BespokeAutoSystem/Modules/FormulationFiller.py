@@ -79,7 +79,7 @@ class FormulationFiller:
             ingredient_name = list(assigned_vals.keys())[i]
             # Insert ingredient into the correct row
             j=self.SOF
-            while sheet[f"C{j}"].value != None:
+            while sheet[f"C{j}"].value != None and sheet[f"B{j}"].value != None:
 
                 # Only fill w/w% if fixed ingredient
                 if ("doesn't change" in ingredient_name.lower()) or ("does not change" in ingredient_name.lower()):

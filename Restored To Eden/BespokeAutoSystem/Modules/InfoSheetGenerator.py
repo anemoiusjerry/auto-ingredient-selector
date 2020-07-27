@@ -201,9 +201,13 @@ class InfoSheetGenerator:
 
         # Use male template if a male product
         if "man" in prod_type.lower():
+            self.misc_values["isMale"] = True
+            self.genHeader()
             html_str = self.courTemplate.render(headings=headings, paragraphs=paragraphs,
                 name=name, prod_type=prod_type, misc_vals=self.misc_values)
         else:
+            self.misc_values["isMale"] = False
+            self.genHeader()
             html_str = self.template.render(headings=headings, paragraphs=paragraphs,
                 name=name, prod_type=prod_type, misc_vals=self.misc_values)
 

@@ -11,6 +11,10 @@
 
 <body>
     <header align=right>
-        <img src= "{{ misc_vals['assetsPath'] }}/RTELogo.png" style="width: 100px;">
+        {% if misc_vals["isMale"] %}
+            <img src= "{{ misc_vals['assetsPath'] }}/CourageousLogo.png" style="width: 175px;">
+        {% else %}
+            <img src= "{{ misc_vals['assetsPath'] }}/RTELogo.png" style="width: 100px;">
+        {% endif %}
     </header>
 </body>
