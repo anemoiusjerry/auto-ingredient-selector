@@ -253,11 +253,20 @@ class IngredientSelector(QObject):
                                 nrow = node[0] + 4
                             worksheet.write(nrow, ncol, "X", node_format)
                         break
+
+                for benefits in solution[2]:
+                    if benefits[0] == ingredient:
+                        worksheet.write(row + 2, ncol, "Xtra Benefits",headail_format)
+                        j=0
+                        for benefit in benefits[1]:
+                            worksheet.write(row+3+j, ncol, benefit)
+                            j += 1
+                        break
                 ncol = ncol + 1
             i = i+1
 
             # Adding the unresolved columns and additional benefits
-            row = nrow + 3
+            row = row + 2
             worksheet.write(row, 0, "Unresolved Conditions", headail_format)
             if len(unresolved) > 0:
                 for j in range(len(unresolved)):
@@ -265,13 +274,13 @@ class IngredientSelector(QObject):
             else:
                 worksheet.write(row + 1, 0, 'everything is resolved')
 
-            row = row + 2 + len(unresolved)
+            """row = row + 2 + len(unresolved)
             worksheet.write(row, 0, "Additional Benefits", headail_format)
             if len(solution[2]) > 0:
                 for j in range(len(solution[2])):
                     worksheet.write(row + 1 + j, 0, solution[2][j])
             else:
-                worksheet.write(row + 1, 0, 'No additional benefits')
+                worksheet.write(row + 1, 0, 'No additional benefits')"""
 
     def orderParser(self, product, qdata):
 
@@ -411,8 +420,9 @@ class IngredientSelector(QObject):
 
             vals = dd(list)
             benefits = 0
-            benefits_lst = []
+            blist = []
             for ingredient in solution:
+                benefits_lst = [ingredient, []]
                 # Finding information to calculate fit
                 # Retrieve comodegenic rating
                 _como = self.ingredients.loc[ingredient,self.comedogenicCol]
@@ -439,11 +449,13 @@ class IngredientSelector(QObject):
                 for skinProb in self.ingredients.loc[ingredient,self.skinProbCol]:
                     if skinProb not in ailments:
                         benefits = benefits + 1
-                        benefits_lst.append(skinProb)
+                        benefits_lst[1].append(skinProb)
+                blist.append([benefits_lst[0], list(set(benefits_lst[1]))])
                 if benefits > maxBenefits:
                     maxBenefits = benefits
                 elif benefits < leastBenefits:
                     leastBenefits = benefits
+
             # Returns the percentage composition of each ingredient in the product
             composition = self.calc_ingredient_weight(solution, ww_dict, copy.deepcopy(assigned_vals))
             # Returns the point that this current solution occupies
@@ -460,12 +472,12 @@ class IngredientSelector(QObject):
             # Need to find the additional benefits <----------------------------------------------------------------------
 
             if len(chosen) < self.maxSols:
-                chosen.append((solution, score, list(set(benefits_lst))))
+                chosen.append((solution, score, blist))
             elif score < max([sol[1] for sol in chosen]):
                 # remove the old maximum and add the solution to the list
                 for i in range(len(chosen)):
                     if chosen[i][1] > score:
-                        chosen[i] = (solution, score, list(set(benefits_lst)))
+                        chosen[i] = (solution, score, blist)
                         break
         """
         print("Best solutions: ")
