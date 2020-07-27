@@ -11,6 +11,7 @@ from PySide2.QtCore import QObject, Signal, Slot
 from datetime import date
 from collections import defaultdict as dd
 from openpyxl import load_workbook
+from BespokeAutoSystem.WarningRaiser import *
 
 class IngredientSelector(QObject):
     launched = Signal(int)
@@ -20,7 +21,7 @@ class IngredientSelector(QObject):
     def __init__(self, orders, ingredients, qnair, catalog):
         # signal setup
         QObject.__init__(self)
-
+        self.warn = WarningRaiser()
         config = FigMe()
 
         self.config = config
@@ -369,10 +370,11 @@ class IngredientSelector(QObject):
         print(len(solutions))
         print("Unresolved: ", unresolved)
 
-        try:
-            bestSols = self.findBestSol(solutions, product, ailments)
-        except Exception as e:
-            self.warn.displayWarningDialog("Error", f"error occured while finding best solution: {str(e)}")
+        bestSols = self.findBestSol(solutions, product, ailments)
+        # try:
+        #     bestSols = self.findBestSol(solutions, product, ailments)
+        # except Exception as e:
+        #     self.warn.displayWarningDialog("Error", f"error occured while finding best solution: {str(e)}")
 
         return bestSols, rows, cols, unresolved
 

@@ -49,13 +49,20 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf"
+        wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
-            "enable-local-file-access":None
+            "enable-local-file-access":None,
         }
         self.app_path = app_path
+
+    def genHeader(self):
+        header_tmp = open(self.app_path + "/Assets/headerTmp.html")
+        headerTemplate = jinja2.Environment(loader=jinja2.BaseLoader).from_string(header_tmp.read())
+        html_str = headerTemplate.render(misc_vals=self.misc_values)
+        with open(f"{self.footer_save_path}/header.html", "w") as f:
+            f.write(html_str)
 
     def genFooter(self):
         footer_tmp = open(self.app_path + "/Assets/footerTmp.html")
@@ -76,19 +83,22 @@ class InfoSheetGenerator:
         self.misc_values["font"] = self.config.getMisc("Font")
         self.misc_values["contactNumber"] = self.config.getMisc("Contact number")
         self.misc_values["abn"] = self.config.getMisc("ABN")
+        self.misc_values["para_offset"] = 0
 
         # Generate Footer html
         self.genFooter()
+        self.genHeader()
         self.options["footer-html"] = self.footer_save_path + "/footer.html"
+        self.options["header-html"] = self.footer_save_path + "/header.html"
 
         # Create list of all formlation sheet files
         sheet_paths = []
+        # Go through all order folders
         for _folder in os.listdir(path):
-            print(_folder)
             _folder_path = os.path.join(path, _folder)
             if os.path.isdir(_folder_path):
+                # Go through all files in folder
                 for _file in os.listdir(_folder_path):
-                    print(_file)
                     _file_path = os.path.join(_folder_path, _file)
                     if os.path.isfile(_file_path) and "Worksheet" in _file:
                         sheet_paths.append(_file_path)
@@ -114,6 +124,8 @@ class InfoSheetGenerator:
                 self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF.\n{str(e)}")
 
     def fill_instructions(self, name, prod_type, df):
+        # Reset para offset
+        self.misc_values["para_offset"] = 0
         instructions_filename = f"{prod_type.title()} Instructions"
 
         # Get product instructions
@@ -135,6 +147,10 @@ class InfoSheetGenerator:
         for para in doc.paragraphs:
             fullText += para.text + "\n"
 
+        # Find word count of instructions to determine offset number
+        word_count = len(fullText.split(" "))
+        if word_count > 200:
+            self.misc_values["para_offset"] = 1
         df[["Recommendations For Use"]] = fullText
         return df
 

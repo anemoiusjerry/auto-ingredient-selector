@@ -5,11 +5,15 @@
         body {
             font-family:{{ misc_vals["font"] }};
         }
+        footer {
+            height: 50px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <footer style="text-align: center;">
+    <footer>
         <div>{{ misc_vals["website"] }}</div>
         <div>
             {{ misc_vals["address"] }} | {{ misc_vals["contactNumber"] }} | ABN {{ misc_vals["abn"] }}

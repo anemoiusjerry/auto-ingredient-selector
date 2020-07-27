@@ -9,7 +9,7 @@
                 padding: 15px;
             }
 
-            header {
+            .header {
                 font-size: 15px;
                 color: rgb(221, 126, 107);
             }
@@ -37,15 +37,15 @@
         <table>
             <tr>
                 <td>
-                    <header align="left">
+                    <div class="header" align="left">
                         <h2> Restored to Eden </h2>
                         <h1> Product Information & Ingredients </h1>
                         <h2> {{ prod_type }} {{ name }} </h2>
-                    </header>
+                    </div>
 
                     <br>
 
-                    {% for i in range(len(headings)//2) %}
+                    {% for i in range(len(headings)//2 - misc_vals["para_offset"]) %}
                     <div>
                         <div class="heading"> {{ headings[i] }} </div>
                         <div class="paragraph">{{ paragraphs[i] }}</div>
@@ -55,11 +55,11 @@
 
                 </td>
                 <td>
-                    <header align=right>
+                    <!-- <header align=right>
                         <img src= "{{ misc_vals['assetsPath'] }}/RTELogo.png" style="width: 100px;">
-                    </header>
+                    </header> -->
 
-                    {% for i in range(len(headings)//2, len(headings)) %}
+                    {% for i in range(len(headings)//2 - misc_vals["para_offset"], len(headings)) %}
                     <div>
                         <div class="heading"> {{ headings[i] }} </div>
                         <div class="paragraph">{{ paragraphs[i] }}</div>
