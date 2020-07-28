@@ -34,13 +34,13 @@ class InfoTab(QWidget):
 
         self.instruction_browser = FileBrowser("dir", "Product Instructions Directory", config)
         sheets_layout.addWidget(self.instruction_browser,0, 1)
-        
+
         return sheets_layout
 
 
     def run(self):
-        reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
-        reporter.process_all()
+            reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
+            reporter.process_all()
 
     def loadSheetLocal(self):
         # self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
@@ -80,7 +80,7 @@ class InfoTab(QWidget):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll.setWidgetResizable(True)
         self.scroll.setWidget(self.widget)
-        
+
         self.para_layout = QVBoxLayout()
         self.sections = []
         self.txt_boxes = []
@@ -89,7 +89,7 @@ class InfoTab(QWidget):
             body = df.iloc[0,i]
             section_layout = self.create_paragraph_section(heading, body)
             self.para_layout.addLayout(section_layout)
-        
+
         self.widget.setLayout(self.para_layout)
         self.layout.addWidget(self.scroll)
 
@@ -152,7 +152,7 @@ class InfoTab(QWidget):
         l = QLabel(n_heading)
         l.setMinimumSize(50, 50)
         banner_layout.addWidget(l, 0, 0)
-        
+
         # Create text boxes
         if type(n_body) == str and n_body != "AutoFilled by system":
             t = QTextEdit(n_body)
@@ -167,7 +167,7 @@ class InfoTab(QWidget):
         upButton = self.create_button_icon("/Assets/caret-up.svg")
         banner_layout.addWidget(upButton, 0, 1)
         # Down button
-        downButton = self.create_button_icon("/Assets/caret-down.svg")   
+        downButton = self.create_button_icon("/Assets/caret-down.svg")
         banner_layout.addWidget(downButton, 0, 2)
         # Delete button
         del_button = self.create_button_icon("/Assets/trash.svg")
@@ -210,7 +210,7 @@ class SectionWrapper:
         self.upButton.clicked.connect(lambda: self.move("up"))
         self.downButton.clicked.connect(lambda: self.move("down"))
         self.button.clicked.connect(self.del_section)
-        
+
         self.txt_boxes = txt_boxes
 
     def move(self, direction):
@@ -224,7 +224,7 @@ class SectionWrapper:
         copy_sec = QVBoxLayout()
         copy_sec.addLayout(copy_banner)
         copy_sec.addWidget(self.t)
-        
+
         ix = self.para_layout.indexOf(self.section_layout)
         if direction == "down":
             self.para_layout.insertLayout(ix+2, copy_sec)

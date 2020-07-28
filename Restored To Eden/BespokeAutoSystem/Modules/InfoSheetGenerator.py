@@ -49,7 +49,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -157,7 +157,7 @@ class InfoSheetGenerator:
     def fill_dates(self, sheet, df):
         # Convert date strings to datetime object
         try:
-            
+
             date_blended = datetime.strptime(sheet["B3"].value, "%d.%m.%Y")
             expiry_date = datetime.strptime(sheet["B6"].value, "%d.%m.%Y")
             dt = expiry_date - date_blended

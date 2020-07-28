@@ -113,19 +113,19 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Downloads/RTE Ingredients Database - Latest - Sheet1.csv",
-        "Orders Spreadsheet": "C:/Users/jerry/Downloads/10031 Order.csv",
-        "Customer Questionnaire": "C:/Users/jerry/Downloads/10031 Qs.csv",
-        "Product Catalog": "C:/Users/jerry/Downloads/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Formulation Worksheet",
-        "Information Sheet Paragraphs": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/beta ouput",
-        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
+        "Ingredients Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/RTE Ingredients Database - Latest.xlsx",
+        "Orders Spreadsheet": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/orders-monnihardstone.csv",
+        "Customer Questionnaire": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/new_questionnaire.csv",
+        "Product Catalog": "/Users/HG/Downloads/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
+        "Export Directory": "/Users/HG/Desktop",
+        "Product Instructions Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
         "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 1,
+        "tpyeoverlap_low": 0,
         "typeoverlap_up": 2,
         "maxupBound": 50,
         "maxsols": 1,
