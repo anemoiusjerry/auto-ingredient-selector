@@ -82,7 +82,7 @@ class FormulationFiller:
             while sheet[f"C{j}"].value != None and sheet[f"B{j}"].value != None:
 
                 # Only fill w/w% if fixed ingredient
-                if ("doesn't change" in ingredient_name.lower()) or ("does not change" in ingredient_name.lower()):
+                if "fixed" in ingredient_name.lower():
                     if ingredient_name.lower() == sheet[f"B{j}"].value.lower():
                         # Fill w/w%
                         sheet[f"D{j}"] = assigned_vals[ingredient_name]
@@ -135,7 +135,7 @@ class FormulationFiller:
         if len(realloc_dict) > 0:
             sheet, last_i = self.too_many_slots(realloc_dict, sheet)
 
-        #sheet = self.write_grams(sheet)
+        sheet = self.write_formulas(sheet)
         filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
         path = self.export_to_file(workbook, filename, customer_name)
 
@@ -189,7 +189,7 @@ class FormulationFiller:
         # Get fixed weight %
         fixed_weight = 0
         for ingredient, weight in ww_dict.items():
-            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
+            if "fixed" in ingredient:
                 fixed_weight += weight[0]
 
         # Scale to 100
@@ -228,13 +228,7 @@ class FormulationFiller:
             ww_dict[cell_ingredient].append(cell_weight)
             phase_dict[cell_ingredient] = sheet[F"C{i}"].value
 
-            # # Add fixed ingredient to assigned dict
-            # if ("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient):
-            #     assigned_dict[cell_ingredient] = cell_weight
-            # # If no fixed, add to dict to be reallocated
-            # else:
-            #     realloc_dict[f"D{i}"] = cell_weight
-            if not(("doesn't change" in cell_ingredient) or ("does not change" in cell_ingredient)):
+            if not("fixed" in cell_ingredient):
                 realloc_dict[f"D{i}"] = cell_weight
 
             i += 1
@@ -268,7 +262,7 @@ class FormulationFiller:
 
         for ingredient, weight in leftovers.items():
             # No need to add fixed ingredients as they are already in sheet
-            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
+            if "fixed" in ingredient:
                 continue
 
             # Get ingredient type and assign corresponding w/w%
@@ -295,7 +289,7 @@ class FormulationFiller:
                         sheet.cell(row=EOF, column=col_index).number_format = copy(sheet.cell(row=self.SOF, column=col_index).number_format)
                         sheet.cell(row=EOF, column=col_index).protection = copy(sheet.cell(row=self.SOF, column=col_index).protection)
                         sheet.cell(row=EOF, column=col_index).alignment = copy(sheet.cell(row=self.SOF, column=col_index).alignment)
-
+                    EOF += 1
         return sheet
 
     def convert_eo_label(self, ingredient_name):  
@@ -307,15 +301,14 @@ class FormulationFiller:
             ingredient_type = "eo middle"  
         return ingredient_type
 
-    def write_grams(self, sheet):
-        default_gram = 100
+    def write_formulas(self, sheet):
         i=self.SOF
         while sheet[f"C{i}"].value != None:
-            try:
-                sheet[f"E{i}"] = sheet[f"D{i}"].value/100 * float(sheet["B5"].value)
-            except:
-                sheet[f"E{i}"] = sheet[f"D{i}"].value/100 * default_gram
+            sheet[f"E{i}"] = f"=B5*D{i}/100"
             i+=1
+        # Write totalising formula
+        sheet[f"D{i}"] = f"=SUM(D{self.SOF}:D{i-1})"
+        sheet[f"E{i}"] = f"=SUM(E{self.SOF}:E{i-1})"
         return sheet
 
     def export_to_file(self, workbook, filename, customer_name):

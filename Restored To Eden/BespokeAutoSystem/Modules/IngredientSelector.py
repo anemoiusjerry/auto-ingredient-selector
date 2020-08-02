@@ -106,8 +106,10 @@ class IngredientSelector(QObject):
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
             elif email in self.qnair[self.qemailCol].values.tolist():
+                email_index = self.qnair[self.qemailCol].values.tolist().index(email)
+                client_name = self.qnair.index[email_index]
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
-                qdata = self.qnair.loc[self.qnair[self.qemailCol].values.tolist().index(email)]
+                qdata = self.qnair.loc[client_name]
             else:
                 self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Questionnaire.")
                 print("no matching name found for ", name)
@@ -161,29 +163,40 @@ class IngredientSelector(QObject):
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
 
         # Ailment label format
-        _ailDict = {"bold": True,
-                    "align": "right",
-                    "bg_color": "#E696AE"}
+        _ailDict = {
+            "font": "Raleway",
+            "bold": True,
+            "align": "center",
+            "bg_color": "#E4B883"
+            }
         ailment_format = workbook.add_format(_ailDict)
 
         # Skin problem and Ailment header format
-        _hailDict = {"bold": True,
-                    "align": "center",
-                    "bg_color": "#DB7093",
-                    "bottom": True}
+        _hailDict = {
+            "font": "Raleway",
+            "bold": True,
+            "align": "center",
+            "bg_color": "#D18973",
+            "bottom": True
+            }
         headail_format = workbook.add_format(_hailDict)
 
-        # Ingredient label format
-        _ingDict = {"bold": True,
-                    "align": "right",
-                    "bg_color": "#C71585",
-                    "font_color": "white"}
+        # Ingredient name label format
+        _ingDict = {
+            "font": "Raleway",
+            "bold": True,
+            "align": "center",
+            "bg_color": "#D18973"
+            }
         ingred_format = workbook.add_format(_ingDict)
 
         # Nodes format
-        _nodDict = {"bold": True,
-                    "align": "center",
-                    "bg_color": "#D8BFD8"}
+        _nodDict = {
+            "font": "Raleway",
+            "bold": True,
+            "align": "center",
+            "bg_color": "#E2DDD8"
+            }
         node_format = workbook.add_format(_nodDict)
 
         i=1
@@ -211,6 +224,7 @@ class IngredientSelector(QObject):
             _strLen = 0
             check = True
             _nrow = 0
+
             for problem in cols:
                 if problem[0] not in ["aqueous base","aqueous high performance","anhydrous high performance","anhydrous base","essential oil"]:
                     _strLen = len(problem[0]) if len(problem[0]) > _strLen else _strLen
@@ -236,11 +250,19 @@ class IngredientSelector(QObject):
             hcol = 1
             nrow = 2
             ncol = 1
+
+            # get max length for ingredients
+            maxLen = 0
+            for ingredient in solution[0]:
+                if len(ingredient) > maxLen:
+                    maxLen = len(ingredient)
+
             for ingredient in solution[0]:
                 # write the heading
                 _ingredient = ingredient[0].upper() + ingredient[1:] # capitalise first letter
                 worksheet.write(hrow, hcol, _ingredient,ingred_format)
-                worksheet.set_column(hcol, hcol, round(len(ingredient)*1))
+                #worksheet.set_column(hcol, hcol, round(len(ingredient)*1))
+                worksheet.set_column(hcol, hcol, round(maxLen))
                 hcol = hcol+1
 
                 # populate the nodes
@@ -259,7 +281,7 @@ class IngredientSelector(QObject):
                         worksheet.write(row + 2, ncol, "Xtra Benefits",headail_format)
                         j=0
                         for benefit in benefits[1]:
-                            worksheet.write(row+3+j, ncol, benefit)
+                            worksheet.write(row+3+j, ncol, benefit, ailment_format)
                             j += 1
                         break
                 ncol = ncol + 1
@@ -270,7 +292,7 @@ class IngredientSelector(QObject):
             worksheet.write(row, 0, "Unresolved Conditions", headail_format)
             if len(unresolved) > 0:
                 for j in range(len(unresolved)):
-                    worksheet.write(row + j + 1, 0, unresolved[j])
+                    worksheet.write(row + j + 1, 0, unresolved[j], node_format)
             else:
                 worksheet.write(row + 1, 0, 'everything is resolved')
 
@@ -611,7 +633,7 @@ class IngredientSelector(QObject):
         # Get fixed weight %
         fixed_weight = 0
         for ingredient, weight in ww_dict.items():
-            if ("doesn't change" in ingredient) or ("does not change" in ingredient):
+            if ("fixed" in ingredient):
                 fixed_weight += weight[0]
 
         # Scale to 100
@@ -631,7 +653,6 @@ class IngredientSelector(QObject):
     def get_misc_items(self, sheet):
         """ Creates the dicts and values needed for reallocation
             Returns: ww_dict - dict { ingredient type: w/w% }
-                     assigned_dict - dict { ingredient type: w/w% } init. filled with all does not change names
         """
         ww_dict = dd(list)
 

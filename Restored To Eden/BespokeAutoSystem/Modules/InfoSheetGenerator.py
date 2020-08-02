@@ -49,7 +49,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf"
+        wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -182,7 +182,7 @@ class InfoSheetGenerator:
         # make an deep copy of df
         df = copy.deepcopy(df)
 
-        inci_str = "Batch No. " + sheet["A4"].value + "\n\n"
+        inci_str = "Batch No. " + str(sheet["B4"].value) + "\n\n"
         i=7
         while sheet[f"C{i}"].value != None:
             inci = sheet[f"A{i}"].value
