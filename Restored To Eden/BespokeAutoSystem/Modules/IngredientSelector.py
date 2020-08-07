@@ -385,7 +385,6 @@ class IngredientSelector(QObject):
             print(row[0], end="")
             print(list(set(row[0])))
 
-
         matrix = DLX(cols, rows)
         solutions = self.solve(matrix)
 

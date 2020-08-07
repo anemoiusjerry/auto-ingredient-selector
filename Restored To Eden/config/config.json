@@ -146,7 +146,7 @@
     "Values": {
         "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 0,
+        "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
         "maxsols": 1,
