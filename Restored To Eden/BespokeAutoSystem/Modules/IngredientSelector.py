@@ -440,6 +440,7 @@ class IngredientSelector(QObject):
 
         j=0
         for solution in solutions:
+            print(solution)
             if self.stop:
                 return None
             # send signal if the index of solution is a multiple of 100
@@ -539,7 +540,9 @@ class IngredientSelector(QObject):
 
                 # Create and append nodes for each row of the dlx matrix created
                 nodes = self.dlxRowFormat(cures, ailments)
-                rows.append((nodes, index))
+                print("cures: ", cures)
+                print("ailments: ", ailments)
+                rows.append((list(set(nodes)), index))
 
         return rows, ailments
 
