@@ -24,6 +24,7 @@ class InfoSheetGenerator:
         self.contents_df = infoSheet_df
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
+        self.SOF = 8
 
         # Open html template as string
         if getattr(sys, 'frozen', False):
@@ -49,7 +50,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf"
+        wkhtml_path = app_path + "/wkhtmltopdf.exe"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -142,7 +143,8 @@ class InfoSheetGenerator:
             self.warn.displayWarningDialog("", error_msg)
             return df
 
-        fullText = name + ", "
+        # First name only
+        fullText = name.split(" ")[0] + ", "
         doc = docx.Document(f)
         for para in doc.paragraphs:
             fullText += para.text + "\n"
@@ -182,13 +184,23 @@ class InfoSheetGenerator:
         # make an deep copy of df
         df = copy.deepcopy(df)
 
-        inci_str = "Batch No. " + str(sheet["B4"].value) + "\n\n"
-        i=7
+        inci_str = "Batch No. " + str(sheet["B4"].value) + "\n\n" + "Ingredients: "
+        i=self.SOF
+
+        inci_names = []
+        # Add inci names and weights to list of tuples for sorting
         while sheet[f"C{i}"].value != None:
             inci = sheet[f"A{i}"].value
+            weight = sheet[f"D{i}"].value
             if inci != None:
-                inci_str += inci + ", "
+                inci_names.append((inci, weight))
             i+=1
+        
+        # Sort ingredients by weight (2nd element in tuple)
+        inci_names.sort(key=lambda x: x[1], reverse=True)
+
+        for inci, weight in inci_names:
+            inci_str += inci + ", "
         # Remove final comma with full stop
         inci_str = inci_str[:-2] + "."
 

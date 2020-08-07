@@ -325,6 +325,14 @@ class IngredientSelector(QObject):
             colind = len(cols) - 1
             for row in rows:
                 ingredtype = self.ingredients.loc[row[1],self.typeCol]
+                ################################################################################
+                #  JERRY EDIT TO INCLUDE ALL ESSENTIAL OILS
+                if "essential oil" in ingredtype:
+                    # index of essential oil key word in list
+                    eoIndex = ingredtype.index("essential oil")
+                    # get note of EO
+                    ingredtype[eoIndex] = "essential oil " + self.ingredients.loc[row[1], self.EOnoteCol]
+                ################################################################################
                 if type in ingredtype:
                     row[0].append((colind, None))
 
@@ -335,6 +343,7 @@ class IngredientSelector(QObject):
             if col not in colsCovered:
                 if col <= last:
                     last = last - 1
+                # Add to unresolved and remove the condition from columns
                 unresolved.append(cols.pop(col)[0])
                 for i in range(len(rows)):
                     rows[i] = list(rows[i])
@@ -584,6 +593,10 @@ class IngredientSelector(QObject):
     def typeCheck(self, types, type):
         for t1 in types:
             for t2 in type:
+                # Essential oil fix
+                if t2 == "essential oil":
+                    if t2 in t1:
+                        return True
                 if t1 == t2:
                     return True
         return False

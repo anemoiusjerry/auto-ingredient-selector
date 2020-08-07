@@ -68,6 +68,7 @@ class FormulationFiller:
             sheet["B5"] = 100 # placeholder (varies)
 
         i=0
+        # Keep trying to insert ingredients into slots if there still are ingredients
         while len(assigned_vals) > 0:
             # End loop if not enough slots
             if len(realloc_dict) <= 0 or i >= len(assigned_vals):
