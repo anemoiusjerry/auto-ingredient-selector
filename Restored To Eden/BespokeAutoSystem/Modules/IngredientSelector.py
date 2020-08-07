@@ -379,6 +379,13 @@ class IngredientSelector(QObject):
                 cols[key] = tuple(cols[key])
 
         # Run the DLX to find all the solutions
+        print(cols)
+
+        for row in rows:
+            print(row[0], end="")
+            print(list(set(row[0])))
+
+
         matrix = DLX(cols, rows)
         solutions = self.solve(matrix)
 

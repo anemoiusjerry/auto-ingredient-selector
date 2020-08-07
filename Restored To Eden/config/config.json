@@ -134,14 +134,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/testing-isaac essential oil problem/RTE Ingredients Database - 29.7.20.csv",
-        "Orders Spreadsheet": "C:/Users/jerry/Downloads/10020 Order.xlsx",
-        "Customer Questionnaire": "C:/Users/jerry/Downloads/10020 Qs.xlsx",
-        "Product Catalog": "C:/Users/jerry/Desktop/testing-isaac essential oil problem/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Formulation Worksheet",
-        "Information Sheet Paragraphs": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/shireen",
-        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
+        "Ingredients Spreadsheet": "/Users/HG/Downloads/RTE-Ingredients-Database-Latest-Sheet1.csv",
+        "Orders Spreadsheet": "/Users/HG/Downloads/10020-Order.xlsx",
+        "Customer Questionnaire": "/Users/HG/Downloads/10020-Qs.xlsx",
+        "Product Catalog": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
+        "Export Directory": "/Users/HG/Desktop",
+        "Product Instructions Directory": "/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/Product Information"
     },
     "Values": {
         "lowBound": 1,
