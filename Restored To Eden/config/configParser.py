@@ -10,6 +10,8 @@ class FigMe:
 
     def __init__(self):
         self.warn = WarningRaiser()
+        self.gdriveAPI = Gdriver()
+        
         # getting correct path of the application
         if getattr(sys, 'frozen', False):
             path = os.path.dirname(sys.executable)
@@ -22,7 +24,6 @@ class FigMe:
         except:
             self.path = app_path + "/config/config.json"
 
-        self.gdriveAPI = Gdriver()
         # open the config file in read only mode and retrieve dictionary
         with open(self.path, "r") as config:
             self.masterDict = json.load(config)
