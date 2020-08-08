@@ -379,12 +379,6 @@ class IngredientSelector(QObject):
                 cols[key] = tuple(cols[key])
 
         # Run the DLX to find all the solutions
-        print(cols)
-
-        for row in rows:
-            print(row[0], end="")
-            print(list(set(row[0])))
-
         matrix = DLX(cols, rows)
         solutions = self.solve(matrix)
 
@@ -448,7 +442,6 @@ class IngredientSelector(QObject):
 
         j=0
         for solution in solutions:
-            print(solution)
             if self.stop:
                 return None
             # send signal if the index of solution is a multiple of 100
@@ -548,9 +541,7 @@ class IngredientSelector(QObject):
 
                 # Create and append nodes for each row of the dlx matrix created
                 nodes = self.dlxRowFormat(cures, ailments)
-                print("cures: ", cures)
-                print("ailments: ", ailments)
-                rows.append((list(set(nodes)), index))
+                rows.append((sorted(list(set(nodes))), index))
 
         return rows, ailments
 

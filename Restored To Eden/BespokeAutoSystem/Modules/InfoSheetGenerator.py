@@ -50,7 +50,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -195,7 +195,7 @@ class InfoSheetGenerator:
             if inci != None:
                 inci_names.append((inci, weight))
             i+=1
-        
+
         # Sort ingredients by weight (2nd element in tuple)
         inci_names.sort(key=lambda x: x[1], reverse=True)
 
