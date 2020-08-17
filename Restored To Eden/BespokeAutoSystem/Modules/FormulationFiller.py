@@ -2,7 +2,7 @@ import re
 import os
 import pandas as pd
 from copy import copy
-from PySide2.QtCore import QObject, Signal
+from PySide2.QtCore import QObject, Signal, Slot
 # Spreadsheet library
 from openpyxl import load_workbook
 from datetime import *
@@ -11,28 +11,49 @@ from collections import defaultdict as dd
 from config.configParser import FigMe
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
-class FormulationFiller:
+class FormulationFiller(QObject):
     SOF = 8
+    launched = Signal(int)
+    stateChanged = Signal(str, str, int)
+    cancel = Signal()
+    error = Signal(str)
 
     def __init__(self, ingredients_df, gdriveObject):
+        QObject.__init__(self)
+        self.stop = False
+
         self.ingredients_df = ingredients_df
         self.config = FigMe()
         self.gdriveObject = gdriveObject
         self.warn = WarningRaiser()
 
+        self.errorStr = ""
+
     def process_all(self, results):
-        for soln in results:
+        for i, soln in enumerate(results):
+            if self.stop:
+                return
             name = soln["CustomerName"].title()
             product_type = soln["ProductType"].title()
-            self.write_to_template(soln["Ingredients"], name, product_type)
-            # try:
-            #     self.write_to_template(soln["Ingredients"], name, product_type)
-            # except:
-            #     self.warn.displayWarningDialog("Write Failure",
-            #         f"Failed to write {name}'s {product_type} formulation sheet.\nCheck that the template file has no embbed formating.")
+            product_name = soln["ProductName"].lower()
+            self.stateChanged.emit("writing", f"{product_name.title()} for {name}", i)
+
+            isMale = False
+            # Check for men's product
+            if "courageous" in product_name or "men" in product_name or "man" in product_name:
+                isMale = True
+
+            try:
+                self.write_to_template(soln["Ingredients"], name, product_type, isMale)
+            except:
+                self.errorStr += f"Failed to write {name}'s {product_type} formulation sheet. Check template has not changed"
+
+        if self.errorStr != "":
+            self.error.emit(self.errorStr)
+            
         print("All form sheet generated.")
 
-    def write_to_template(self, ingredients, customer_name, prod_type):
+    def write_to_template(self, ingredients, customer_name, prod_type, isMale):
         """ Take information from ingredients selector and fill in
             formulation worksheet.
             inputs: ingredients - list of strings of ingredients
@@ -54,7 +75,7 @@ class FormulationFiller:
                 error_msg = "Failed to load formulation template."
                 workbook = load_workbook(filename=template_path)
         except:
-            self.warn.displayWarningDialog("", error_msg)
+            self.errorStr += error_msg
         
         sheet = workbook.active
 
@@ -64,6 +85,9 @@ class FormulationFiller:
         # Fill header info
         sheet["B1"] = customer_name
         sheet["B2"] = prod_type
+        # Tag male product
+        if isMale:
+            sheet["A2"] = sheet["A2"].value + " [M]"
         if type(sheet["B5"].value) != int:
             sheet["B5"] = 100 # placeholder (varies)
 
@@ -118,7 +142,7 @@ class FormulationFiller:
                                     prob_col_name = self.config.getColname("Ingredients Spreadsheet", "skin problem")
                                     sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name][prob_col_name]
                             except:
-                                print("No needs targetting column.")
+                                pass
 
                             realloc_dict.pop(f"D{j}", None)
                             assigned_vals.pop(ingredient_name)
@@ -225,6 +249,9 @@ class FormulationFiller:
         while sheet[f"C{i}"].value != None and sheet[f"B{i}"].value != None:
             cell_ingredient = sheet[f"B{i}"].value.lower()
             cell_weight = sheet[f"D{i}"].value
+            # Guard against uninitialsed w/w
+            if cell_weight == None:
+                cell_weight = 0
 
             ww_dict[cell_ingredient].append(cell_weight)
             phase_dict[cell_ingredient] = sheet[F"C{i}"].value
@@ -322,3 +349,8 @@ class FormulationFiller:
         workbook.save(save_path + filename)
         print("Done exporting...")
         return save_path + filename
+
+    @Slot()
+    def stop_(self):
+        self.stop = True
+        self.cancel.emit()

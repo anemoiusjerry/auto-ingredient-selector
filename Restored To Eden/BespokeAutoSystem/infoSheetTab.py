@@ -4,19 +4,24 @@ import pandas as pd
 from PySide2.QtWidgets import *
 from PySide2.QtGui import QPixmap, QIcon
 from PySide2.QtCore import Qt, QSize
+from PySide2.QtCore import Qt, QObject, Signal, Slot, QRunnable, QThreadPool
 import copy
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
 from .Modules import InfoSheetGenerator
+from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class InfoTab(QWidget):
 
     def __init__(self, config):
         QWidget.__init__(self)
+        self.threadpool = QThreadPool()
+
         self.config=config
         self.layout = QVBoxLayout()
         self.gdriveAPI = Gdriver()
+        self.warn = WarningRaiser()
 
         init_layout = self.load_init_layout(config)
         self.layout.addLayout(init_layout)
@@ -36,11 +41,6 @@ class InfoTab(QWidget):
         sheets_layout.addWidget(self.instruction_browser,0, 1)
 
         return sheets_layout
-
-
-    def run(self):
-            reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
-            reporter.process_all()
 
     def loadSheetLocal(self):
         # self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
@@ -197,6 +197,83 @@ class InfoTab(QWidget):
     def save_misc_entry(self, key, text):
         self.config.setMisc(key, text)
 
+
+    def run(self):
+        self.reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
+        #self.reporter.process_all()
+        self.reporter.launched.connect(self.launchProgress)
+        self.reporter.stateChanged.connect(self.progStateChanged)
+        self.reporter.error.connect(self.showError)
+        
+        worker = Worker(self.reporter.process_all)
+        worker.signals.result.connect(self.processResults)
+        self.threadpool.start(worker)
+
+    @Slot()
+    def closeProg(self):
+        self.prog.cancel()
+
+    @Slot(str)
+    def showError(self, errors):
+        self.warn.displayWarningDialog("Error", errors)
+
+    @Slot(int)
+    def launchProgress(self, end):
+        primaryMsg = "Generating PDFs...\n"
+        self.prog = QProgressDialog(primaryMsg, "Cancel", 0, end)
+        self.prog.canceled.connect(self.reporter.stop_)
+        self.prog.setMinimumDuration(3000)
+        self.prog.setFixedSize(400, 150)
+        self.prog.exec_()
+
+    @Slot(int)
+    def progStateChanged(self, i):
+        # Set the new value of the progress bar
+        self.prog.setValue(i)
+
+    @Slot(object)
+    def processResults(self):
+        # Start formulation calculations for all orders
+        self.closeProg()
+
+
+class Worker(QRunnable):
+    def __init__(self, fn, *args, **kwargs):
+        # fn = function to be run in the thread
+        # *args = list of arguments the function uses
+        # **kwargs = any signals the function will use. e.g.
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+        # Add the callback to our kwargs
+        #self.kwargs['cancel_signal'] = self.signals.cancel
+
+    @Slot()
+    def run(self):
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done
+
+class WorkerSignals(QObject):
+    finished = Signal()
+    error = Signal(tuple)
+    result = Signal(object)
+    cancel = Signal()
+
+
 class SectionWrapper:
     def __init__(self, upButton, downButton, button, l, t, section_layout, para_layout, txt_boxes):
         self.upButton = upButton
@@ -245,20 +322,3 @@ class SectionWrapper:
         self.l.deleteLater()
         self.t.deleteLater()
         self.section_layout.deleteLater()
-
-
-# class ButtonWrapper:
-#     def __init__(self, button, label, text_box):
-#         self.button = button
-#         self.label = label
-#         self.text_box = text_box
-#         self.button.clicked.connect(self.del_section)
-
-#         self.layout = layout
-
-#     def del_section(self):
-#         #df = pd.DataFrame({self.label.text(): [self.text_box.toPlainText()]})
-#         self.label.deleteLater()
-#         self.text_box.deleteLater()
-#         self.button.deleteLater()
-#         #return df

@@ -11,19 +11,27 @@ import argparse
 import math
 
 from PySide2.QtWidgets import *
+from PySide2.QtCore import QObject, Signal, Slot
+
 from datetime import *
 from openpyxl import load_workbook
 from pathlib import Path
 from config.configParser import FigMe
-from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
-class InfoSheetGenerator:
+class InfoSheetGenerator(QObject):
+    launched = Signal(int)
+    stateChanged = Signal(int)
+    cancel = Signal()
+    error = Signal(str)
 
     def __init__(self, infoSheet_df, gdriveObject, config):
+        QObject.__init__(self)
+        self.stop = False
+
         self.config = config
         self.contents_df = infoSheet_df
         self.gdriveObject = gdriveObject
-        self.warn = WarningRaiser()
+        self.errorStr = ""
         self.SOF = 8
 
         # Open html template as string
@@ -50,7 +58,7 @@ class InfoSheetGenerator:
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",
@@ -103,14 +111,23 @@ class InfoSheetGenerator:
                     _file_path = os.path.join(_folder_path, _file)
                     if os.path.isfile(_file_path) and "Worksheet" in _file:
                         sheet_paths.append(_file_path)
-
+        
+        self.launched.emit(len(sheet_paths))
         # Retrieve all info. needed for pdf
-        for f in sheet_paths:
+        for i, f in enumerate(sheet_paths):
+            # Stop if cancelled
+            if self.stop:
+                return
+            self.stateChanged.emit(i)
+
             workbook = load_workbook(filename=f)
             sheet = workbook.active
 
             name = sheet["B1"].value
             prod_type = sheet["B2"].value
+            isMale = False
+            if "[M]" in sheet["A2"].value:
+                isMale = True
 
             df = self.extract_incis(sheet, self.contents_df)
             df = self.fill_dates(sheet, df)
@@ -120,9 +137,13 @@ class InfoSheetGenerator:
             # Pass all info to gen brochure
             print("calling generate report")
             try:
-                self.generateReport(headings, paragraphs, name, prod_type)
+                self.generateReport(headings, paragraphs, name, prod_type, isMale)
             except Exception as e:
-                self.warn.displayWarningDialog("Write Failure", f"Failed to generate {name}'s {prod_type} report PDF.\n{str(e)}")
+                print(e)
+                self.errorStr += f"Failed to generate {name.upper()}'s {prod_type.upper()} report PDF.\n\n"
+        
+        if self.errorStr != "":
+            self.error.emit(self.errorStr)
 
     def fill_instructions(self, name, prod_type, df):
         # Reset para offset
@@ -132,15 +153,15 @@ class InfoSheetGenerator:
         # Get product instructions
         try:
             if (self.config.masterDict["gdrive"]):
-                error_msg = "Failed to fetch product instructions from Google Drive."
+                error_msg = f"Failed to fetch {prod_type} instructions from Google Drive."
                 f, file_id = self.gdriveObject.fetch_file(instructions_filename)
             else:
-                error_msg = "Failed to fetch product instructions."
+                error_msg = f"Failed to fetch {prod_type} instructions."
                 instructions_path = self.config.getDir("Product Instructions Directory") + f"/{instructions_filename}.docx"
                 f = open(instructions_path, "rb")
         # If failed to open instructions then return straightaway
         except:
-            self.warn.displayWarningDialog("", error_msg)
+            self.errorStr += error_msg
             return df
 
         # First name only
@@ -165,7 +186,10 @@ class InfoSheetGenerator:
             dt = expiry_date - date_blended
         # Return df if exception to allow for manual user editing
         except:
-            self.warn.displayWarningDialog("", "Date not in the format of dd.mm.yyyy")
+            name = sheet["B1"].value.upper()
+            prod_type = sheet["B2"].value.upper()
+            # Add to error string
+            self.errorStr += f"- Date not in the format of dd.mm.yyyy for {name}'s {prod_type} order.\n\n"
             return df
         # Always round down to nearest month
         months = math.floor(dt.days / 30)
@@ -207,12 +231,12 @@ class InfoSheetGenerator:
         df[["Ingredients"]] = inci_str
         return df
 
-    def generateReport(self, headings, paragraphs, name, prod_type):
+    def generateReport(self, headings, paragraphs, name, prod_type, isMale):
         name = name.title()
         prod_type = prod_type.title()
 
         # Use male template if a male product
-        if "man" in prod_type.lower():
+        if isMale:
             self.misc_values["isMale"] = True
             self.genHeader()
             html_str = self.courTemplate.render(headings=headings, paragraphs=paragraphs,
@@ -241,3 +265,8 @@ class InfoSheetGenerator:
         for i in range(df.shape[1]):
             paragraphs.append(df.iloc[0,i])
         return headings, paragraphs
+
+    @Slot()
+    def stop_(self):
+        self.stop = True
+        self.cancel.emit()

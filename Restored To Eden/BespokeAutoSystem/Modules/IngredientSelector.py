@@ -137,6 +137,10 @@ class IngredientSelector(QObject):
                 os.makedirs(orderFolderName)
 
             for product in products:
+                # Skip over constant products
+                if product in ["hydration serum", "toner"]:
+                    continue
+                
                 # Get the solutions
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + ordername + "-" + str(product) + ".xlsx"
@@ -152,7 +156,8 @@ class IngredientSelector(QObject):
                 for solution in solutions:
                     returns.append({"Ingredients": solution[0],
                                     "CustomerName": name,
-                                    "ProductType": product})
+                                    "ProductType": product,
+                                    "ProductName": item})
 
         if returns:
             if allErrorString != "":
@@ -167,7 +172,8 @@ class IngredientSelector(QObject):
             "font": "Raleway",
             "bold": True,
             "align": "center",
-            "bg_color": "#E4B883"
+            "valign": "vcenter",
+            "bg_color": "#FFFBF4"
             }
         ailment_format = workbook.add_format(_ailDict)
 
@@ -176,8 +182,9 @@ class IngredientSelector(QObject):
             "font": "Raleway",
             "bold": True,
             "align": "center",
-            "bg_color": "#D18973",
-            "bottom": True
+            "valign": "vcenter",
+            "bg_color": "#D18973"
+            #"bottom": True
             }
         headail_format = workbook.add_format(_hailDict)
 
@@ -186,6 +193,7 @@ class IngredientSelector(QObject):
             "font": "Raleway",
             "bold": True,
             "align": "center",
+            "valign": "vcenter",
             "bg_color": "#D18973"
             }
         ingred_format = workbook.add_format(_ingDict)
@@ -195,6 +203,7 @@ class IngredientSelector(QObject):
             "font": "Raleway",
             "bold": True,
             "align": "center",
+            "valign": "vcenter",
             "bg_color": "#E2DDD8"
             }
         node_format = workbook.add_format(_nodDict)
@@ -217,6 +226,8 @@ class IngredientSelector(QObject):
             solution[0] = tmplst
 
             worksheet = workbook.add_worksheet("Solution " + str(i))
+            # Set row height
+            worksheet.set_default_row(30)
             # Write the row headers (skin problems & ingredient types)
             row = 2
             col = 0
@@ -296,16 +307,7 @@ class IngredientSelector(QObject):
             else:
                 worksheet.write(row + 1, 0, 'everything is resolved')
 
-            """row = row + 2 + len(unresolved)
-            worksheet.write(row, 0, "Additional Benefits", headail_format)
-            if len(solution[2]) > 0:
-                for j in range(len(solution[2])):
-                    worksheet.write(row + 1 + j, 0, solution[2][j])
-            else:
-                worksheet.write(row + 1, 0, 'No additional benefits')"""
-
     def orderParser(self, product, qdata):
-
         types = self.config.getProduct(product, "types")
         # Retrieving the skin problems from customer info
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
@@ -378,13 +380,6 @@ class IngredientSelector(QObject):
                 cols[key][2] = val
                 cols[key] = tuple(cols[key])
 
-        # Run the DLX to find all the solutions
-        print(cols)
-
-        for row in rows:
-            print(row[0], end="")
-            print(list(set(row[0])))
-
         matrix = DLX(cols, rows)
         solutions = self.solve(matrix)
 
@@ -448,7 +443,6 @@ class IngredientSelector(QObject):
 
         j=0
         for solution in solutions:
-            print(solution)
             if self.stop:
                 return None
             # send signal if the index of solution is a multiple of 100
@@ -683,6 +677,9 @@ class IngredientSelector(QObject):
         while sheet[f"C{i}"].value != None and sheet[f"B{i}"].value != None:
             cell_ingredient = sheet[f"B{i}"].value.lower()
             cell_weight = sheet[f"D{i}"].value
+            # Guard against uninitialised weights
+            if cell_weight == None:
+                cell_weight = 0
 
             ww_dict[cell_ingredient].append(cell_weight)
             i += 1

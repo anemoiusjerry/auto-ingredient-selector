@@ -120,19 +120,26 @@ class LandingTab(QWidget):
 
         worker = Worker(self.ingredient_selector.selectIngredients)
         worker.signals.result.connect(self.processResults)
-
         self.threadpool.start(worker)
 
     @Slot(object)
     def processResults(self, results):
         # Start formulation calculations for all orders
-        self.closeProg()
         if not results == None:
             filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
-            filler.process_all(results)
+            #filler.process_all(results)
+            self.prog.canceled.connect(filler.stop_)
+            filler.stateChanged.connect(self.progStateChanged)
+            filler.error.connect(self.showError)
+            
+            worker = Worker(lambda: filler.process_all(results))
+            worker.signals.result.connect(self.closeProg)
+            self.threadpool.start(worker)
+
         else:
-            self.warn.displayWarningDialog("No Orers Fulfilled",
+            self.warn.displayWarningDialog("No Orders Fulfilled",
                 "No Orders Fulfilled\n\nError can occur when:\n- Searching and sorting operation was cancelled.\n- No Matching orders and questionnaires were found.")
+        self.closeProg()
 
     @Slot()
     def closeProg(self):
@@ -180,6 +187,10 @@ class LandingTab(QWidget):
 
         if state == "sorting":
             text = self.primaryMsg + "Finding the best solution.\nSolutions sorted: " + info
+
+        # Formulation filler
+        if state == "writing":
+            text = self.primaryMsg + "Writing formulation sheet: \n" + info
 
         self.prog.setLabelText(text)
 

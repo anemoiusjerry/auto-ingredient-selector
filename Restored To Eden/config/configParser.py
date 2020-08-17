@@ -72,9 +72,9 @@ class FigMe:
                         self.warn.displayWarningDialog("Load Error", f"File ({dfpath}) is not a csv or xlsx")
                         raise Exception("Incorrect filetype")
                     return None
-            except:
+            except Exception as e:
                 # Pop up dialog that errors when not all df are browsed
-                print(f"{dfname} Not browsed")
+                print(e)
                 if not os.path.isdir(dfpath):
                     self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
                     raise Exception("Error loading dataframe")
