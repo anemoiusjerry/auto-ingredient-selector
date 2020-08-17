@@ -380,6 +380,7 @@ class IngredientSelector(QObject):
                 cols[key][2] = val
                 cols[key] = tuple(cols[key])
 
+        # Run the DLX to find all the solutions
         matrix = DLX(cols, rows)
         solutions = self.solve(matrix)
 
@@ -542,9 +543,7 @@ class IngredientSelector(QObject):
 
                 # Create and append nodes for each row of the dlx matrix created
                 nodes = self.dlxRowFormat(cures, ailments)
-                print("cures: ", cures)
-                print("ailments: ", ailments)
-                rows.append((list(set(nodes)), index))
+                rows.append((sorted(list(set(nodes))), index))
 
         return rows, ailments
 
