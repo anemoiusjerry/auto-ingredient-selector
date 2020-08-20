@@ -1,5 +1,18 @@
 {
     "Product": {
+        "cleansing lotion": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
         "day cream": {
             "viscosity": "light",
             "absorbency": "fast",
@@ -19,7 +32,9 @@
                 "aqueous base",
                 "aqueous high performance",
                 "anhydrous base",
-                "essential oil"
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         },
         "night cream": {
@@ -29,7 +44,9 @@
             "types": [
                 "aqueous base",
                 "anhydrous base",
-                "essential oil"
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         },
         "oil cleanser": {
@@ -38,7 +55,9 @@
             "comedogenic": 0,
             "types": [
                 "anhydrous base",
-                "essential oil"
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         },
         "oil serum": {
@@ -47,8 +66,10 @@
             "comedogenic": 0,
             "types": [
                 "anhydrous base",
-                "essential oil",
-                "anhydrous high performance"
+                "anhydrous high performance",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         }
     },
@@ -125,7 +146,7 @@
     "Values": {
         "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 0,
+        "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
         "maxsols": 1,
@@ -144,6 +165,6 @@
         "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
         "Product Catalog": "catalog_products"
     },
-    "gdrive": 1,
+    "gdrive": 0,
     "darkmode": 1
 }

@@ -105,13 +105,18 @@ class IngredientSelector(QObject):
 
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
-            elif email in self.qnair[self.qemailCol].values.tolist():
+            elif email in self.qnair[self.qemailCol].values.tolist() and email != "":
+                nonamestr = f"No questionaire name matched {name}. Matched with questionnaire using email {email}. Please check that this email corresponds to the correct person.\n\n"
+                if nonamestr not in allErrorString:
+                    allErrorString += nonamestr
                 email_index = self.qnair[self.qemailCol].values.tolist().index(email)
                 client_name = self.qnair.index[email_index]
                 # Add a dialog that asks if the customer name is indeed the corect customer linked to the email address
                 qdata = self.qnair.loc[client_name]
             else:
-                self.warn.displayWarningDialog("Questionnaire Retrieval Error", f"No questionaire found for {name}.\n Make sure the names are the same for the Order and Questionnaire.")
+                nonamestr = f"No questionaire found for {name}. Make sure names are the same for the Order and Questionnaire.\n\n"
+                if nonamestr not in allErrorString:
+                    allErrorString += nonamestr
                 print("no matching name found for ", name)
                 continue
 
@@ -122,9 +127,7 @@ class IngredientSelector(QObject):
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
-                #self.warn.displayWarningDialog("Not Found Error", f"Ordered product named {item} not found in catalog.")
-                #raise Exception("Unknown Item")
-                allErrorString += f"Ordered product named {item} not found in catalog.\n"
+                allErrorString += f"Ordered product named {item} not found in catalog.\n\n"
                 continue
 
             # Create a folder for the order
@@ -140,29 +143,36 @@ class IngredientSelector(QObject):
                 # Skip over constant products
                 if product in ["hydration serum", "toner"]:
                     continue
-                
+
                 # Get the solutions
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + ordername + "-" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-                solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                if self.stop:
+                try:
+                    solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                    if self.stop:
+                        workbook.close()
+                        return None
+                    # create a new worksheet for each solution
+                    self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
                     workbook.close()
-                    return None
-                # create a new worksheet for each solution
-                self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
-                workbook.close()
 
-                for solution in solutions:
-                    returns.append({"Ingredients": solution[0],
-                                    "CustomerName": name,
-                                    "ProductType": product,
-                                    "ProductName": item})
+                    for solution in solutions:
+                        returns.append({"Ingredients": solution[0],
+                                        "CustomerName": name,
+                                        "ProductType": product,
+                                        "ProductName": item})
+                except:
+                    allErrorString += f"Order not computed: {name}, {product}"
+                    pass
 
         if returns:
             if allErrorString != "":
                 self.error.emit(allErrorString)
             return returns
+
+        if allErrorString != "":
+            self.error.emit(allErrorString)
         return None
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
@@ -308,7 +318,10 @@ class IngredientSelector(QObject):
                 worksheet.write(row + 1, 0, 'everything is resolved')
 
     def orderParser(self, product, qdata):
-        types = self.config.getProduct(product, "types")
+        try:
+            types = self.config.getProduct(product, "types")
+        except:
+            return
         # Retrieving the skin problems from customer info
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
         # Finding the customers contraindications
@@ -548,7 +561,6 @@ class IngredientSelector(QObject):
         return rows, ailments
 
     def pointGen(self, composition, vals):
-
         point = []
         for i in range(3):
             val = 0

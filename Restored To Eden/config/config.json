@@ -134,14 +134,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/jerry/Desktop/batch2 testing/orders/104 Order.csv",
-        "Customer Questionnaire": "C:/Users/jerry/Desktop/batch2 testing/orders/104 Qs.csv",
-        "Product Catalog": "C:/Users/jerry/Downloads/catalog_products-4.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Formulation Worksheet",
-        "Information Sheet Paragraphs": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/batch 2 output",
-        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
+        "Ingredients Spreadsheet": "/Users/HG/Desktop/ver4 testing files/RTE Ingredients Database - 07.08.20.xlsx",
+        "Orders Spreadsheet": "/Users/HG/Desktop/ver4 testing files/104 Order.csv",
+        "Customer Questionnaire": "/Users/HG/Desktop/ver4 testing files/104 Qs.csv",
+        "Product Catalog": "/Users/HG/Desktop/ver4 testing files/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/HG/Desktop/ver4 testing files/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/HG/Desktop/ver4 testing files/InformationSheet.xlsx",
+        "Export Directory": "/Users/HG/Desktop",
+        "Product Instructions Directory": "/Users/HG/Desktop/ver4 testing files/Product Information"
     },
     "Values": {
         "lowBound": 1,
@@ -165,6 +165,6 @@
         "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
         "Product Catalog": "catalog_products"
     },
-    "gdrive": 0,
+    "gdrive": 1,
     "darkmode": 1
 }
