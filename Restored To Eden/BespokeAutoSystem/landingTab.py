@@ -118,7 +118,10 @@ class LandingTab(QWidget):
         self.ingredient_selector.stateChanged.connect(self.progStateChanged)
         self.ingredient_selector.error.connect(self.showError)
 
-        worker = Worker(self.ingredient_selector.selectIngredients)
+        try:
+            worker = Worker(self.ingredient_selector.selectIngredients)
+        except Exception as e:
+            print(e)
         worker.signals.result.connect(self.processResults)
         self.threadpool.start(worker)
 
@@ -127,7 +130,6 @@ class LandingTab(QWidget):
         # Start formulation calculations for all orders
         if not results == None:
             filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
-            #filler.process_all(results)
             self.prog.canceled.connect(filler.stop_)
             filler.stateChanged.connect(self.progStateChanged)
             filler.error.connect(self.showError)

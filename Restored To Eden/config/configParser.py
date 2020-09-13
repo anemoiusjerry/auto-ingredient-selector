@@ -25,6 +25,7 @@ class FigMe:
             self.path = app_path + "/config/config.json"
 
         # open the config file in read only mode and retrieve dictionary
+        print(self.path)
         with open(self.path, "r") as config:
             self.masterDict = json.load(config)
 

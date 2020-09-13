@@ -8,6 +8,7 @@ from openpyxl import load_workbook
 from datetime import *
 from collections import defaultdict as dd
 
+import traceback
 from config.configParser import FigMe
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
@@ -45,7 +46,9 @@ class FormulationFiller(QObject):
 
             try:
                 self.write_to_template(soln["Ingredients"], name, product_type, isMale)
-            except:
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
                 self.errorStr += f"Failed to write {name}'s {product_type} formulation sheet. Check template has not changed"
 
         if self.errorStr != "":
@@ -331,7 +334,7 @@ class FormulationFiller(QObject):
 
     def write_formulas(self, sheet):
         i=self.SOF
-        while sheet[f"C{i}"].value != None:
+        while (sheet[f"C{i}"].value != None) or ("100%" not in sheet[f"B{i}"].value):
             sheet[f"E{i}"] = f"=B5*D{i}/100"
             i+=1
         # Write totalising formula

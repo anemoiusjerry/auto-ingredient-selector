@@ -4,9 +4,9 @@ block_cipher = None
 
 
 a = Analysis(['cli.py'],
-             pathex=['/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden'],
-             binaries=[("/usr/local/bin/wkhtmltopdf", '.')],
-             datas=[("/Users/HG/Downloads/pyinstaller instructions/gdriveAssets", '.')],
+             pathex=['/Users/hello/Desktop/ingredient-sorter/Restored To Eden'],
+             binaries=[('/Users/hello/Desktop/ingredient-sorter/Restored To Eden/wkhtmltopdf', '.')],
+             datas=[('/Users/hello/Desktop/gdriveAssets', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -30,9 +30,9 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='rte_icon.icns')
+          console=True )
 app = BUNDLE(exe,
-             name='cli.app',
+             name='RTE Automatron.app',
              icon='rte_icon.icns',
              info_plist={
              'NSHighResolutionCapable': 'True'

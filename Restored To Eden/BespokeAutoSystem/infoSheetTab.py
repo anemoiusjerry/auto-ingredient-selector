@@ -98,7 +98,7 @@ class InfoTab(QWidget):
         new_dict = {}
 
         for label, txt_box in self.txt_boxes:
-            print(label.text())
+            #print(label.text())
             try:
                 new_dict[label.text()] = [txt_box.toPlainText()]
             except Exception as e:
@@ -138,11 +138,8 @@ class InfoTab(QWidget):
         new_section_df = pd.DataFrame({n_heading: [n_body]})
         self.infoSheet_df = pd.concat([self.infoSheet_df, new_section_df], axis=1)
 
-        banner_layout, t = self.create_paragraph_section(n_heading, n_body)
-
-        self.layout.addLayout(banner_layout)
-        self.layout.addWidget(t)
-
+        section_layout = self.create_paragraph_section(n_heading, n_body)
+        self.para_layout.addLayout(section_layout)
         dialog.close()
 
     def create_paragraph_section(self, n_heading, n_body):

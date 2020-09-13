@@ -117,7 +117,6 @@ class IngredientSelector(QObject):
                 nonamestr = f"No questionaire found for {name}. Make sure names are the same for the Order and Questionnaire.\n\n"
                 if nonamestr not in allErrorString:
                     allErrorString += nonamestr
-                print("no matching name found for ", name)
                 continue
 
             # Finding the products required to fulfil the order. if they cannot be found, skip to next order
@@ -142,6 +141,10 @@ class IngredientSelector(QObject):
             for product in products:
                 # Skip over constant products
                 if product in ["hydration serum", "toner"]:
+                    returns.append({"Ingredients": [],
+                                        "CustomerName": name,
+                                        "ProductType": product,
+                                        "ProductName": item})
                     continue
 
                 # Get the solutions

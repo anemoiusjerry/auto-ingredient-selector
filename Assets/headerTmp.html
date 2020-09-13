@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+    <header align=left>
+        {% if misc_vals["isMale"] %}
+            <header align=left style="height: 100px;">
+                <img src= "{{ misc_vals['assetsPath'] }}/CourageousLogo.png" style="width: 200px;">
+            </header>
+        {% else %}
+            <header align=left style="height: 100px;">
+                <img src= "{{ misc_vals['assetsPath'] }}/RTELogo.png" style="width: 100px;">
+            </header>
+        {% endif %}
+    </header>
+</body>

@@ -6,7 +6,6 @@
             "comedogenic": 0,
             "types": [
                 "aqueous base",
-                "aqueous high performance",
                 "anhydrous base",
                 "essential oil top",
                 "essential oil middle",
@@ -21,7 +20,9 @@
                 "aqueous base",
                 "aqueous high performance",
                 "anhydrous base",
-                "essential oil"
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         },
         "man cream": {
@@ -134,14 +135,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/jerry/Desktop/batch2 testing/orders/104 Order.csv",
-        "Customer Questionnaire": "C:/Users/jerry/Desktop/batch2 testing/orders/104 Qs.csv",
-        "Product Catalog": "C:/Users/jerry/Desktop/batch2 testing/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/batch2 testing/Formulation Templates",
+        "Ingredients Spreadsheet": "/Users/hello/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
+        "Orders Spreadsheet": "",
+        "Customer Questionnaire": "/Users/hello/Desktop/batch2 testing/orders/100 Qs.csv",
+        "Product Catalog": "/Users/hello/Desktop/batch2 testing/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/hello/Desktop/batch2 testing/Formulation Templates",
         "Information Sheet Paragraphs": "C:/Users/jerry/Desktop/batch2 testing/InformationSheet.xlsx",
         "Export Directory": "C:/Users/jerry/Desktop/batch 2 output",
-        "Product Instructions Directory": "C:/Users/jerry/source/repos/ingredient-sorter/Restored To Eden/Product Information"
+        "Product Instructions Directory": "C:/Users/jerry/Desktop/batch2 testing/Product Information"
     },
     "Values": {
         "lowBound": 1,
@@ -149,7 +150,7 @@
         "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
-        "maxsols": 1,
+        "maxsols": 2,
         "fitweight": 0.8,
         "numingredweight": 0.0,
         "addedbenefitweight": 0.2
@@ -165,6 +166,6 @@
         "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
         "Product Catalog": "catalog_products"
     },
-    "gdrive": 1,
+    "gdrive": 0,
     "darkmode": 1
 }

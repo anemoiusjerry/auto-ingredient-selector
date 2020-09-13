@@ -1,3 +1,0 @@
-([('cli',
-   '/Users/HG/Documents/GitHub/ingredient-sorter/Restored To Eden/dist/cli',
-   'EXECUTABLE')],)
