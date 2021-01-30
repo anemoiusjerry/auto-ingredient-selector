@@ -1,11 +1,9 @@
-import os
-import sys
+import os, sys, traceback, copy
 import pandas as pd
 from PySide2.QtWidgets import *
 from PySide2.QtGui import QPixmap, QIcon
 from PySide2.QtCore import Qt, QSize
 from PySide2.QtCore import Qt, QObject, Signal, Slot, QRunnable, QThreadPool
-import copy
 
 from .fileBrowser import FileBrowser
 from .Gdriver import Gdriver
@@ -13,7 +11,6 @@ from .Modules import InfoSheetGenerator
 from BespokeAutoSystem.WarningRaiser import WarningRaiser
 
 class InfoTab(QWidget):
-
     def __init__(self, config):
         QWidget.__init__(self)
         self.threadpool = QThreadPool()
@@ -197,14 +194,14 @@ class InfoTab(QWidget):
 
     def run(self):
         self.reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
-        #self.reporter.process_all()
-        self.reporter.launched.connect(self.launchProgress)
-        self.reporter.stateChanged.connect(self.progStateChanged)
-        self.reporter.error.connect(self.showError)
+        self.reporter.process_all()
+        # self.reporter.launched.connect(self.launchProgress)
+        # self.reporter.stateChanged.connect(self.progStateChanged)
+        # self.reporter.error.connect(self.showError)
         
-        worker = Worker(self.reporter.process_all)
-        worker.signals.result.connect(self.processResults)
-        self.threadpool.start(worker)
+        # worker = Worker(self.reporter.process_all)
+        # worker.signals.result.connect(self.processResults)
+        # self.threadpool.start(worker)
 
     @Slot()
     def closeProg(self):

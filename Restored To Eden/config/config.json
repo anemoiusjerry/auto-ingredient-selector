@@ -130,8 +130,8 @@
             "item": "Item's Name"
         },
         "Product Catalog": {
-            "item": "Name",
-            "products": "Additional Info Sections"
+            "item": "name",
+            "products": "additionalInfoDescription6"
         }
     },
     "Directories": {
@@ -140,9 +140,9 @@
         "Customer Questionnaire": "C:/Users/Jerry/Downloads/Bespoke Analysis Questionnaire.csv",
         "Product Catalog": "C:/Users/Jerry/Downloads/Archive/Current Product Catalogue/catalog_products.csv",
         "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Archive/Current Formulation Sheets for Formulation Software/Formulation Worksheet",
-        "Information Sheet Paragraphs": "C:/Users/Jerry/Desktop/batch2 testing/InformationSheet.xlsx",
+        "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/Archive/Current Information Sheet/InformationSheet.xlsx",
         "Export Directory": "C:/Users/Jerry/Downloads/Archive/jerry test output",
-        "Product Instructions Directory": "C:/Users/Jerry/Desktop/batch2 testing/Product Information"
+        "Product Instructions Directory": "C:/Users/Jerry/Downloads/Archive/Current Product Information"
     },
     "Values": {
         "lowBound": 1,
