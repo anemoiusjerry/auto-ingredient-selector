@@ -20,7 +20,9 @@
                 "aqueous base",
                 "aqueous high performance",
                 "anhydrous base",
-                "essential oil"
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
             ]
         },
         "man cream": {
@@ -133,14 +135,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/jerry/Downloads/10043 Order.csv",
-        "Customer Questionnaire": "C:/Users/jerry/Downloads/10043 Qs.csv",
-        "Product Catalog": "C:/Users/jerry/Downloads/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/batch2 testing/Formulation Templates",
-        "Information Sheet Paragraphs": "C:/Users/jerry/Desktop/batch2 testing/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/batch 2 output",
-        "Product Instructions Directory": "C:/Users/jerry/Desktop/batch2 testing/Product Information"
+        "Ingredients Spreadsheet": "/Users/hello/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
+        "Orders Spreadsheet": "/Users/hello/Desktop/batch2 testing/10042 Order.csv",
+        "Customer Questionnaire": "/Users/hello/Desktop/batch2 testing/10042 Qs.csv",
+        "Product Catalog": "/Users/hello/Desktop/batch2 testing/catalog_products.csv",
+        "Formulation Sheets Directory": "/Users/hello/Desktop/batch2 testing/Formulation Templates",
+        "Information Sheet Paragraphs": "/Users/hello/Desktop/batch2 testing/InformationSheet.xlsx",
+        "Export Directory": "/Users/hello/Desktop/batch2 testing/New folder",
+        "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
     },
     "Values": {
         "lowBound": 1,
@@ -148,7 +150,7 @@
         "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
-        "maxsols": 2,
+        "maxsols": 1,
         "fitweight": 0.8,
         "numingredweight": 0.0,
         "addedbenefitweight": 0.2

@@ -118,7 +118,7 @@
             ],
             "Additional": [
                 "Lighter fragrance or strong f",
-                "Allergies, please give detail"
+                "Allergies please give detail"
             ]
         },
         "Orders Spreadsheet": {
@@ -135,14 +135,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/RTE Ingredients Database - 07.08.20.xlsx",
-        "Orders Spreadsheet": "",
-        "Customer Questionnaire": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/10050 Qs.csv",
-        "Product Catalog": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Stores_Products.csv",
-        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Formulation Worksheets",
-        "Information Sheet Paragraphs": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Testing output",
-        "Product Instructions Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Product Information"
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/Archive/Current Ingredients Database for Formulation Software/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders-25.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Bespoke Analysis Questionnaire.csv",
+        "Product Catalog": "C:/Users/Jerry/Downloads/Archive/Current Product Catalogue/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Archive/Current Formulation Sheets for Formulation Software/Formulation Worksheet",
+        "Information Sheet Paragraphs": "C:/Users/Jerry/Desktop/batch2 testing/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/Jerry/Downloads/Archive/jerry test output",
+        "Product Instructions Directory": "C:/Users/Jerry/Desktop/batch2 testing/Product Information"
     },
     "Values": {
         "lowBound": 1,
@@ -150,13 +150,13 @@
         "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
-        "maxsols": 2,
+        "maxsols": 1,
         "fitweight": 0.8,
         "numingredweight": 0.0,
         "addedbenefitweight": 0.2
     },
     "Misc": {
-        "Address": "Suite 93, 139 Cardigan Street, Carlton, VIC, 3053",
+        "Address": "Suite 93, 139 Cardigan Street, ",
         "Contact number": "03 9111 5762",
         "ABN": "94 113 762 673",
         "Website": "www.restoredtoeden.com",
