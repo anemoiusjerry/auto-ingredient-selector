@@ -151,23 +151,38 @@ class IngredientSelector(QObject):
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + ordername + "-" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-                try:
-                    solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                    if self.stop:
-                        workbook.close()
-                        return None
-                    # create a new worksheet for each solution
-                    self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
-                    workbook.close()
 
-                    for solution in solutions:
-                        returns.append({"Ingredients": solution[0],
-                                        "CustomerName": name,
-                                        "ProductType": product,
-                                        "ProductName": item})
-                except:
-                    allErrorString += f"Order not computed: {name}, {product}"
-                    pass
+                solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                if self.stop:
+                    workbook.close()
+                    return None
+                # create a new worksheet for each solution
+                self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
+                workbook.close()
+
+                for solution in solutions:
+                    returns.append({"Ingredients": solution[0],
+                                    "CustomerName": name,
+                                    "ProductType": product,
+                                    "ProductName": item})
+                # try:
+                #     solutions, rows, cols, unresolved = self.orderParser(product, qdata)
+                #     if self.stop:
+                #         workbook.close()
+                #         return None
+                #     # create a new worksheet for each solution
+                #     self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
+                #     workbook.close()
+
+                #     for solution in solutions:
+                #         returns.append({"Ingredients": solution[0],
+                #                         "CustomerName": name,
+                #                         "ProductType": product,
+                #                         "ProductName": item})
+                # except Exception as err:
+                #     print(err.st)
+                #     allErrorString += f"Order not computed: {name}, {product}"
+                #     pass
 
         if returns:
             if allErrorString != "":
