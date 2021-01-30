@@ -165,8 +165,9 @@ class IngredientSelector(QObject):
                                         "CustomerName": name,
                                         "ProductType": product,
                                         "ProductName": item})
-                except:
-                    allErrorString += f"Order not computed: {name}, {product}"
+                except Exception as e:
+                    allErrorString += f"Order not computed: {name}, {product}\n"
+                    print(e)
                     pass
 
         if returns:

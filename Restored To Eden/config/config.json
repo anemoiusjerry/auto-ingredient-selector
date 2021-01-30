@@ -130,19 +130,19 @@
             "item": "Item's Name"
         },
         "Product Catalog": {
-            "item": "name",
-            "products": "additionalInfoDescription6"
+            "item": "Name",
+            "products": "Additional Info Sections"
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/hello/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
+        "Ingredients Spreadsheet": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/RTE Ingredients Database - 07.08.20.xlsx",
         "Orders Spreadsheet": "",
-        "Customer Questionnaire": "/Users/hello/Desktop/batch2 testing/orders/100 Qs.csv",
-        "Product Catalog": "/Users/hello/Desktop/batch2 testing/catalog_products.csv",
-        "Formulation Sheets Directory": "/Users/hello/Desktop/batch2 testing/Formulation Templates",
-        "Information Sheet Paragraphs": "C:/Users/jerry/Desktop/batch2 testing/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/jerry/Desktop/batch 2 output",
-        "Product Instructions Directory": "C:/Users/jerry/Desktop/batch2 testing/Product Information"
+        "Customer Questionnaire": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/10050 Qs.csv",
+        "Product Catalog": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Stores_Products.csv",
+        "Formulation Sheets Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Formulation Worksheets",
+        "Information Sheet Paragraphs": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Testing output",
+        "Product Instructions Directory": "C:/Users/jerry/Desktop/Side Hussle - RTE/Inputs/Product Information"
     },
     "Values": {
         "lowBound": 1,

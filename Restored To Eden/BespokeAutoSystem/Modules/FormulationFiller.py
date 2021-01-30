@@ -161,7 +161,9 @@ class FormulationFiller(QObject):
 
         # Reallocate surplus %
         if len(realloc_dict) > 0:
-            sheet, last_i = self.too_many_slots(realloc_dict, sheet)
+            sheet, EOF = self.too_many_slots(realloc_dict, sheet)
+            realloc_dict = {}
+            sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
 
         sheet = self.write_formulas(sheet)
         filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
@@ -223,9 +225,11 @@ class FormulationFiller(QObject):
         # Scale to 100
         tot = sum(assigned_vals.values())
         target = 100 - fixed_weight
+        # Scale back if ingredients exceed the allocatable portion
         if tot > target:
             for key in assigned_vals.keys():
                 assigned_vals[key] = round(assigned_vals[key] * (target)/tot, 1)
+        # Scale up if smaller than allocatable portion
         elif tot < target:
             leftover = target - tot
             for key in assigned_vals.keys():
@@ -277,7 +281,7 @@ class FormulationFiller(QObject):
 
         i = self.SOF
         while sheet[f"C{i}"].value != None:
-            if sheet[f"D{i}"].value == 0:
+            if sheet[f"D{i}"].value == 0 or sheet[f"D{i}"].value == None:
                 sheet.delete_rows(i)
             else:
                 i+=1
@@ -300,7 +304,7 @@ class FormulationFiller(QObject):
             type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
             type_list = self.ingredients_df.loc[ingredient][type_col_name]
             for i_type in type_list:
-                if i_type == "essential oil":
+                if "essential oil" in i_type:
                     i_type = self.convert_eo_label(ingredient)
 
                 if i_type in phase_dict.keys():

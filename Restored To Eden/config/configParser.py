@@ -131,7 +131,9 @@ class FigMe:
                 itemCol = self.getColname("Product Catalog", "item")
                 productCol = self.getColname("Product Catalog", "products")
 
-                df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
+                # Convert string description to dict
+                df[productCol] = df[productCol].apply(lambda des: json.loads(des[1:-1]))
+                df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x["description"][3:-5]) if x and "privacy policy" not in x else [])
                 df.set_index(itemCol, inplace=True)
 
             # Remove duplicates

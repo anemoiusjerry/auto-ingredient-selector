@@ -200,7 +200,7 @@ class ValuesBlade(QWidget):
             "upBound": "Skin Needs Overlap: Max",
             "maxupBound": "Max Skin Needs Overlap",
             "tpyeoverlap_low": "Ingredient Type Overlap: Min",
-            "typeoverlap_up": "Ingredient Type Ovrelap: Max",
+            "typeoverlap_up": "Ingredient Type Overlap: Max",
             "maxsols": "Max Solutions",
             "fitweight": "Constraint Fit Weight",
             "numingredweight": "Number of Ingredients Weight",
