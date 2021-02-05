@@ -80,6 +80,13 @@ class InfoSheetGenerator(QObject):
         with open(f"{self.footer_save_path}/footer.html", "w") as f:
             f.write(html_str)
 
+    def isExcel(self, filename):
+        excelLike = ["csv", "xlsx", "xls"]
+        ext = filename.split(".")[-1]
+        if ext in (excelLike):
+            return True
+        return False
+
     def process_all(self):
         # Get all formulation sheets from output dir
         path = self.config.getDir("Export Directory")
@@ -105,12 +112,16 @@ class InfoSheetGenerator(QObject):
         # Go through all order folders
         for _folder in os.listdir(path):
             _folder_path = os.path.join(path, _folder)
+            # Check if file is a folder
             if os.path.isdir(_folder_path):
                 # Go through all files in folder
                 for _file in os.listdir(_folder_path):
                     _file_path = os.path.join(_folder_path, _file)
-                    if os.path.isfile(_file_path) and "Worksheet" in _file:
+                    if os.path.isfile(_file_path) and "Worksheet" in _file and self.isExcel(_file_path):
                         sheet_paths.append(_file_path)
+            # Add to paths if is excel worksheet
+            elif "Worksheet" in _folder_path and self.isExcel(_folder_path):
+                sheet_paths.append(_folder_path)
         
         self.launched.emit(len(sheet_paths))
         # Retrieve all info. needed for pdf
