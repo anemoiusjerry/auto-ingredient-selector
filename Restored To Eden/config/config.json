@@ -110,15 +110,17 @@
         "Customer Questionnaire": {
             "name": "Full Name",
             "email": "Email",
-            "pregnancy": "Are you or could you be pregn",
-            "contraindications": "Do you suffer any of the foll",
+            "pregnancy": "8",
+            "contraindications": "9",
             "skin problem": [
-                "Multi Selection Field 4",
-                "Do you feel your skin has any"
+                "15",
+                "16",
+                "17"
             ],
             "Additional": [
-                "Lighter fragrance or strong f",
-                "Allergies please give detail"
+                "18",
+                "11",
+                "12"
             ]
         },
         "Orders Spreadsheet": {
@@ -136,8 +138,8 @@
     },
     "Directories": {
         "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/Archive/Current Ingredients Database for Formulation Software/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders-25.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Bespoke Analysis Questionnaire.csv",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Archive/orders-25.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Outgrow Signup  - Leads.csv",
         "Product Catalog": "C:/Users/Jerry/Downloads/Archive/Current Product Catalogue/catalog_products.csv",
         "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Archive/Current Formulation Sheets for Formulation Software/Formulation Worksheet",
         "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/Archive/Current Information Sheet/InformationSheet.xlsx",
@@ -147,8 +149,8 @@
     "Values": {
         "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
+        "numeo": 1,
         "maxupBound": 50,
         "maxsols": 1,
         "fitweight": 0.8,

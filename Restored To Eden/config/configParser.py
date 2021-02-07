@@ -62,6 +62,7 @@ class FigMe:
                 self.warn.displayWarningDialog("", f"Cannot fetch {gdrive_name} from Google Drive - check filename in drive and your internet connection.")
         else:
             try:
+                # For or
                 dfpath = self.masterDict["Directories"][dfname]
                 file_type = dfpath.split(".")[-1]
                 if file_type == "csv":
@@ -80,7 +81,8 @@ class FigMe:
                     self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
                     raise Exception("Error loading dataframe")
                 return None
-
+        
+        # If all expected columns are there then begin to clean data
         if self.checkCols(df, dfname):
             df.fillna("", inplace=True)
 

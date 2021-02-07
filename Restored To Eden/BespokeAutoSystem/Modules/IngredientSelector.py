@@ -62,8 +62,9 @@ class IngredientSelector(QObject):
         self.lowBound = config.getVal("lowBound")
         self.upBound = config.getVal("upBound")
         self.maxupBound = config.getVal("maxupBound")
-        self.tpyeoverlap_low = config.getVal("tpyeoverlap_low")
+        #self.tpyeoverlap_low = config.getVal("tpyeoverlap_low")
         self.typeoverlap_up = config.getVal("typeoverlap_up")
+        self.numeo = config.getVal("numeo")
         self.maxSols = config.getVal("maxsols")
         self.fitWeight = config.getVal("fitweight")
         self.numIngredWeight = config.getVal("numingredweight")
@@ -354,8 +355,13 @@ class IngredientSelector(QObject):
 
         # If an ingredient type is part of the product recipe, make sure they are included at least once
         for type in types:
-            cols.append((type,0,self.tpyeoverlap_low,self.typeoverlap_up))
+            # If essential oil then constrain max selected via setting
+            if "essential" in type:
+                cols.append((type, 0, self.numeo, self.numeo))
+            else:
+                cols.append((type, 0, 1, self.typeoverlap_up))
             colind = len(cols) - 1
+            
             for row in rows:
                 ingredtype = self.ingredients.loc[row[1],self.typeCol]
                 ################################################################################
@@ -400,7 +406,7 @@ class IngredientSelector(QObject):
                     mining[node[0]] = mining[node[0]] + 1
 
         for key, val in mintype.items():
-            if val < self.tpyeoverlap_low:
+            if val < 1:
                 cols[key] = list(cols[key])
                 cols[key][2] = val
                 cols[key] = tuple(cols[key])
