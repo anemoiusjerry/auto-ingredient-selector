@@ -111,7 +111,10 @@
             "name": "Full Name",
             "email": "Email",
             "pregnancy": "8",
-            "contraindications": "9",
+            "contraindications": [
+                "9",
+                "10"
+            ],
             "skin problem": [
                 "15",
                 "16",
@@ -137,13 +140,13 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/Archive/Current Ingredients Database for Formulation Software/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Archive/orders-25.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Outgrow Signup  - Leads.csv",
-        "Product Catalog": "C:/Users/Jerry/Downloads/Archive/Current Product Catalogue/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Archive/Current Formulation Sheets for Formulation Software/Formulation Worksheet",
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/Working Files/Working Files/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Orders - Jo Compagne.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Qs - Jo Compagne.csv",
+        "Product Catalog": "C:/Users/Jerry/Downloads/Working Files/Working Files/catalog_products.csv",
+        "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Working Files/Working Files/Formulation Worksheet",
         "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/Archive/Current Information Sheet/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/Jerry/Downloads/Archive/jerry test output",
+        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing",
         "Product Instructions Directory": "C:/Users/Jerry/Downloads/Archive/Current Product Information"
     },
     "Values": {

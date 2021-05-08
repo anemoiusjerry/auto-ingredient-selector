@@ -16,22 +16,32 @@ class InfoTab(QWidget):
         self.threadpool = QThreadPool()
 
         self.config=config
-        self.layout = QVBoxLayout()
         self.gdriveAPI = Gdriver()
         self.warn = WarningRaiser()
 
-        init_layout = self.load_init_layout(config)
-        self.layout.addLayout(init_layout)
+        # self.layout = QVBoxLayout()
+        # init_layout = self.load_init_layout(config)
+        # self.layout.addLayout(init_layout)
 
-        # Init. load
+        # # Init. load
+        # self.loadSheetLocal()
+        # self.setLayout(self.layout)
+        self.reload_all()
+
+    def reload_all(self):
+        self.layout = QVBoxLayout()
+        init_layout = self.load_init_layout(self.config)
+        self.layout.addLayout(init_layout)
         self.loadSheetLocal()
         self.setLayout(self.layout)
+
 
     def load_init_layout(self, config):
         # Sheets + edit box layout
         sheets_layout = QGridLayout()
         self.infosheet_browser = FileBrowser("csv", "Information Sheet Paragraphs", config)
-        self.infosheet_browser.button.clicked.connect(self.loadSheetLocal)
+        #self.infosheet_browser.button.clicked.connect(self.loadSheetLocal)
+        self.infosheet_browser.button.clicked.connect(self.reload_all)
         sheets_layout.addWidget(self.infosheet_browser, 0, 0)
 
         self.instruction_browser = FileBrowser("dir", "Product Instructions Directory", config)
@@ -40,8 +50,6 @@ class InfoTab(QWidget):
         return sheets_layout
 
     def loadSheetLocal(self):
-        # self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
-        # self.loadUi(self.infoSheet_df)
         try:
             # If failed then use local vers
             self.infoSheet_df = pd.read_excel(self.infosheet_browser.display.text())
@@ -194,14 +202,14 @@ class InfoTab(QWidget):
 
     def run(self):
         self.reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
-        self.reporter.process_all()
-        # self.reporter.launched.connect(self.launchProgress)
-        # self.reporter.stateChanged.connect(self.progStateChanged)
-        # self.reporter.error.connect(self.showError)
+        #self.reporter.process_all()
+        self.reporter.launched.connect(self.launchProgress)
+        self.reporter.stateChanged.connect(self.progStateChanged)
+        self.reporter.error.connect(self.showError)
         
-        # worker = Worker(self.reporter.process_all)
-        # worker.signals.result.connect(self.processResults)
-        # self.threadpool.start(worker)
+        worker = Worker(self.reporter.process_all)
+        worker.signals.result.connect(self.processResults)
+        self.threadpool.start(worker)
 
     @Slot()
     def closeProg(self):

@@ -130,14 +130,14 @@ class LandingTab(QWidget):
         # Start formulation calculations for all orders
         if not results == None:
             filler = FormulationFiller.FormulationFiller(self.dataframes["Ingredients Spreadsheet"], self.gdriveAPI)
-            filler.process_all(results)
-            # self.prog.canceled.connect(filler.stop_)
-            # filler.stateChanged.connect(self.progStateChanged)
-            # filler.error.connect(self.showError)
+            #filler.process_all(results)
+            self.prog.canceled.connect(filler.stop_)
+            filler.stateChanged.connect(self.progStateChanged)
+            filler.error.connect(self.showError)
             
-            # worker = Worker(lambda: filler.process_all(results))
-            # worker.signals.result.connect(self.closeProg)
-            # self.threadpool.start(worker)
+            worker = Worker(lambda: filler.process_all(results))
+            worker.signals.result.connect(self.closeProg)
+            self.threadpool.start(worker)
 
         else:
             self.warn.displayWarningDialog("No Orders Fulfilled",

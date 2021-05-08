@@ -108,26 +108,28 @@
             "comedogenic": "COMEDOGENIC RATING"
         },
         "Customer Questionnaire": {
-            "name": "Full Name",
-            "email": "Email",
-            "pregnancy": "Are you or could you be pregn",
-            "contraindications": "Do you suffer any of the foll",
-            "skin problem": [
-                "Multi Selection Field 4",
-                "Do you feel your skin has any"
+            "name": "GQi5neO - About this Quiz",
+            "email": "a2i8L3g - ",
+            "pregnancy": "3Oi2bb8 - Are you or could you be pregnant? OR \u00c2\u00a0Are you breastfeeding or nursing?\u00c2\u00a0",
+            "contraindications": [
+                "rgiJXXG - ",
+                "0MiMVV5 - "
             ],
-            "Additional": [
-                "Lighter fragrance or strong f",
-                "Allergies, please give detail"
-            ]
+            "skin problem": [
+                "8Ji8LXA - ",
+                "qQiMePZ - Category 1 : Short Amount of Time",
+                "rgiJVXL - Category 2 : Will Take a Couple of Months",
+                "0MiMRVa - Category 3 : Longer Term\u00c2\u00a0"
+            ],
+            "Additional": "kdiRxxd - "
         },
         "Orders Spreadsheet": {
-            "order number": "Order #",
-            "date": "Date",
-            "time": "Time",
-            "customer": "Billing Customer",
-            "email": "Buyer's Email",
-            "item": "Item's Name"
+            "order number": "Name",
+            "date": "Created at",
+            "time": "Paid at",
+            "customer": "Billing Name",
+            "email": "Email",
+            "item": "Lineitem name"
         },
         "Product Catalog": {
             "item": "name",
@@ -135,19 +137,18 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "/Users/hello/Desktop/batch2 testing/RTE Ingredients Database - 07.08.20.xlsx",
-        "Orders Spreadsheet": "/Users/hello/Desktop/batch2 testing/10042 Order.csv",
-        "Customer Questionnaire": "/Users/hello/Desktop/batch2 testing/10042 Qs.csv",
-        "Product Catalog": "/Users/hello/Desktop/batch2 testing/catalog_products.csv",
-        "Formulation Sheets Directory": "/Users/hello/Desktop/batch2 testing/Formulation Templates",
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Desktop/Shopify testing/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Desktop/Shopify testing/Shopify Orders.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Desktop/Shopify testing/RTE - Shopify change/Shopify Quiz Responses.csv",
+        "Product Catalog": "C:/Users/Jerry/Desktop/Shopify testing/Shopify Product Catalogue - May 2021.csv",
+        "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
         "Information Sheet Paragraphs": "/Users/hello/Desktop/batch2 testing/InformationSheet.xlsx",
-        "Export Directory": "/Users/hello/Desktop/batch2 testing/New folder",
+        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing/Test Output",
         "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
     },
     "Values": {
         "lowBound": 1,
         "upBound": 2,
-        "tpyeoverlap_low": 1,
         "typeoverlap_up": 2,
         "maxupBound": 50,
         "maxsols": 1,

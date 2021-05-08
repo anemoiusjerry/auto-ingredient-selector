@@ -344,7 +344,9 @@ class IngredientSelector(QObject):
         # Retrieving the skin problems from customer info
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
         # Finding the customers contraindications
-        usercons = qdata[self.pregnancyCol] + qdata[self.cusContrainCol]
+        contras = [a for col in self.cusContrainCol for a in qdata[col] if a]
+        usercons = qdata[self.pregnancyCol] + contras
+        #usercons = qdata[self.pregnancyCol] + qdata[self.cusContrainCol]
 
         # Retrieve the rows and columns that will make up the dlx matrix
         rows, cols = self.matrixGen(product, ailments, usercons)

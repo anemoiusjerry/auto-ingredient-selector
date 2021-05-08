@@ -126,7 +126,7 @@ class FigMe:
                 # Set names as index
                 df.set_index(nameCol, drop=False, inplace=True)
                 
-                for colname in ailmentCols + [pregnancyCol, cusContrainCol]:
+                for colname in ailmentCols + [pregnancyCol] + cusContrainCol:
                     df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
 
             elif dfname == "Product Catalog":
@@ -144,7 +144,7 @@ class FigMe:
 
             return df
         else:
-            self.warn.displayWarningDialog("Load Error", f"({dfpath}) column names do not match")
+            self.warn.displayWarningDialog("Load Error", f"({dfname}) column names do not match")
             raise Exception("names dont match")
             #sys.exit()
 
@@ -202,8 +202,12 @@ class FigMe:
             fp.write(json_obj)
 
     def checkCols(self, df, dfname):
+        """Check that column names of CSV matches that in settings."""
+        # Get columns names of CSV
         dfCols = set(list(df.columns))
+
         knownCols = []
+        # Check names in settings
         for key, val in self.masterDict["Column names"][dfname].items():
             if type(val) == list:
                 knownCols.extend(val)

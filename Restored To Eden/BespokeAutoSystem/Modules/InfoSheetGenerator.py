@@ -258,8 +258,6 @@ class InfoSheetGenerator(QObject):
             html_str = self.template.render(headings=headings, paragraphs=paragraphs,
                 name=name, prod_type=prod_type, misc_vals=self.misc_values)
 
-        # HTML is shit. We spent 2 hours debugging code that wasnt used. poop
-
         output_path = self.config.getDir("Export Directory") + f"/{name}"
 
         # Create reports folder if it doesnt exist
