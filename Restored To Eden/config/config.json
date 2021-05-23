@@ -108,60 +108,58 @@
             "comedogenic": "COMEDOGENIC RATING"
         },
         "Customer Questionnaire": {
-            "name": "Full Name",
-            "email": "Email",
-            "pregnancy": "8",
+            "name": "GQi5neO - About this Quiz",
+            "email": "a2i8L3g - ",
+            "pregnancy": "3Oi2bb8 - Are you or could you be pregnant? OR \u00c2\u00a0Are you breastfeeding or nursing?\u00c2\u00a0",
             "contraindications": [
-                "9",
-                "10"
+                "rgiJXXG - ",
+                "0MiMVV5 - "
             ],
             "skin problem": [
-                "15",
-                "16",
-                "17"
+                "8Ji8LXA - ",
+                "qQiMePZ - Category 1 : Short Amount of Time",
+                "rgiJVXL - Category 2 : Will Take a Couple of Months",
+                "0MiMRVa - Category 3 : Longer Term\u00c2\u00a0",
+                "bJiNzPG - "
             ],
-            "Additional": [
-                "18",
-                "11",
-                "12"
-            ]
+            "Additional": "kdiRxxd - "
         },
         "Orders Spreadsheet": {
-            "order number": "Order #",
-            "date": "Date",
-            "time": "Time",
-            "customer": "Billing Customer",
-            "email": "Buyer's Email",
-            "item": "Item's Name"
+            "order number": "Name",
+            "date": "Created at",
+            "time": "Paid at",
+            "customer": "Billing Name",
+            "email": "Email",
+            "item": "Lineitem name"
         },
         "Product Catalog": {
-            "item": "name",
-            "products": "additionalInfoDescription6"
+            "item": "Title",
+            "products": "Type"
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/Working Files/Working Files/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Orders - Jo Compagne.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Qs - Jo Compagne.csv",
-        "Product Catalog": "C:/Users/Jerry/Downloads/Working Files/Working Files/catalog_products.csv",
-        "Formulation Sheets Directory": "C:/Users/Jerry/Downloads/Working Files/Working Files/Formulation Worksheet",
-        "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/Archive/Current Information Sheet/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing",
-        "Product Instructions Directory": "C:/Users/Jerry/Downloads/Archive/Current Product Information"
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Desktop/Shopify testing/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Rowena Test Order 1003 - 18.5.2021.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Rowena Test Qs - 18.5.2021.csv",
+        "Product Catalog": "C:/Users/Jerry/Desktop/Shopify testing/Shopify Product Catalogue - May 2021.csv",
+        "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
+        "Information Sheet Paragraphs": "/Users/hello/Desktop/batch2 testing/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing/Test Output",
+        "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
     },
     "Values": {
         "lowBound": 1,
         "upBound": 2,
         "typeoverlap_up": 2,
         "numeo": 1,
-        "maxupBound": 50,
+        "maxupBound": 10,
         "maxsols": 1,
         "fitweight": 0.8,
         "numingredweight": 0.0,
         "addedbenefitweight": 0.2
     },
     "Misc": {
-        "Address": "Suite 93, 139 Cardigan Street, ",
+        "Address": "Suite 93, 139 Cardigan Street, Carlton, VIC, 3053",
         "Contact number": "03 9111 5762",
         "ABN": "94 113 762 673",
         "Website": "www.restoredtoeden.com",

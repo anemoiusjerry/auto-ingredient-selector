@@ -14,7 +14,6 @@ from .infoSheetTab import InfoTab
 from .prefTab import PrefTab
 
 class TabDialog(QTabWidget):
-
     def __init__(self, app, parent=None):
         super(TabDialog, self).__init__(parent)
         self.config = FigMe()
@@ -33,6 +32,13 @@ class TabDialog(QTabWidget):
         """
         self.config.saveConfig()
 
+    def center(self):
+        """ Get location of screen center """
+        qRect = self.frameGeometry()
+        centerPoint = QDesktopWidget().availableGeometry().center()
+        qRect.moveCenter(centerPoint)
+        self.move(qRect.topLeft())
+
 def main():
     """ Central control point for all modules.
     """
@@ -44,4 +50,9 @@ def main():
     app.setStyle("Fusion")
     window = TabDialog(app)
     window.show()
+    # Center window
+    qRect = window.frameGeometry()
+    centerPoint = QDesktopWidget().availableGeometry().center()
+    qRect.moveCenter(centerPoint)
+    window.move(qRect.topLeft())
     sys.exit(app.exec_())

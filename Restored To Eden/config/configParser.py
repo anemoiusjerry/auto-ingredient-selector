@@ -33,7 +33,6 @@ class FigMe:
         """ dfname is the label of in landing tab
         """
         # Attempt google drive retrieval for ingredients df
-
         if (dfname == "Ingredients Spreadsheet" or dfname == "Product Catalog") and self.masterDict["gdrive"]:
             try:
                 # Retrieve from gdrive
@@ -81,7 +80,7 @@ class FigMe:
                     self.warn.displayWarningDialog("Load Error", f"Error when loading {dfname}")
                     raise Exception("Error loading dataframe")
                 return None
-        
+
         # If all expected columns are there then begin to clean data
         if self.checkCols(df, dfname):
             df.fillna("", inplace=True)
@@ -127,21 +126,19 @@ class FigMe:
                 df.set_index(nameCol, drop=False, inplace=True)
                 
                 for colname in ailmentCols + [pregnancyCol] + cusContrainCol:
-                    df[colname] = df[colname].apply(lambda x: re.split("\s*[,]\s*", x))
+                    df[colname] = df[colname].apply(lambda x: re.split(" / ", x))
 
             elif dfname == "Product Catalog":
                 itemCol = self.getColname("Product Catalog", "item")
                 productCol = self.getColname("Product Catalog", "products")
-
-                # Convert string description to dict
-                #df[productCol] = df[productCol].apply(lambda des: json.loads(des[1:-1]))
-                #df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x["description"][3:-5]) if x and "privacy policy" not in x else [])
-                df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
+                # Set product column as a list
+                df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x) if x else [])
+                # Filter out product type from html paragraph
+                # df[productCol] = df[productCol].apply(lambda x: re.split("\s*[,]\s*", x[3:-5]) if x and "privacy policy" not in x else [])
                 df.set_index(itemCol, inplace=True)
 
             # Remove duplicates
             df = df.loc[~df.index.duplicated(keep="first")]
-
             return df
         else:
             self.warn.displayWarningDialog("Load Error", f"({dfname}) column names do not match")
@@ -154,7 +151,13 @@ class FigMe:
         self.masterDict["Values"][variable] = new_value
 
     def getColname(self,dataframe, col):
-        return self.masterDict["Column names"][dataframe][col]
+        name = self.masterDict["Column names"][dataframe][col]
+        # replace special character (Shopify excel fix)
+        if type(name) == list:
+            name = [n.replace("Â","") for n in name]
+        else:
+            name = name.replace("Â","")
+        return name
     def setColname(self, dataframe, col, new_value):
         self.masterDict["Column names"][dataframe][col] = new_value
 
@@ -162,7 +165,7 @@ class FigMe:
         # Constants are stored as a list of values, key refers to the constant name
         return self.masterDict["Constants"][key]
 
-    def getProduct(self,product, var):
+    def getProduct(self, product, var):
         return self.masterDict["Product"][product][var]
     def setProduct(self, product, var, new_value):
         self.masterDict["Product"][product][var] = new_value
@@ -202,7 +205,10 @@ class FigMe:
             fp.write(json_obj)
 
     def checkCols(self, df, dfname):
-        """Check that column names of CSV matches that in settings."""
+        """ Check that column names of CSV matches that in settings.
+            df: python dataframe of the excel sheet
+            dfname : string of dataframe name
+        """
         # Get columns names of CSV
         dfCols = set(list(df.columns))
 
@@ -213,5 +219,14 @@ class FigMe:
                 knownCols.extend(val)
             else:
                 knownCols.append(val)
+        
+        # Remove accented characters from question sheet
+        if dfname == "Customer Questionnaire":
+            for i in range (len(knownCols)):
+                knownCols[i] = knownCols[i].replace("Â", "")
 
+        diff = [col for col in knownCols if col not in dfCols]
+        # print(diff)
+        # print("\n")
+        # print(dfCols)
         return set(knownCols).issubset(dfCols)

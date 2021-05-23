@@ -104,6 +104,7 @@ class IngredientSelector(QObject):
             text = "Order " + order[self.orderCol] +", "+ name
             self.stateChanged.emit("retrieve", text, self.progress)
 
+            # Get questionnaire data by matching name/ email
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
             elif email in self.qnair[self.qemailCol].values.tolist() and email != "":
@@ -120,10 +121,11 @@ class IngredientSelector(QObject):
                     allErrorString += nonamestr
                 continue
 
-            # Finding the products required to fulfil the order. if they cannot be found, skip to next order
-            item = order[self.oitemCol]
-
+            item = order[self.oitemCol]  # index the order name from orders spreadsheet
+            # If order item is not in the catalog they cannot be found, skip to next order
             try:
+                # Modify items name (Shopify fix)
+                item = item.split(" - ")[0]
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
@@ -152,7 +154,7 @@ class IngredientSelector(QObject):
                 # create a new excel workbook for the order
                 wbookname = orderFolderName + "/" + ordername + "-" + str(product) + ".xlsx"
                 workbook = xlsxwriter.Workbook(wbookname)
-                
+
                 solutions, rows, cols, unresolved = self.orderParser(product, qdata)
                 if self.stop:
                     workbook.close()
@@ -166,24 +168,6 @@ class IngredientSelector(QObject):
                                     "CustomerName": name,
                                     "ProductType": product,
                                     "ProductName": item})
-                # try:
-                #     solutions, rows, cols, unresolved = self.orderParser(product, qdata)
-                #     if self.stop:
-                #         workbook.close()
-                #         return None
-                #     # create a new worksheet for each solution
-                #     self.writeToWorkbook(workbook, solutions, rows, cols, unresolved)
-                #     workbook.close()
-
-                #     for solution in solutions:
-                #         returns.append({"Ingredients": solution[0],
-                #                         "CustomerName": name,
-                #                         "ProductType": product,
-                #                         "ProductName": item})
-                # except Exception as err:
-                #     print(err.st)
-                #     allErrorString += f"Order not computed: {name}, {product}"
-                #     pass
 
         if returns:
             if allErrorString != "":
@@ -337,16 +321,11 @@ class IngredientSelector(QObject):
                 worksheet.write(row + 1, 0, 'everything is resolved')
 
     def orderParser(self, product, qdata):
-        try:
-            types = self.config.getProduct(product, "types")
-        except:
-            return
         # Retrieving the skin problems from customer info
         ailments = [a for col in self.ailmentCols for a in qdata[col] if a]
         # Finding the customers contraindications
         contras = [a for col in self.cusContrainCol for a in qdata[col] if a]
         usercons = qdata[self.pregnancyCol] + contras
-        #usercons = qdata[self.pregnancyCol] + qdata[self.cusContrainCol]
 
         # Retrieve the rows and columns that will make up the dlx matrix
         rows, cols = self.matrixGen(product, ailments, usercons)
@@ -354,6 +333,13 @@ class IngredientSelector(QObject):
         # Convert cols into dlx useable format
         cols = [(cols[i],0,self.lowBound,self.upBound) for i in range(len(cols))]
         last = len(cols) - 1
+        
+        # Retrieve defined ingredient types for a product type
+        try:
+            types = self.config.getProduct(product, "types")
+        except Exception as exp:
+            print(f"Could not retrieve product types from catalog {exp}")
+            return
 
         # If an ingredient type is part of the product recipe, make sure they are included at least once
         for type in types:
@@ -447,7 +433,7 @@ class IngredientSelector(QObject):
             else:
                 break
 
-        print("Name: ", qdata["Full Name"], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
+        print("Name: ", qdata[self.qnameCol], ", Product: ", product,", Rows: ", len(rows), ", Cols: ", len(cols), ", Solutions: ", end="")
         print(len(solutions))
         print("Unresolved: ", unresolved)
 
@@ -482,9 +468,14 @@ class IngredientSelector(QObject):
         maxBenefits, leastBenefits = 0, 0
 
         j=0
+        # if there are too many solutions then only process some
+        if solLen > 15000:
+            solutions = solutions[:15000]
         for solution in solutions:
+            # Detect cancel command
             if self.stop:
                 return None
+
             # send signal if the index of solution is a multiple of 100
             if j % 500 == 0:
                 self.solsSorted(j, solLen)
