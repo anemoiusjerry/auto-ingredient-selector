@@ -62,7 +62,6 @@ class IngredientSelector(QObject):
         self.lowBound = config.getVal("lowBound")
         self.upBound = config.getVal("upBound")
         self.maxupBound = config.getVal("maxupBound")
-        #self.tpyeoverlap_low = config.getVal("tpyeoverlap_low")
         self.typeoverlap_up = config.getVal("typeoverlap_up")
         self.numeo = config.getVal("numeo")
         self.maxSols = config.getVal("maxsols")
@@ -124,8 +123,6 @@ class IngredientSelector(QObject):
             item = order[self.oitemCol]  # index the order name from orders spreadsheet
             # If order item is not in the catalog they cannot be found, skip to next order
             try:
-                # Modify items name (Shopify fix)
-                item = item.split(" - ")[0]
                 products = self.catalog.loc[item,self.productCol]
             except:
                 # add a check to make sure that all the products are within the known products
@@ -143,7 +140,7 @@ class IngredientSelector(QObject):
 
             for product in products:
                 # Skip over constant products
-                if product in ["hydration serum", "toner"]:
+                if product in ["hydration serum", "toner", "2-birds"]:
                     returns.append({"Ingredients": [],
                                         "CustomerName": name,
                                         "ProductType": product,
@@ -411,23 +408,26 @@ class IngredientSelector(QObject):
 
         # Run the DLX with an increased upper bound until max is reached or enough solutions are found
         while len(solutions) < 100 and self.typeoverlap_up <= len(rows):
-
             upBound = self.upBound
+            # Raise the ingredient overlap cap
             while len(solutions) < 100 and upBound <= len(rows):
                 upBound = upBound + 1
                 for i in range(0,last+1):
-                    cols[i] = list(cols[i])
-                    cols[i][3] = upBound
-                    cols[i] = tuple(cols[i])
+                    # Do raise for essential oils
+                    if "essential" not in cols[i][0]:
+                        cols[i] = list(cols[i])
+                        cols[i][3] = upBound
+                        cols[i] = tuple(cols[i])
                 matrix = DLX(cols, rows)
                 solutions = self.solve(matrix)
 
             if len(solutions) < 100:
                 self.typeoverlap_up = self.typeoverlap_up + 1
                 for i in range(last+1,len(cols)):
-                    cols[i] = list(cols[i])
-                    cols[i][3] = self.typeoverlap_up
-                    cols[i] = tuple(cols[i])
+                    if "essential" not in cols[i][0]:
+                        cols[i] = list(cols[i])
+                        cols[i][3] = self.typeoverlap_up
+                        cols[i] = tuple(cols[i])
                 matrix = DLX(cols, rows)
                 solutions = self.solve(matrix)
             else:
@@ -437,11 +437,10 @@ class IngredientSelector(QObject):
         print(len(solutions))
         print("Unresolved: ", unresolved)
 
-        bestSols = self.findBestSol(solutions, product, ailments)
-        # try:
-        #     bestSols = self.findBestSol(solutions, product, ailments)
-        # except Exception as e:
-        #     self.warn.displayWarningDialog("Error", f"error occured while finding best solution: {str(e)}")
+        try:
+            bestSols = self.findBestSol(solutions, product, ailments)
+        except Exception as e:
+            self.warn.displayWarningDialog("Error", f"error occured while finding best solution: {str(e)}")
 
         return bestSols, rows, cols, unresolved
 
@@ -469,8 +468,8 @@ class IngredientSelector(QObject):
 
         j=0
         # if there are too many solutions then only process some
-        if solLen > 15000:
-            solutions = solutions[:15000]
+        if solLen > 5000:
+            solutions = solutions[:5000]
         for solution in solutions:
             # Detect cancel command
             if self.stop:

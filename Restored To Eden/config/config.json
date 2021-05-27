@@ -139,8 +139,8 @@
     },
     "Directories": {
         "Ingredients Spreadsheet": "C:/Users/Jerry/Desktop/Shopify testing/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/Rowena Test Order 1003 - 18.5.2021.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/Rowena Test Qs - 18.5.2021.csv",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-5.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-05-27.csv",
         "Product Catalog": "C:/Users/Jerry/Desktop/Shopify testing/Shopify Product Catalogue - May 2021.csv",
         "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
         "Information Sheet Paragraphs": "/Users/hello/Desktop/batch2 testing/InformationSheet.xlsx",
@@ -155,8 +155,8 @@
         "maxupBound": 10,
         "maxsols": 1,
         "fitweight": 0.8,
-        "numingredweight": 0.0,
-        "addedbenefitweight": 0.2
+        "numingredweight": 0.5,
+        "addedbenefitweight": 0.1
     },
     "Misc": {
         "Address": "Suite 93, 139 Cardigan Street, Carlton, VIC, 3053",

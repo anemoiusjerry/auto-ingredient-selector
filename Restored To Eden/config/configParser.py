@@ -113,6 +113,9 @@ class FigMe:
             elif dfname == "Orders Spreadsheet":
                 customerCol = self.getColname("Orders Spreadsheet", "customer")
                 df[customerCol] = df[customerCol].apply(lambda x:" ".join(x.split()))
+                # Modify items name (Shopify fix)
+                itemColOrders = self.getColname("Orders Spreadsheet", "item")
+                df[itemColOrders] = df[itemColOrders].apply(lambda x: x.split(" - ")[0]) 
 
             elif dfname == "Customer Questionnaire":
                 nameCol = self.getColname("Customer Questionnaire", "name")

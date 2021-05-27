@@ -78,7 +78,9 @@ class FormulationFiller(QObject):
                 error_msg = "Failed to load formulation template."
                 workbook = load_workbook(filename=template_path)
         except:
+            # Except early if cant load the template
             self.errorStr += error_msg
+            return
         
         sheet = workbook.active
 

@@ -38,8 +38,8 @@ class DLX(QObject):
     PRIMARY = 0
     SECONDARY = 1
     INFTY = 100000000
-    MAX_LEVEL = 500
-    MAX_COUNT = 10**10
+    MAX_LEVEL = 500     # At most this many options in a solution
+    MAX_COUNT = 2000  # Stop after this many solutions
 
     sols = Signal(int)
 
@@ -472,7 +472,7 @@ class DLX(QObject):
                     elif self.nodes[pp].colour > 0:
                         self.unpurify(pp)
                 pp -= 1
-        self.choice[self.level] = self.nodes[self.cur_node].down;
+        self.choice[self.level] = self.nodes[self.cur_node].down
         self.cur_node = self.nodes[self.cur_node].down
 
         return self.advance

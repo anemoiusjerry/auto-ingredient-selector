@@ -122,6 +122,7 @@ class LandingTab(QWidget):
             worker = Worker(self.ingredient_selector.selectIngredients)
         except Exception as e:
             print(e)
+        # Execute formulation filler when ingredient selection is done
         worker.signals.result.connect(self.processResults)
         self.threadpool.start(worker)
 
