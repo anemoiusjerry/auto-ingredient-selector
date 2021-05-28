@@ -155,7 +155,7 @@
         "maxupBound": 10,
         "maxsols": 1,
         "fitweight": 0.8,
-        "numingredweight": 0.5,
+        "numingredweight": 0.0,
         "addedbenefitweight": 0.1
     },
     "Misc": {

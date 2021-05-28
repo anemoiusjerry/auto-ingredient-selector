@@ -78,7 +78,7 @@ class FormulationFiller(QObject):
                 error_msg = "Failed to load formulation template."
                 workbook = load_workbook(filename=template_path)
         except:
-            # Except early if cant load the template
+            # Exit early if cant load the template
             self.errorStr += error_msg
             return
         
@@ -96,76 +96,77 @@ class FormulationFiller(QObject):
         if type(sheet["B5"].value) != int:
             sheet["B5"] = 100 # placeholder (varies)
 
-        i=0
+        i=0  # Ingredient indice
         # Keep trying to insert ingredients into slots if there still are ingredients
         while len(assigned_vals) > 0:
-            # End loop if not enough slots
-            if len(realloc_dict) <= 0 or i >= len(assigned_vals):
-                sheet, EOF = self.too_many_slots(realloc_dict, sheet)
-                realloc_dict = {}
-                sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
-                break
-
             ingredient_name = list(assigned_vals.keys())[i]
+            
+            j=self.SOF  # Cell row indice
             # Insert ingredient into the correct row
-            j=self.SOF
             while sheet[f"C{j}"].value != None and sheet[f"B{j}"].value != None:
+                # Get ingredient types
+                type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+                type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
 
-                # Only fill w/w% if fixed ingredient
-                if "fixed" in ingredient_name.lower():
-                    if ingredient_name.lower() == sheet[f"B{j}"].value.lower():
-                        # Fill w/w%
-                        sheet[f"D{j}"] = assigned_vals[ingredient_name]
+                i_type = None
+                # Extract the relevant type
+                for ingredient_type in type_list:
+                    if "essential oil" in ingredient_type:
+                        eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
+                        i_type = "eo " + self.ingredients_df.loc[ingredient_name][eo_note_col_name].lower()
+                    if ingredient_type in phase_dict.keys():
+                        i_type = ingredient_type
 
-                        realloc_dict.pop(f"D{j}", None)
+                # Fill row in ingredient types match
+                if (i_type == sheet[f"B{j}"].value.lower()):
+                    # INCI
+                    inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+                    sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name][inci_col_name]
+                    # Ingredient Name
+                    sheet[f"B{j}"] = ingredient_name
+                    # w/w%
+                    sheet[f"D{j}"] = assigned_vals[ingredient_name]
+                    # Fill needs targted column if applicable
+                    try:
+                        if sheet[f"F{6}"].value.lower() == "needs targetting":
+                            prob_col_name = self.config.getColname("Ingredients Spreadsheet", "skin problem")
+                            sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name][prob_col_name]
+                    except:
+                        pass
+
+                    realloc_dict.pop(f"D{j}", None)
+                    assigned_vals.pop(ingredient_name)
+                    break
+                j+=1  # Move to next row in formulation template
+
+            # Insert new row for ingredient if no space for it
+            if len(assigned_vals) != 0 and ingredient_name == list(assigned_vals.keys())[i]:
+                type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
+                type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
+                
+                i_type = None
+                # Extract the relevant type
+                for ingredient_type in type_list:
+                    if "essential oil" in ingredient_type:
+                        eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
+                        i_type = "eo " + self.ingredients_df.loc[ingredient_name][eo_note_col_name].lower()
+                    if ingredient_type in phase_dict.keys():
+                        i_type = ingredient_type
+
+                row_insert_i = self.SOF
+                # Calc location of row insert
+                while sheet[f"C{row_insert_i}"].value != None and sheet[f"B{row_insert_i}"].value != None:
+                    i_name = sheet[f"B{row_insert_i}"].value
+                    # Find first row with ingredient type thats the same
+                    if "fixed" not in i_name.lower() and i_type in self.ingredients_df.loc[i_name][type_col_name]:
+                        self.write_ingredient_new_row(ingredient_name, phase_dict[i_type], assigned_vals[ingredient_name], row_insert_i, sheet)
                         assigned_vals.pop(ingredient_name)
                         break
-
-                else:
-                    # Get ingredient types ???????????/// Waiting for answer to simply column
-                    type_col_name = self.config.getColname("Ingredients Spreadsheet", "type")
-                    type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
-
-                    for ingredient_type in type_list:
-
-                        if "essential oil" in ingredient_type:
-                            eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
-                            ingredient_type = "eo " + self.ingredients_df.loc[ingredient_name][eo_note_col_name].lower()
-
-                        # Fill row in ingredient types match
-                        if (ingredient_type == sheet[f"B{j}"].value.lower()):
-                            # INCI
-                            inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
-                            sheet[f"A{j}"] = self.ingredients_df.loc[ingredient_name][inci_col_name]
-                            # Ingredient Name
-                            sheet[f"B{j}"] = ingredient_name
-                            # w/w%
-                            sheet[f"D{j}"] = assigned_vals[ingredient_name]
-                            # Fill needs targted column if applicable
-                            try:
-                                if sheet[f"F{6}"].value.lower() == "needs targetting":
-                                    prob_col_name = self.config.getColname("Ingredients Spreadsheet", "skin problem")
-                                    sheet[f"F{6}"] = self.ingredients_df.loc[ingredient_name][prob_col_name]
-                            except:
-                                pass
-
-                            realloc_dict.pop(f"D{j}", None)
-                            assigned_vals.pop(ingredient_name)
-                            break
-                    # break out of inner while loop of ingredient is assigned
-                    if ingredient_name not in assigned_vals.keys():
-                        break
-                j+=1
-
-            # Move onto next if cannot write ingredient
-            if ingredient_name in assigned_vals.keys():
-                i+=1
+                    row_insert_i += 1
 
         # Reallocate surplus %
         if len(realloc_dict) > 0:
             sheet, EOF = self.too_many_slots(realloc_dict, sheet)
-            realloc_dict = {}
-            sheet = self.too_few_slots(assigned_vals, phase_dict, EOF, sheet)
 
         sheet = self.write_formulas(sheet)
         filename = customer_name + " - " + prod_type.title() + " Worksheet.xlsx"
@@ -288,6 +289,27 @@ class FormulationFiller(QObject):
             else:
                 i+=1
         return sheet, i
+
+    def write_ingredient_new_row(self, ingredient_name, phase, wweight, row_num, sheet):
+        sheet.insert_rows(row_num)
+
+        inci_col_name = self.config.getColname("Ingredients Spreadsheet", "inci")
+        sheet[f"A{row_num}"] = self.ingredients_df.loc[ingredient_name][inci_col_name]  # INCI name
+        sheet[f"B{row_num}"] = ingredient_name                                          # name
+        sheet[f"C{row_num}"] = phase                                 
+        sheet[f"D{row_num}"] = wweight                                                  # w/w%
+        sheet[f"E{row_num}"] = f"=B5*D{row_num}/100"
+
+        # Copy over cell styles
+        for col_index in range(1,6):
+            sheet.cell(row=row_num, column=col_index).font = copy(sheet.cell(row=row_num+1, column=col_index).font)
+            sheet.cell(row=row_num, column=col_index).border = copy(sheet.cell(row=row_num+1, column=col_index).border)
+            sheet.cell(row=row_num, column=col_index).fill = copy(sheet.cell(row=row_num+1, column=col_index).fill)
+            sheet.cell(row=row_num, column=col_index).number_format = copy(sheet.cell(row=row_num+1, column=col_index).number_format)
+            sheet.cell(row=row_num, column=col_index).protection = copy(sheet.cell(row=row_num+1, column=col_index).protection)
+            sheet.cell(row=row_num, column=col_index).alignment = copy(sheet.cell(row=row_num+1, column=col_index).alignment)
+
+        return sheet
 
     def too_few_slots(self, leftovers, phase_dict, EOF, sheet):
         """
