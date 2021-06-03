@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os
+os.environ["QT_MAC_WANTS_LAYER"] = "1"
 import sys
-import json
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeySequence, QPalette, QColor
 from PySide2.QtWidgets import *
