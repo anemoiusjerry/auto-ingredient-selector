@@ -459,6 +459,9 @@ class IngredientSelector(QObject):
         # Get all required data to fill sheet
         ww_dict = self.get_misc_items(sheet)
 
+        # Update the config ingredient types list
+        self.update_formulation_list(product, ww_dict.keys())
+
         target = self.config.getTarget(product)
         chosen = []
         solLen = len(solutions)
@@ -711,6 +714,16 @@ class IngredientSelector(QObject):
             ww_dict[cell_ingredient].append(cell_weight)
             i += 1
         return ww_dict
+
+    def update_formulation_list(self, prod_type, new_form_types):
+        # Get list of ingredient types for product formulation
+        form_types = self.config.getProduct(prod_type, "types")
+        # Write any new ingredient types added to config
+        for i_type in new_form_types:
+            if ("fix" not in i_type) and (i_type not in form_types):
+                form_types.append(i_type)
+        # Commit the change
+        self.config.setProduct(prod_type, "types", form_types)
 
     def solsSorted(self, i, max):
         state = "sorting"

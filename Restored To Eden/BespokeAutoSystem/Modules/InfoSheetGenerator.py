@@ -58,7 +58,10 @@ class InfoSheetGenerator(QObject):
         self.template.globals["len"] = len
         self.courTemplate.globals["len"] = len
 
-        wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        if (os.name == "nt"):
+            wkhtml_path = app_path + "/wkhtmltopdf.exe"
+        else:
+            wkhtml_path = app_path + "/wkhtmltopdf"
         self.pdfkitConfig = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
         self.options = {
             "orientation":"Landscape",

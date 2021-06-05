@@ -40,7 +40,7 @@ class InfoTab(QWidget):
         # Sheets + edit box layout
         sheets_layout = QGridLayout()
         self.infosheet_browser = FileBrowser("csv", "Information Sheet Paragraphs", config)
-        #self.infosheet_browser.button.clicked.connect(self.loadSheetLocal)
+        self.infosheet_browser.button.clicked.connect(self.loadSheetLocal)
         self.infosheet_browser.button.clicked.connect(self.reload_all)
         sheets_layout.addWidget(self.infosheet_browser, 0, 0)
 

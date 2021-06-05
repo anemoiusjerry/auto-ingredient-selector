@@ -3,7 +3,7 @@
 <head>
     <style>
         body {
-            font-family:Raleway;
+            font-family:{{ misc_vals["font"] }};
         }
         footer {
             height: 50px;
@@ -14,9 +14,9 @@
 
 <body>
     <footer>
-        <div>www.restoredtoeden.com</div>
+        <div>{{ misc_vals["website"] }}</div>
         <div>
-            Suite 93, 139 Cardigan Street, Carlton, VIC, 3053 | 03 9111 5762 | ABN 94 113 762 673
+            {{ misc_vals["address"] }} | {{ misc_vals["contactNumber"] }} | ABN {{ misc_vals["abn"] }}
         </div>
     </footer>
 </body>
