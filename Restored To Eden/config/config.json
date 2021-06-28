@@ -39,9 +39,9 @@
             ]
         },
         "night cream": {
-            "viscosity": "heavy",
-            "absorbency": "slow",
-            "comedogenic": 0,
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 2,
             "types": [
                 "aqueous base",
                 "anhydrous base",
@@ -110,7 +110,7 @@
         "Customer Questionnaire": {
             "name": "GQi5neO - About this Quiz",
             "email": "a2i8L3g - ",
-            "pregnancy": "3Oi2bb8 - Are you or could you be pregnant? OR \u00c2\u00a0Are you breastfeeding or nursing?\u00c2\u00a0",
+            "pregnancy": "3Oi2bb8 - Are you or could you be pregnant? OR Are you breastfeeding or nursing?",
             "contraindications": [
                 "rgiJXXG - ",
                 "0MiMVV5 - "
@@ -119,7 +119,7 @@
                 "8Ji8LXA - ",
                 "qQiMePZ - Category 1 : Short Amount of Time",
                 "rgiJVXL - Category 2 : Will Take a Couple of Months",
-                "0MiMRVa - Category 3 : Longer Term\u00c2\u00a0",
+                "0MiMRVa - Category 3 : Longer Term",
                 "bJiNzPG - "
             ],
             "Additional": "kdiRxxd - "
@@ -138,12 +138,12 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-2.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-06-05.csv",
-        "Product Catalog": "C:/Users/Jerry/Downloads/Shopify Product Catalogue - May 2021.csv",
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/RTE Ingredients Database - June 2021.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-8.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-03-30_2021-06-28.csv",
+        "Product Catalog": "C:/Users/Jerry/Downloads/Shopify Product Catalogue - May 2021 (1).csv",
         "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
-        "Information Sheet Paragraphs": "",
+        "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/InformationSheet.xlsx",
         "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing/Test Output",
         "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
     },

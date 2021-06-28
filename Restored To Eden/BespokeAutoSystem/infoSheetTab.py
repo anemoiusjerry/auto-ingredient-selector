@@ -202,7 +202,6 @@ class InfoTab(QWidget):
 
     def run(self):
         self.reporter = InfoSheetGenerator.InfoSheetGenerator(self.infoSheet_df, self.gdriveAPI, self.config)
-        #self.reporter.process_all()
         self.reporter.launched.connect(self.launchProgress)
         self.reporter.stateChanged.connect(self.progStateChanged)
         self.reporter.error.connect(self.showError)

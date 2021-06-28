@@ -145,7 +145,7 @@ class FormulationFiller(QObject):
                 type_list = self.ingredients_df.loc[ingredient_name][type_col_name]
                 
                 i_type = None
-                # Extract the relevant type
+                # Extract the ingredient type from ingred database
                 for ingredient_type in type_list:
                     if "essential oil" in ingredient_type:
                         eo_note_col_name = self.config.getColname("Ingredients Spreadsheet", "EO note")
@@ -156,11 +156,14 @@ class FormulationFiller(QObject):
                 row_insert_i = self.SOF
                 # Calc location of row insert
                 while sheet[f"C{row_insert_i}"].value != None and sheet[f"B{row_insert_i}"].value != None:
-                    i_name = sheet[f"B{row_insert_i}"].value
+                    # get type from wksheet
+                    filled_ingredient = sheet[f"B{row_insert_i}"].value
                     # Find first row with ingredient type thats the same
-                    if "fixed" not in i_name.lower() and i_type in self.ingredients_df.loc[i_name][type_col_name]:
-                        self.write_ingredient_new_row(ingredient_name, phase_dict[i_type], assigned_vals[ingredient_name], row_insert_i, sheet)
-                        assigned_vals.pop(ingredient_name)
+                    if "fixed" not in filled_ingredient.lower():
+                        filled_types = self.ingredients_df.loc[filled_ingredient][type_col_name]
+                        if i_type in filled_types:
+                            self.write_ingredient_new_row(ingredient_name, phase_dict[i_type], assigned_vals[ingredient_name], row_insert_i, sheet)
+                            assigned_vals.pop(ingredient_name)
                         break
                     row_insert_i += 1
 

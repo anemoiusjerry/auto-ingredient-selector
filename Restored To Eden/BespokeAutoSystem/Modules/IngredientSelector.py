@@ -103,10 +103,12 @@ class IngredientSelector(QObject):
             text = "Order " + order[self.orderCol] +", "+ name
             self.stateChanged.emit("retrieve", text, self.progress)
 
+            emails = self.qnair[self.qemailCol].values.tolist()
+
             # Get questionnaire data by matching name/ email
             if name in self.qnair.index.tolist():
                 qdata = self.qnair.loc[name,:]
-            elif email in self.qnair[self.qemailCol].values.tolist() and email != "":
+            elif email in emails and email != "":
                 nonamestr = f"No questionaire name matched {name}. Matched with questionnaire using email {email}. Please check that this email corresponds to the correct person.\n\n"
                 if nonamestr not in allErrorString:
                     allErrorString += nonamestr
@@ -176,10 +178,10 @@ class IngredientSelector(QObject):
         return None
 
     def writeToWorkbook(self, workbook, solutions, rows, cols, unresolved):
-
+        font = self.config.getMisc("Font")
         # Ailment label format
         _ailDict = {
-            "font": "Raleway",
+            "font": font,
             "bold": True,
             "align": "center",
             "valign": "vcenter",
@@ -189,7 +191,7 @@ class IngredientSelector(QObject):
 
         # Skin problem and Ailment header format
         _hailDict = {
-            "font": "Raleway",
+            "font": font,
             "bold": True,
             "align": "center",
             "valign": "vcenter",
@@ -200,7 +202,7 @@ class IngredientSelector(QObject):
 
         # Ingredient name label format
         _ingDict = {
-            "font": "Raleway",
+            "font": font,
             "bold": True,
             "align": "center",
             "valign": "vcenter",
@@ -210,7 +212,7 @@ class IngredientSelector(QObject):
 
         # Nodes format
         _nodDict = {
-            "font": "Raleway",
+            "font": font,
             "bold": True,
             "align": "center",
             "valign": "vcenter",
@@ -437,6 +439,7 @@ class IngredientSelector(QObject):
         print(len(solutions))
         print("Unresolved: ", unresolved)
 
+        #bestSols = self.findBestSol(solutions, product, ailments)
         try:
             bestSols = self.findBestSol(solutions, product, ailments)
         except Exception as e:
@@ -544,11 +547,6 @@ class IngredientSelector(QObject):
                     if chosen[i][1] > score:
                         chosen[i] = (solution, score, blist)
                         break
-        """
-        print("Best solutions: ")
-        for sol in chosen:
-            print(sol)
-        """
         return chosen
 
     def matrixGen(self, product, ailments, userCons):

@@ -113,6 +113,8 @@ class LandingTab(QWidget):
                                     self.dataframes["Ingredients Spreadsheet"],
                                     self.dataframes["Customer Questionnaire"],
                                     self.dataframes["Product Catalog"])
+
+        #self.ingredient_selector.selectIngredients()
         self.ingredient_selector.launched.connect(self.launchProgress)
         self.ingredient_selector.stateChanged.connect(self.progStateChanged)
         self.ingredient_selector.error.connect(self.showError)
@@ -134,6 +136,7 @@ class LandingTab(QWidget):
             filler.stateChanged.connect(self.progStateChanged)
             filler.error.connect(self.showError)
             
+            filler.process_all(results)
             worker = Worker(lambda: filler.process_all(results))
             worker.signals.result.connect(self.closeProg)
             self.threadpool.start(worker)

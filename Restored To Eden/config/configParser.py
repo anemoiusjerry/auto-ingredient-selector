@@ -82,7 +82,8 @@ class FigMe:
                 return None
 
         # If all expected columns are there then begin to clean data
-        if self.checkCols(df, dfname):
+        mismatchedCols = self.checkCols(df, dfname)
+        if len(mismatchedCols) <= 0: #self.checkCols(df, dfname):
             df.fillna("", inplace=True)
 
             # Save a copy of original INCI formatting
@@ -144,7 +145,7 @@ class FigMe:
             df = df.loc[~df.index.duplicated(keep="first")]
             return df
         else:
-            self.warn.displayWarningDialog("Load Error", f"({dfname}) column names do not match")
+            self.warn.displayWarningDialog("Load Error", f"({dfname}) column names do not match: {mismatchedCols}")
             raise Exception("names dont match")
             #sys.exit()
 
@@ -229,7 +230,5 @@ class FigMe:
                 knownCols[i] = knownCols[i].replace("Â", "")
 
         diff = [col for col in knownCols if col not in dfCols]
-        # print(diff)
-        # print("\n")
-        # print(dfCols)
-        return set(knownCols).issubset(dfCols)
+        return diff  # return which columns names are mismatched (list)
+        #return set(knownCols).issubset(dfCols)

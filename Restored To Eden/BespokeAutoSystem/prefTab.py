@@ -124,8 +124,8 @@ class ProductBlade(QWidget):
 
     def saveSettings(self):
         for prod_type in self.wids.keys():
-            for setting, slider in self.wids[prod_type].items():
-                int_val = slider.value()/10  # int x10 actual value
+            for setting, sliderWrap in self.wids[prod_type].items():
+                int_val = sliderWrap.slider.value()//10  # int x10 actual value
                 actual_val = self.constraint_const_dict[setting][int_val] # string
                 self.config.setProduct(prod_type, setting, self.constraint_const_dict[setting][int_val])
 
