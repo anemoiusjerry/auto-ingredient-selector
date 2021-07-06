@@ -160,11 +160,14 @@ class FormulationFiller(QObject):
                     filled_ingredient = sheet[f"B{row_insert_i}"].value
                     # Find first row with ingredient type thats the same
                     if "fixed" not in filled_ingredient.lower():
-                        filled_types = self.ingredients_df.loc[filled_ingredient][type_col_name]
-                        if i_type in filled_types:
-                            self.write_ingredient_new_row(ingredient_name, phase_dict[i_type], assigned_vals[ingredient_name], row_insert_i, sheet)
-                            assigned_vals.pop(ingredient_name)
-                        break
+                        try:
+                            filled_types = self.ingredients_df.loc[filled_ingredient][type_col_name]
+                            if i_type in filled_types:
+                                self.write_ingredient_new_row(ingredient_name, phase_dict[i_type], assigned_vals[ingredient_name], row_insert_i, sheet)
+                                assigned_vals.pop(ingredient_name)
+                                break
+                        except:
+                            print("no ingredient found moving on")
                     row_insert_i += 1
 
         # Reallocate surplus %

@@ -3,7 +3,7 @@
         "cleansing lotion": {
             "viscosity": "medium",
             "absorbency": "medium",
-            "comedogenic": 0,
+            "comedogenic": 2,
             "types": [
                 "aqueous base",
                 "anhydrous base",
@@ -13,9 +13,9 @@
             ]
         },
         "day cream": {
-            "viscosity": "light",
-            "absorbency": "fast",
-            "comedogenic": 0,
+            "viscosity": "heavy",
+            "absorbency": "medium",
+            "comedogenic": 2,
             "types": [
                 "aqueous base",
                 "aqueous high performance",
@@ -39,7 +39,7 @@
             ]
         },
         "night cream": {
-            "viscosity": "medium",
+            "viscosity": "heavy",
             "absorbency": "medium",
             "comedogenic": 2,
             "types": [
@@ -51,7 +51,7 @@
             ]
         },
         "oil cleanser": {
-            "viscosity": "medium",
+            "viscosity": "heavy",
             "absorbency": "medium",
             "comedogenic": 0,
             "types": [
@@ -62,9 +62,9 @@
             ]
         },
         "oil serum": {
-            "viscosity": "medium",
+            "viscosity": "heavy",
             "absorbency": "medium",
-            "comedogenic": 0,
+            "comedogenic": 2,
             "types": [
                 "anhydrous base",
                 "anhydrous high performance",
@@ -139,8 +139,8 @@
     },
     "Directories": {
         "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/RTE Ingredients Database - June 2021.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-8.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-03-30_2021-06-28.csv",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-9.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-04-07_2021-07-06 (1).csv",
         "Product Catalog": "C:/Users/Jerry/Downloads/Shopify Product Catalogue - May 2021 (1).csv",
         "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
         "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/InformationSheet.xlsx",

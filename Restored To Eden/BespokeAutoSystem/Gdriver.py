@@ -10,7 +10,11 @@ from googleapiclient.http import *
 class Gdriver:
 
     def __init__(self):
-        self.service = self.connect()
+        try:
+            self.service = self.connect()
+        # Continue program as normal if no internet
+        except:
+            print("no internet proceeding as normal")
 
     def connect(self):
         """ Shows basic usage of the Drive v3 API.
