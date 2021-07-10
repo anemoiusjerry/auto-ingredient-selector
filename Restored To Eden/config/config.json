@@ -138,14 +138,14 @@
         }
     },
     "Directories": {
-        "Ingredients Spreadsheet": "C:/Users/Jerry/Downloads/RTE Ingredients Database - June 2021.xlsx",
-        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-9.csv",
-        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-04-07_2021-07-06 (1).csv",
-        "Product Catalog": "C:/Users/Jerry/Downloads/Shopify Product Catalogue - May 2021 (1).csv",
-        "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
-        "Information Sheet Paragraphs": "C:/Users/Jerry/Downloads/InformationSheet.xlsx",
-        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing/Test Output",
-        "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
+        "Ingredients Spreadsheet": "/Users/jerriosity/Downloads/latest testing files/RTE Ingredients Database - June 2021.xlsx",
+        "Orders Spreadsheet": "/Users/jerriosity/Downloads/latest testing files/orders_export-9.csv",
+        "Customer Questionnaire": "/Users/jerriosity/Downloads/latest testing files/restored to eden_rte product selection_responses_2021-04-07_2021-07-06 (1).csv",
+        "Product Catalog": "/Users/jerriosity/Downloads/latest testing files/Shopify Product Catalogue - May 2021 (1).csv",
+        "Formulation Sheets Directory": "/Users/jerriosity/Downloads/latest testing files/Formulation sheets",
+        "Information Sheet Paragraphs": "/Users/jerriosity/Downloads/latest testing files/InformationSheet.xlsx",
+        "Export Directory": "/Users/jerriosity/Desktop/untitled folder",
+        "Product Instructions Directory": "/Users/jerriosity/Downloads/latest testing files/Product Information"
     },
     "Values": {
         "lowBound": 1,
