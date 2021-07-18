@@ -1,0 +1,174 @@
+{
+    "Product": {
+        "cleansing lotion": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
+        "day cream": {
+            "viscosity": "light",
+            "absorbency": "fast",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
+        "man cream": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "aqueous high performance",
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
+        "night cream": {
+            "viscosity": "heavy",
+            "absorbency": "slow",
+            "comedogenic": 0,
+            "types": [
+                "aqueous base",
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
+        "oil cleanser": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "anhydrous base",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        },
+        "oil serum": {
+            "viscosity": "medium",
+            "absorbency": "medium",
+            "comedogenic": 0,
+            "types": [
+                "anhydrous base",
+                "anhydrous high performance",
+                "essential oil top",
+                "essential oil middle",
+                "essential oil base"
+            ]
+        }
+    },
+    "Constants": {
+        "viscosity": [
+            "light",
+            "medium",
+            "heavy"
+        ],
+        "absorbency": [
+            "slow",
+            "medium",
+            "fast"
+        ],
+        "comedogenicRating": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+        ]
+    },
+    "Column names": {
+        "Ingredients Spreadsheet": {
+            "name": "INGREDIENT COMMON NAME",
+            "inci": "INGREDIENT INCI NAME",
+            "stock": "In Stock",
+            "type": "TYPE OF INGREDIENT",
+            "EO note": "ESSENTIAL OIL NOTE",
+            "skin problem": "SKIN PROBLEM",
+            "contraindications": "CONTRAINDICATIONS",
+            "viscosity": "VISCOSITY",
+            "absorption": "ABSORPTION RATE",
+            "comedogenic": "COMEDOGENIC RATING"
+        },
+        "Customer Questionnaire": {
+            "name": "GQi5neO - About this Quiz",
+            "email": "a2i8L3g - ",
+            "pregnancy": "3Oi2bb8 - Are you or could you be pregnant? OR \u00c2\u00a0Are you breastfeeding or nursing?\u00c2\u00a0",
+            "contraindications": [
+                "rgiJXXG - ",
+                "0MiMVV5 - "
+            ],
+            "skin problem": [
+                "8Ji8LXA - ",
+                "qQiMePZ - Category 1 : Short Amount of Time",
+                "rgiJVXL - Category 2 : Will Take a Couple of Months",
+                "0MiMRVa - Category 3 : Longer Term\u00c2\u00a0",
+                "bJiNzPG - "
+            ],
+            "Additional": "kdiRxxd - "
+        },
+        "Orders Spreadsheet": {
+            "order number": "Name",
+            "date": "Created at",
+            "time": "Paid at",
+            "customer": "Billing Name",
+            "email": "Email",
+            "item": "Lineitem name"
+        },
+        "Product Catalog": {
+            "item": "Title",
+            "products": "Type"
+        }
+    },
+    "Directories": {
+        "Ingredients Spreadsheet": "C:/Users/Jerry/Desktop/Shopify testing/RTE Ingredients Database - With Extracts - 31.08.20.xlsx",
+        "Orders Spreadsheet": "C:/Users/Jerry/Downloads/orders_export-5.csv",
+        "Customer Questionnaire": "C:/Users/Jerry/Downloads/restored to eden_rte product selection_responses_2021-05-27.csv",
+        "Product Catalog": "C:/Users/Jerry/Desktop/Shopify testing/Shopify Product Catalogue - May 2021.csv",
+        "Formulation Sheets Directory": "C:/Users/Jerry/Desktop/Shopify testing/Formulation sheets",
+        "Information Sheet Paragraphs": "/Users/hello/Desktop/batch2 testing/InformationSheet.xlsx",
+        "Export Directory": "C:/Users/Jerry/Desktop/Shopify testing/Test Output",
+        "Product Instructions Directory": "/Users/hello/Desktop/batch2 testing/Product Information"
+    },
+    "Values": {
+        "lowBound": 1,
+        "upBound": 2,
+        "typeoverlap_up": 2,
+        "numeo": 1,
+        "maxupBound": 10,
+        "maxsols": 1,
+        "fitweight": 0.8,
+        "numingredweight": 0.0,
+        "addedbenefitweight": 0.1
+    },
+    "Misc": {
+        "Address": "Suite 93, 139 Cardigan Street, Carlton, VIC, 3053",
+        "Contact number": "03 9111 5762",
+        "ABN": "94 113 762 673",
+        "Website": "www.restoredtoeden.com",
+        "Font": "Raleway"
+    },
+    "GoogleDrive": {
+        "Ingredients Spreadsheet": "RTE Ingredients Database - Latest",
+        "Product Catalog": "catalog_products"
+    },
+    "gdrive": 0,
+    "darkmode": 1
+}

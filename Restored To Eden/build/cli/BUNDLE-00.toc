@@ -1,4 +1,10 @@
 ([('cli',
    '/Users/jerriosity/Documents/GitHub/ingredient-sorter/Restored To '
-   'Eden/dist/cli',
-   'EXECUTABLE')],)
+   'Eden/build/cli/cli',
+   'EXECUTABLE'),
+  ('_struct.cpython-39-darwin.so',
+   '/usr/local/Cellar/python@3.9/3.9.6/Frameworks/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/_struct.cpython-39-darwin.so',
+   'EXTENSION'),
+  ('zlib.cpython-39-darwin.so',
+   '/usr/local/Cellar/python@3.9/3.9.6/Frameworks/Python.framework/Versions/3.9/lib/python3.9/lib-dynload/zlib.cpython-39-darwin.so',
+   'EXTENSION')],)

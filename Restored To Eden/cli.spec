@@ -6,8 +6,8 @@ block_cipher = None
 
 a = Analysis(['cli.py'],
              pathex=['/Users/jerriosity/Documents/GitHub/ingredient-sorter/Restored To Eden'],
-             binaries=[],
-             datas=[],
+             binaries=[('/Users/jerriosity/Documents/GitHub/ingredient-sorter/Restored To Eden/wkhtmltopdf', '.')],
+             datas=[('/Users/jerriosity/Documents/GitHub/ingredient-sorter/gdriveAssets', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -36,3 +36,10 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
                name='cli')
+app = BUNDLE(exe,
+             name='RTE Automatron.app',
+             icon='rte_icon.icns',
+             info_plist={
+             'NSHighResolutionCapable': 'True'
+             },
+             bundle_identifier='com.restoredtoeden.automatron')
