@@ -596,7 +596,8 @@ class IngredientSelector(QObject):
         maxY = max([len(self.config.getConst("viscosity"))-1-t[1], t[1]]) # viscocity
         maxZ = max([len(self.config.getConst("absorbency"))-1-t[2], t[2]]) # absorption
         maxdist = math.sqrt((t[0]-maxX)**2 + (t[1]-maxY)**2 + (t[2]-maxZ)**2)
-
+        if (maxdist == 0):
+            maxdist = dist
         return maxdist, dist
 
     def stockCheck(self, stock):
