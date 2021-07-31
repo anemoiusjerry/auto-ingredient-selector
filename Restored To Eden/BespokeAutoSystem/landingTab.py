@@ -136,7 +136,7 @@ class LandingTab(QWidget):
             filler.stateChanged.connect(self.progStateChanged)
             filler.error.connect(self.showError)
             
-            filler.process_all(results)
+            #filler.process_all(results)
             worker = Worker(lambda: filler.process_all(results))
             worker.signals.result.connect(self.closeProg)
             self.threadpool.start(worker)
