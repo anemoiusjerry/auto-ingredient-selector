@@ -1,0 +1,4 @@
+([('cli',
+   '/Users/jerriosity/Documents/GitHub/ingredient-sorter/Restored To '
+   'Eden/dist/cli',
+   'EXECUTABLE')],)
