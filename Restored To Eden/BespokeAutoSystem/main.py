@@ -1,5 +1,7 @@
 from __future__ import print_function
 import os
+
+from PySide2 import QtGui
 os.environ["QT_MAC_WANTS_LAYER"] = "1"
 import sys
 from PySide2.QtCore import Qt
@@ -42,12 +44,10 @@ class TabDialog(QTabWidget):
 def main():
     """ Central control point for all modules.
     """
-    # # This line changes cwd to RTE folder (for Windows)
-    # if os.name == "nt":
-    #     os.chdir(os.getcwd() + "/Restored To Eden")
     # Load UI
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setFont(QtGui.QFont("SF Pro Display", 12))
     window = TabDialog(app)
     window.show()
     # Center window

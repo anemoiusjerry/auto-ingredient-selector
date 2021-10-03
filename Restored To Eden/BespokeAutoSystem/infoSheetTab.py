@@ -89,6 +89,7 @@ class InfoTab(QWidget):
         self.para_layout = QVBoxLayout()
         self.sections = []
         self.txt_boxes = []
+        # Editable paragraphs for info sheet
         for i in range(df.shape[1]):
             heading = list(df)[i]
             body = df.iloc[0,i]
@@ -162,7 +163,7 @@ class InfoTab(QWidget):
             t = QTextEdit("AutoFilled by system")
             t.setReadOnly(True)
 
-        t.setMinimumSize(50, 50)
+        t.setMinimumHeight(100)
         self.txt_boxes.append((l, t))
 
         # Up button
