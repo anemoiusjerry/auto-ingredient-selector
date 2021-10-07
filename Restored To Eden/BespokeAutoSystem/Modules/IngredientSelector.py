@@ -344,7 +344,7 @@ class IngredientSelector(QObject):
         for type in types:
             # If essential oil then constrain max selected via setting
             if "essential" in type:
-                cols.append((type, 0, self.numeo, self.numeo))
+                cols.append((type, 0, 1, self.numeo))
             else:
                 cols.append((type, 0, 1, self.typeoverlap_up))
             colind = len(cols) - 1
@@ -469,7 +469,12 @@ class IngredientSelector(QObject):
         chosen = []
         solLen = len(solutions)
         _lenlst = [len(s) for s in solutions]
-        maxlen, minlen = max(_lenlst), min(_lenlst)
+        # Prevent crashing
+        if (_lenlst == []):
+            maxlen = 0
+            minlen = 0
+        else:
+            maxlen, minlen = max(_lenlst), min(_lenlst)
         maxBenefits, leastBenefits = 0, 0
 
         j=0

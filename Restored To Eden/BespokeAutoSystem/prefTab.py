@@ -1,3 +1,4 @@
+from io import UnsupportedOperation
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import *
 from PySide2 import QtCore, QtGui, QtWidgets
@@ -24,7 +25,7 @@ class PrefTab(QTabWidget):
                 pass
 
 class sliderWrapper:
-    def __init__(self, lowBound, upBound, cur_value, tick_interval):
+    def __init__(self, lowBound, upBound, cur_value, tick_interval, **kwargs):
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(lowBound, upBound)
@@ -33,14 +34,16 @@ class sliderWrapper:
         self.slider.setTickInterval(tick_interval)
         self.slider.setSingleStep(tick_interval)
         self.slider.valueChanged.connect(self.updateVal)
-
         self.label = QLabel(f"{cur_value}%")
+        width = kwargs.get("width", None)
+        if (width):
+            self.slider.setFixedWidth(width)
 
         # Ticklabel
         self.tick_layout = QGridLayout()
         for i in range((upBound-lowBound)//tick_interval + 1):
             tick_label = QLabel(str(lowBound + i*tick_interval))
-            self.tick_layout.addWidget(tick_label, 0, i, 1, -1)
+            self.tick_layout.addWidget(tick_label, 0, i, 1, 1)
 
     def updateVal(self):
         self.label.setText(f"{self.slider.value()}%")
@@ -78,7 +81,7 @@ class ProductBlade(QWidget):
             
             prod_layout = QVBoxLayout()
             # Bold product type label
-            header = QtGui.QFont("Avenir", 10, QtGui.QFont.Bold)
+            header = QtGui.QFont("SF Pro Display", 10, QtGui.QFont.Bold)
             prod_label = QLabel(prod_type.title())
             prod_label.setFont(header)
             prod_layout.addWidget(prod_label)
@@ -89,7 +92,7 @@ class ProductBlade(QWidget):
                     continue
                 slider_layout = QGridLayout()
                 # Constraint name
-                header2 = QtGui.QFont("Avenir", 8, QtGui.QFont.Bold)
+                header2 = QtGui.QFont("SF Pro Display", 9)
                 l = QLabel(constraint.title())
                 l.setFont(header2)
                 slider_layout.addWidget(l, 0 ,0)
@@ -98,14 +101,17 @@ class ProductBlade(QWidget):
                 tick_num = len(self.constraint_const_dict[constraint])
                 # x10 everything to get slider mouse click working
                 sliderObj = sliderWrapper(0, (tick_num-1)*10, constraint_dict[constraint]*10, 10)
+                sliderObj.slider.setFixedWidth(300)
                 slider_layout.addWidget(sliderObj.slider, 0, 1)
 
                 # Tick labels
                 tick_layout = QGridLayout()
                 for j, tick in enumerate(self.constraint_const_dict[constraint]):
                     tick_label = QLabel(str(tick))
+                    tick_label.setFixedWidth(300/len(self.constraint_const_dict[constraint]))
+                    tick_label.setFont(QtGui.QFont("SF Pro Display", 9))
                     # This line trys to line up tick labels with ticks above
-                    tick_layout.addWidget(tick_label, 0, j, 1, -1)
+                    tick_layout.addWidget(tick_label, 0, j, 1, 1)
                 slider_layout.addLayout(tick_layout, 1, 1)
                 
                 prod_layout.addLayout(slider_layout)
@@ -168,7 +174,6 @@ class ColumnBlade(QWidget):
             
             widget.setLayout(sheet_layout)
             self.layout.addWidget(scroll, i//2, i%2)
-            #self.layout.addLayout(sheet_layout, i//2, i%2)
 
         # Save button
         self.save_button = QPushButton("Save")
@@ -195,16 +200,34 @@ class ValuesBlade(QWidget):
         QWidget.__init__(self)
         self.config = config
         # Define more readable names for settings
-        nice_names = {
-            "lowBound": "Skin Needs Overlap: Min",
-            "upBound": "Skin Needs Overlap: Max",
-            "maxupBound": "Max Skin Needs Overlap",
-            "typeoverlap_up": "Ingredients Type Overlap",
-            "numeo": "Number of Essential Oil Types",
-            "maxsols": "Max Solutions",
-            "fitweight": "Constraint Fit Weight",
-            "numingredweight": "Number of Ingredients Weight",
-            "addedbenefitweight": "Additional Benefits Weight"
+        self.nice_names = {
+            "lowBound": "Satisfy Skin Needs: Min",
+            "upBound": "Satisfy Skin Needs: Max",
+            "maxupBound": "Satisfy Skin Needs Fallback",
+            "typeoverlap_up": "Repeated Ingredient Types",
+            "numeo": "Repeated Essential Oil Types",
+            "maxsols": "Solutions Returned",
+            "fitweight": "Soft Constraints Priority",
+            "numingredweight": "Number of Ingredients Priority",
+            "addedbenefitweight": "Additional Benefits Priority"
+        }
+        self.help_text = {
+            "lowBound": "<b>Satisfy Skin Needs: Min</b><br/><br/>The LOWER bound for how many times a skin problem needs to be addressed. <br/>eg 0 means allows skin problems to not be addressed at all. While 1 means that the problems will be addressed at least once.",
+
+            "upBound": "<b>Satisfy Skin Needs: Max</b><br/><br/>The UPPER bound for how many times a skin problem needs to be addressed. <br/>eg 1 means skin problems will be addressed no more than once by the selected ingredients.",
+
+            "maxupBound": "<b>Satisfy Skin Needs Fallback</b><br/><br/>Advanced setting. This will be used instead of \"Satisfy Skin Needs: Max\" in the event of an error.<br/> Recommended values: 10-50.",
+
+            "typeoverlap_up": "<b>Repeated Ingredient Types</b><br/><br/>Upper bound for number of EXTRA ingredients selected with the same type. <br/>eg 1 means that if more ingredients are needed than in the formulation template, no more than 1 extra of each type will be selected to satisfy the leftover skin problems.",
+
+            "numeo": "<b>Repeated Essential Oil Types</b><br/><br/>Upper bound for number of EXTRA Essential Oil notes selected. <br/>eg 1 means that if more ingredients are need than in the formulation template, no more than 1 extra oil of each note will be selected to satisfy leftover skin problems.",
+
+            "maxsols": "<b>Solutions Returned</b><br/><br/>Curiosity purposes only. It will display extra solutions in the analysis sheet. <br/>Note that only the first (optimum) solution will be used for the other files.",
+            "fitweight": "<b>Soft Constraints Priority</b><br/><br/>How strongly the solution will adhere to the slider settings in \"Products\" tab. <br/>100% means strong adherence.",
+
+            "numingredweight": "<b>Number of Ingredients Priority</b><br/><br/>How important are the number of ingredients selected. Used as proxy for cost. <br/>100% prioritises less ingredients.",
+
+            "addedbenefitweight": "<b>Additional Benefits Priority</b><br/><br/>Do you want ingredients selected that addresses more skin problems? <br/>100% prioritises ingredients that addresses more problems in addition to ones in questionnaire."
         }
         self.sliders = []
         self.incre_boxes = []
@@ -221,12 +244,12 @@ class ValuesBlade(QWidget):
                 continue
             # Layout for spinbox/slide + label grouping
             edit_layout = QGridLayout()  
-            setting_label = QLabel(nice_names[setting])
+            setting_label = QLabel(self.nice_names[setting])
             edit_layout.addWidget(setting_label, 0, 0)
 
             if "weight" in setting:
-                w_slider = sliderWrapper(0, 100, int(value*100), 10)
-                w_slider.label.setFixedWidth(25)
+                w_slider = sliderWrapper(0, 100, int(value*100), 10, width=650)
+                w_slider.label.setFixedWidth(45)
 
                 edit_layout.addWidget(w_slider.label, 1, 0)
                 edit_layout.addWidget(w_slider.slider, 1, 1)
@@ -245,12 +268,33 @@ class ValuesBlade(QWidget):
 
         self.layout.addLayout(incre_layout)
         self.layout.addLayout(weight_layout)
+        button_layout = QGridLayout()
         # Save button
         self.save_button = QPushButton("Save")
         self.save_button.setFixedWidth(100)
         self.save_button.clicked.connect(self.saveSettings)
-        self.layout.addWidget(self.save_button)
+        button_layout.addWidget(self.save_button, 0, 0)
+        # Help button
+        self.help_button = QPushButton("Help")
+        self.help_button.setFixedWidth(100)
+        self.help_button.clicked.connect(self.showHelpDialog)
+        button_layout.addWidget(self.help_button, 0, 1)
+        self.layout.addLayout(button_layout)
         self.setLayout(self.layout)
+
+    def showHelpDialog(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Help")
+        gridLayout = QGridLayout()
+
+        for i, item in enumerate(self.nice_names.items()):
+            # help text
+            text = QTextEdit(self.help_text[item[0]])
+            text.setReadOnly(True)
+            gridLayout.addWidget(text, i//2, i%2)
+
+        dlg.setLayout(gridLayout)
+        dlg.exec()
 
     def saveSettings(self):
         for setting, w_slider in self.sliders:

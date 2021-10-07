@@ -65,7 +65,7 @@ class LandingTab(QWidget):
 
     def create_toggle_button(self, label):
         toggle_label = QLabel(label)
-        toggle_label.setFixedWidth(50)
+        toggle_label.setMaximumWidth(80)
 
         slider = QSlider(Qt.Horizontal)
         slider.setMinimum(0)
@@ -174,7 +174,7 @@ class LandingTab(QWidget):
         self.prog = QProgressDialog(self.primaryMsg, "Cancel", 0, end)
         self.prog.canceled.connect(self.ingredient_selector.stop_)
         self.prog.setMinimumDuration(1)
-        self.prog.setFixedSize(400, 150)
+        self.prog.setFixedSize(500, 200)
         self.prog.exec_()
 
     @Slot(str, str, int)
