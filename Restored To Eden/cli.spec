@@ -1,13 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 block_cipher = None
 
 
 a = Analysis(['cli.py'],
-             pathex=['/Users/jerriosity/Documents/GitHub/ingredient-sorter/Restored To Eden'],
-             binaries=[],
-             datas=[],
+             pathex=['/Users/hello/Documents/GitHub/ingredient-sorter/Restored To Eden'],
+             binaries=[('/Users/hello/Documents/GitHub/ingredient-sorter/Restored To Eden/wkhtmltopdf', '.')],
+             datas=[('/Users/hello/Documents/GitHub/ingredient-sorter/Restored To Eden/gdriveAssets', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -27,7 +26,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
+          console=False )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -36,3 +35,10 @@ coll = COLLECT(exe,
                upx=True,
                upx_exclude=[],
                name='cli')
+app = BUNDLE(coll,
+             name='cli.app',
+             icon='rte_icon.icns',
+             info_plist={
+             'NSHighResolutionCapable': 'True'
+             },
+             bundle_identifier='com.restoredtoeden.automatron')

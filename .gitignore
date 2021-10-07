@@ -1,4 +1,9 @@
 env/*
 *.pyc
+*.toc
+/Restored To Eden/dist
+/Restored To Eden/build
+/Restored To Eden/build/cli
+/Restored To Eden/gdriveAssets
 *.DS_Store
 ._*
